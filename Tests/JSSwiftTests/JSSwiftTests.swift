@@ -53,11 +53,17 @@ final class JSSwiftTests: XCTestCase {
             let tokenize = esprima["tokenize"]
             XCTAssertTrue(tokenize.isFunction)
 
-            let tokenized = try ctx.trying { tokenize.call(withArguments: [ctx.string("1+2")]) }
+            func expect(js javaScript: String, tokenTypes: [JSTokenType], line: UInt = #line) throws {
+                let tokenized = try ctx.trying { tokenize.call(withArguments: [ctx.string(javaScript)]) }
 
-            print("received", try! tokenized.toJSON(indent: 2))
-            let tokens = try tokenized.toDecodable(ofType: [JSToken].self)
-            print("tokens", tokens)
+                //print("received", try! tokenized.toJSON(indent: 2))
+                let tokenList = try tokenized.toDecodable(ofType: [JSToken].self)
+                //print("tokens", tokens)
+
+                XCTAssertEqual(tokenTypes, tokenList.map(\.type), line: line)
+            }
+
+            try expect(js: "1+2", tokenTypes: [.NumericLiteral, .Punctuator, .NumericLiteral])
         }
     }
 
