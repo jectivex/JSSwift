@@ -1,2 +1,3 @@
-# JXSwift
-Swift JavaScript parser &amp; AST
+# JSSwift
+
+Swift JavaScript parser & AST
