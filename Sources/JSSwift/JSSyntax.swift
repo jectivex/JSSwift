@@ -76,6 +76,264 @@ enum Syntax {
 }
 
 
+// - MARK: messages.ts
+
+public enum Messages {
+    case BadImportCallArity
+    case BadGetterArity
+    case BadSetterArity
+    case BadSetterRestParameter
+    case ConstructorIsAsync
+    case ConstructorSpecialMethod
+    case DeclarationMissingInitializer
+    case DefaultRestParameter
+    case DefaultRestProperty
+    case DuplicateBinding
+    case DuplicateConstructor
+    case DuplicateProtoProperty
+    case ForInOfLoopInitializer
+    case GeneratorInLegacyContext
+    case IllegalBreak
+    case IllegalContinue
+    case IllegalExportDeclaration
+    case IllegalImportDeclaration
+    case IllegalLanguageModeDirective
+    case IllegalReturn
+    case InvalidEscapedReservedWord
+    case InvalidHexEscapeSequence
+    case InvalidLHSInAssignment
+    case InvalidLHSInForIn
+    case InvalidLHSInForLoop
+    case InvalidModuleSpecifier
+    case InvalidRegExp
+    case LetInLexicalBinding
+    case MissingFromClause
+    case MultipleDefaultsInSwitch
+    case NewlineAfterThrow
+    case NoAsAfterImportNamespace
+    case NoCatchOrFinally
+    case ParameterAfterRestParameter
+    case PropertyAfterRestProperty
+    case Redeclaration
+    case StaticPrototype
+    case StrictCatchVariable
+    case StrictDelete
+    case StrictFunction
+    case StrictFunctionName
+    case StrictLHSAssignment
+    case StrictLHSPostfix
+    case StrictLHSPrefix
+    case StrictModeWith
+    case StrictOctalLiteral
+    case StrictParamDupe
+    case StrictParamName
+    case StrictReservedWord
+    case StrictVarName
+    case TemplateOctalLiteral
+    case UnexpectedEOS
+    case UnexpectedIdentifier
+    case UnexpectedNumber
+    case UnexpectedReserved
+    case UnexpectedString
+    case UnexpectedTemplate
+    case UnexpectedToken
+    case UnexpectedTokenIllegal
+    case UnknownLabel
+    case UnterminatedRegExp
+
+    /// Error messages should be identical to V8.
+    var errorDescription: String {
+        switch self {
+        case .BadImportCallArity: return "Unexpected token"
+        case .BadGetterArity: return "Getter must not have any formal parameters"
+        case .BadSetterArity: return "Setter must have exactly one formal parameter"
+        case .BadSetterRestParameter: return "Setter function argument must not be a rest parameter"
+        case .ConstructorIsAsync: return "Class constructor may not be an async method"
+        case .ConstructorSpecialMethod: return "Class constructor may not be an accessor"
+        case .DeclarationMissingInitializer: return "Missing initializer in %0 declaration"
+        case .DefaultRestParameter: return "Unexpected token ="
+        case .DefaultRestProperty: return "Unexpected token ="
+        case .DuplicateBinding: return "Duplicate binding %0"
+        case .DuplicateConstructor: return "A class may only have one constructor"
+        case .DuplicateProtoProperty: return "Duplicate __proto__ fields are not allowed in object literals"
+        case .ForInOfLoopInitializer: return "%0 loop variable declaration may not have an initializer"
+        case .GeneratorInLegacyContext: return "Generator declarations are not allowed in legacy contexts"
+        case .IllegalBreak: return "Illegal break statement"
+        case .IllegalContinue: return "Illegal continue statement"
+        case .IllegalExportDeclaration: return "Unexpected token"
+        case .IllegalImportDeclaration: return "Unexpected token"
+        case .IllegalLanguageModeDirective: return "Illegal 'use strict' directive in function with non-simple parameter list"
+        case .IllegalReturn: return "Illegal return statement"
+        case .InvalidEscapedReservedWord: return "Keyword must not contain escaped characters"
+        case .InvalidHexEscapeSequence: return "Invalid hexadecimal escape sequence"
+        case .InvalidLHSInAssignment: return "Invalid left-hand side in assignment"
+        case .InvalidLHSInForIn: return "Invalid left-hand side in for-in"
+        case .InvalidLHSInForLoop: return "Invalid left-hand side in for-loop"
+        case .InvalidModuleSpecifier: return "Unexpected token"
+        case .InvalidRegExp: return "Invalid regular expression"
+        case .LetInLexicalBinding: return "let is disallowed as a lexically bound name"
+        case .MissingFromClause: return "Unexpected token"
+        case .MultipleDefaultsInSwitch: return "More than one default clause in switch statement"
+        case .NewlineAfterThrow: return "Illegal newline after throw"
+        case .NoAsAfterImportNamespace: return "Unexpected token"
+        case .NoCatchOrFinally: return "Missing catch or finally after try"
+        case .ParameterAfterRestParameter: return "Rest parameter must be last formal parameter"
+        case .PropertyAfterRestProperty: return "Unexpected token"
+        case .Redeclaration: return "%0 '%1' has already been declared"
+        case .StaticPrototype: return "Classes may not have static property named prototype"
+        case .StrictCatchVariable: return "Catch variable may not be eval or arguments in strict mode"
+        case .StrictDelete: return "Delete of an unqualified identifier in strict mode."
+        case .StrictFunction: return "In strict mode code, functions can only be declared at top level or inside a block"
+        case .StrictFunctionName: return "Function name may not be eval or arguments in strict mode"
+        case .StrictLHSAssignment: return "Assignment to eval or arguments is not allowed in strict mode"
+        case .StrictLHSPostfix: return "Postfix increment/decrement may not have eval or arguments operand in strict mode"
+        case .StrictLHSPrefix: return "Prefix increment/decrement may not have eval or arguments operand in strict mode"
+        case .StrictModeWith: return "Strict mode code may not include a with statement"
+        case .StrictOctalLiteral: return "Octal literals are not allowed in strict mode."
+        case .StrictParamDupe: return "Strict mode function may not have duplicate parameter names"
+        case .StrictParamName: return "Parameter name eval or arguments is not allowed in strict mode"
+        case .StrictReservedWord: return "Use of future reserved word in strict mode"
+        case .StrictVarName: return "Variable name may not be eval or arguments in strict mode"
+        case .TemplateOctalLiteral: return "Octal literals are not allowed in template strings."
+        case .UnexpectedEOS: return "Unexpected end of input"
+        case .UnexpectedIdentifier: return "Unexpected identifier"
+        case .UnexpectedNumber: return "Unexpected number"
+        case .UnexpectedReserved: return "Unexpected reserved word"
+        case .UnexpectedString: return "Unexpected string"
+        case .UnexpectedTemplate: return "Unexpected quasi %0"
+        case .UnexpectedToken: return "Unexpected token %0"
+        case .UnexpectedTokenIllegal: return "Unexpected token ILLEGAL"
+        case .UnknownLabel: return "Undefined label '%0'"
+        case .UnterminatedRegExp: return "Invalid regular expression: missing /"
+        }
+    }
+}
+
+
+// MARK: token.ts
+
+typealias Token = JSTokenType
+
+public enum JSTokenType : String, Hashable, Codable {
+    case BooleanLiteral = "Boolean"
+    case EOF = "<end>"
+    case Identifier = "Identifier"
+    case Keyword = "Keyword"
+    case NullLiteral = "Null"
+    case NumericLiteral = "Numeric"
+    case Punctuator = "Punctuator"
+    case StringLiteral = "String"
+    case RegularExpression = "RegularExpression"
+    case Template = "Template"
+}
+
+let TokenName = [
+    Token.BooleanLiteral: "Boolean",
+    Token.EOF: "<end>",
+    Token.Identifier: "Identifier",
+    Token.Keyword: "Keyword",
+    Token.NullLiteral: "Null",
+    Token.NumericLiteral: "Numeric",
+    Token.Punctuator: "Punctuator",
+    Token.StringLiteral: "String",
+    Token.RegularExpression: "RegularExpression",
+    Token.Template: "Template",
+]
+
+
+// MARK: tokenizer.ts
+
+public struct Regex : Hashable, Codable {
+    public let pattern: String
+    public let flags: String
+}
+
+/// A lexical token from a JS program or fragment
+public struct JSToken : Hashable, Codable {
+    public let type: JSTokenType
+    public let value: String
+    public let regex: Regex?
+    public let range: ClosedRange<Int>?
+    public let loc: SourceLocation?
+}
+
+typealias BufferEntry = JSToken
+
+struct Config : Hashable, Codable {
+    let tolerant: Bool?
+    let comment: Bool?
+    let range: Bool?
+    let loc: Bool?
+}
+
+
+// MARK: error-handler.ts
+
+public struct EsprimaError : Error {
+    public private(set) var name: String;
+    public private(set) var message: String;
+    public private(set) var index: Int;
+    public private(set) var lineNumber: Int;
+    public private(set) var column: Int;
+    public private(set) var description: Messages;
+}
+
+class ErrorHandler {
+    var errors: [EsprimaError];
+    var tolerant: Bool;
+
+    init() {
+        self.errors = [];
+        self.tolerant = false;
+    }
+
+    func recordError(error: EsprimaError) {
+        self.errors.append(error);
+    }
+
+    func tolerate(error: EsprimaError) throws {
+        if (self.tolerant) {
+            self.recordError(error: error);
+        } else {
+            throw error;
+        }
+    }
+
+    func createError(index: Int, line: Int, col: Int, description: Messages) -> EsprimaError {
+        EsprimaError(name: "", message: "Line \(line): \(description)", index: index, lineNumber: line, column: col, description: description)
+    }
+
+    func throwError(index: Int, line: Int, col: Int, description: Messages) throws {
+        throw self.createError(index: index, line: line, col: col, description: description);
+    }
+
+    func tolerateError(index: Int, line: Int, col: Int, description: Messages) throws {
+        let error = self.createError(index: index, line: line, col: col, description: description);
+        if (self.tolerant) {
+            self.recordError(error: error);
+        } else {
+            throw error;
+        }
+    }
+
+}
+
+
+// MARK: scanner.ts
+
+public struct Position : Hashable, Codable {
+    public let line: Int?
+    public let column: Int?
+}
+
+public struct SourceLocation : Hashable, Codable {
+    public var start: Position
+    public var end: Position
+    public var source: String? = nil
+}
+
+
+
 // - MARK: nodes.ts
 
 public protocol EsprimaASTType : Codable {
@@ -757,258 +1015,5 @@ public enum EsprimaASTNode {
 }
 
 
-// - MARK: messages.ts
-
-public enum Messages {
-    case BadImportCallArity
-    case BadGetterArity
-    case BadSetterArity
-    case BadSetterRestParameter
-    case ConstructorIsAsync
-    case ConstructorSpecialMethod
-    case DeclarationMissingInitializer
-    case DefaultRestParameter
-    case DefaultRestProperty
-    case DuplicateBinding
-    case DuplicateConstructor
-    case DuplicateProtoProperty
-    case ForInOfLoopInitializer
-    case GeneratorInLegacyContext
-    case IllegalBreak
-    case IllegalContinue
-    case IllegalExportDeclaration
-    case IllegalImportDeclaration
-    case IllegalLanguageModeDirective
-    case IllegalReturn
-    case InvalidEscapedReservedWord
-    case InvalidHexEscapeSequence
-    case InvalidLHSInAssignment
-    case InvalidLHSInForIn
-    case InvalidLHSInForLoop
-    case InvalidModuleSpecifier
-    case InvalidRegExp
-    case LetInLexicalBinding
-    case MissingFromClause
-    case MultipleDefaultsInSwitch
-    case NewlineAfterThrow
-    case NoAsAfterImportNamespace
-    case NoCatchOrFinally
-    case ParameterAfterRestParameter
-    case PropertyAfterRestProperty
-    case Redeclaration
-    case StaticPrototype
-    case StrictCatchVariable
-    case StrictDelete
-    case StrictFunction
-    case StrictFunctionName
-    case StrictLHSAssignment
-    case StrictLHSPostfix
-    case StrictLHSPrefix
-    case StrictModeWith
-    case StrictOctalLiteral
-    case StrictParamDupe
-    case StrictParamName
-    case StrictReservedWord
-    case StrictVarName
-    case TemplateOctalLiteral
-    case UnexpectedEOS
-    case UnexpectedIdentifier
-    case UnexpectedNumber
-    case UnexpectedReserved
-    case UnexpectedString
-    case UnexpectedTemplate
-    case UnexpectedToken
-    case UnexpectedTokenIllegal
-    case UnknownLabel
-    case UnterminatedRegExp
-
-    /// Error messages should be identical to V8.
-    var errorDescription: String {
-        switch self {
-        case .BadImportCallArity: return "Unexpected token"
-        case .BadGetterArity: return "Getter must not have any formal parameters"
-        case .BadSetterArity: return "Setter must have exactly one formal parameter"
-        case .BadSetterRestParameter: return "Setter function argument must not be a rest parameter"
-        case .ConstructorIsAsync: return "Class constructor may not be an async method"
-        case .ConstructorSpecialMethod: return "Class constructor may not be an accessor"
-        case .DeclarationMissingInitializer: return "Missing initializer in %0 declaration"
-        case .DefaultRestParameter: return "Unexpected token ="
-        case .DefaultRestProperty: return "Unexpected token ="
-        case .DuplicateBinding: return "Duplicate binding %0"
-        case .DuplicateConstructor: return "A class may only have one constructor"
-        case .DuplicateProtoProperty: return "Duplicate __proto__ fields are not allowed in object literals"
-        case .ForInOfLoopInitializer: return "%0 loop variable declaration may not have an initializer"
-        case .GeneratorInLegacyContext: return "Generator declarations are not allowed in legacy contexts"
-        case .IllegalBreak: return "Illegal break statement"
-        case .IllegalContinue: return "Illegal continue statement"
-        case .IllegalExportDeclaration: return "Unexpected token"
-        case .IllegalImportDeclaration: return "Unexpected token"
-        case .IllegalLanguageModeDirective: return "Illegal 'use strict' directive in function with non-simple parameter list"
-        case .IllegalReturn: return "Illegal return statement"
-        case .InvalidEscapedReservedWord: return "Keyword must not contain escaped characters"
-        case .InvalidHexEscapeSequence: return "Invalid hexadecimal escape sequence"
-        case .InvalidLHSInAssignment: return "Invalid left-hand side in assignment"
-        case .InvalidLHSInForIn: return "Invalid left-hand side in for-in"
-        case .InvalidLHSInForLoop: return "Invalid left-hand side in for-loop"
-        case .InvalidModuleSpecifier: return "Unexpected token"
-        case .InvalidRegExp: return "Invalid regular expression"
-        case .LetInLexicalBinding: return "let is disallowed as a lexically bound name"
-        case .MissingFromClause: return "Unexpected token"
-        case .MultipleDefaultsInSwitch: return "More than one default clause in switch statement"
-        case .NewlineAfterThrow: return "Illegal newline after throw"
-        case .NoAsAfterImportNamespace: return "Unexpected token"
-        case .NoCatchOrFinally: return "Missing catch or finally after try"
-        case .ParameterAfterRestParameter: return "Rest parameter must be last formal parameter"
-        case .PropertyAfterRestProperty: return "Unexpected token"
-        case .Redeclaration: return "%0 '%1' has already been declared"
-        case .StaticPrototype: return "Classes may not have static property named prototype"
-        case .StrictCatchVariable: return "Catch variable may not be eval or arguments in strict mode"
-        case .StrictDelete: return "Delete of an unqualified identifier in strict mode."
-        case .StrictFunction: return "In strict mode code, functions can only be declared at top level or inside a block"
-        case .StrictFunctionName: return "Function name may not be eval or arguments in strict mode"
-        case .StrictLHSAssignment: return "Assignment to eval or arguments is not allowed in strict mode"
-        case .StrictLHSPostfix: return "Postfix increment/decrement may not have eval or arguments operand in strict mode"
-        case .StrictLHSPrefix: return "Prefix increment/decrement may not have eval or arguments operand in strict mode"
-        case .StrictModeWith: return "Strict mode code may not include a with statement"
-        case .StrictOctalLiteral: return "Octal literals are not allowed in strict mode."
-        case .StrictParamDupe: return "Strict mode function may not have duplicate parameter names"
-        case .StrictParamName: return "Parameter name eval or arguments is not allowed in strict mode"
-        case .StrictReservedWord: return "Use of future reserved word in strict mode"
-        case .StrictVarName: return "Variable name may not be eval or arguments in strict mode"
-        case .TemplateOctalLiteral: return "Octal literals are not allowed in template strings."
-        case .UnexpectedEOS: return "Unexpected end of input"
-        case .UnexpectedIdentifier: return "Unexpected identifier"
-        case .UnexpectedNumber: return "Unexpected number"
-        case .UnexpectedReserved: return "Unexpected reserved word"
-        case .UnexpectedString: return "Unexpected string"
-        case .UnexpectedTemplate: return "Unexpected quasi %0"
-        case .UnexpectedToken: return "Unexpected token %0"
-        case .UnexpectedTokenIllegal: return "Unexpected token ILLEGAL"
-        case .UnknownLabel: return "Undefined label '%0'"
-        case .UnterminatedRegExp: return "Invalid regular expression: missing /"
-        }
-    }
-}
 
 
-// MARK: token.ts
-
-typealias Token = JSTokenType
-
-public enum JSTokenType : String, Hashable, Codable {
-    case BooleanLiteral = "Boolean"
-    case EOF = "<end>"
-    case Identifier = "Identifier"
-    case Keyword = "Keyword"
-    case NullLiteral = "Null"
-    case NumericLiteral = "Numeric"
-    case Punctuator = "Punctuator"
-    case StringLiteral = "String"
-    case RegularExpression = "RegularExpression"
-    case Template = "Template"
-}
-
-let TokenName = [
-    Token.BooleanLiteral: "Boolean",
-    Token.EOF: "<end>",
-    Token.Identifier: "Identifier",
-    Token.Keyword: "Keyword",
-    Token.NullLiteral: "Null",
-    Token.NumericLiteral: "Numeric",
-    Token.Punctuator: "Punctuator",
-    Token.StringLiteral: "String",
-    Token.RegularExpression: "RegularExpression",
-    Token.Template: "Template",
-]
-
-
-// MARK: tokenizer.ts
-
-public struct Regex : Hashable, Codable {
-    public let pattern: String
-    public let flags: String
-}
-
-/// A lexical token from a JS program or fragment
-public struct JSToken : Hashable, Codable {
-    public let type: JSTokenType
-    public let value: String
-    public let regex: Regex?
-    public let range: ClosedRange<Int>?
-    public let loc: SourceLocation?
-}
-
-typealias BufferEntry = JSToken
-
-struct Config : Hashable, Codable {
-    let tolerant: Bool?
-    let comment: Bool?
-    let range: Bool?
-    let loc: Bool?
-}
-
-
-// MARK: error-handler.ts
-
-public struct EsprimaError : Error {
-    public private(set) var name: String;
-    public private(set) var message: String;
-    public private(set) var index: Int;
-    public private(set) var lineNumber: Int;
-    public private(set) var column: Int;
-    public private(set) var description: Messages;
-}
-
-class ErrorHandler {
-    var errors: [EsprimaError];
-    var tolerant: Bool;
-
-    init() {
-        self.errors = [];
-        self.tolerant = false;
-    }
-
-    func recordError(error: EsprimaError) {
-        self.errors.append(error);
-    }
-
-    func tolerate(error: EsprimaError) throws {
-        if (self.tolerant) {
-            self.recordError(error: error);
-        } else {
-            throw error;
-        }
-    }
-
-    func createError(index: Int, line: Int, col: Int, description: Messages) -> EsprimaError {
-        EsprimaError(name: "", message: "Line \(line): \(description)", index: index, lineNumber: line, column: col, description: description)
-    }
-
-    func throwError(index: Int, line: Int, col: Int, description: Messages) throws {
-        throw self.createError(index: index, line: line, col: col, description: description);
-    }
-
-    func tolerateError(index: Int, line: Int, col: Int, description: Messages) throws {
-        let error = self.createError(index: index, line: line, col: col, description: description);
-        if (self.tolerant) {
-            self.recordError(error: error);
-        } else {
-            throw error;
-        }
-    }
-
-}
-
-
-// MARK: scanner.ts
-
-public struct Position : Hashable, Codable {
-    public let line: Int?
-    public let column: Int?
-}
-
-public struct SourceLocation : Hashable, Codable {
-    public var start: Position
-    public var end: Position
-    public var source: String? = nil
-}
