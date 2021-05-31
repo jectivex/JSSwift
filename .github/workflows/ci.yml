@@ -1,4 +1,4 @@
-name: Judo CI
+name: JSSwift CI
 
 on:
   push:
@@ -26,7 +26,7 @@ jobs:
       - uses: actions/checkout@v2
       - run: |
             xcodebuild clean test \
-              -scheme "Judo" \
+              -scheme "JSSwift" \
               -sdk "iphonesimulator14.4" \
               -destination "OS=14.4,name=iPhone 12 Mini" \
               ONLY_ACTIVE_ARCH=NO CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
@@ -39,7 +39,7 @@ jobs:
       - uses: actions/checkout@v2
       - run: |
             xcodebuild clean test \
-              -scheme "Judo" \
+              -scheme "JSSwift" \
               -sdk "appletvsimulator14.3" \
               -destination "OS=14.3,name=Apple TV" \
               ONLY_ACTIVE_ARCH=NO CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
