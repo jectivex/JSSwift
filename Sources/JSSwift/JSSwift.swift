@@ -11,8 +11,9 @@ open class JavaScriptParser {
 
     let esprima: JXValue
 
-    let tokenize: JXValue
-    let parse: JXValue
+    let tokenizeFunction: JXValue
+    let parseScriptFunction: JXValue
+    let parseModuleFunction: JXValue
 
     public init(ctx: JXContext = JXContext()) throws {
         self.ctx = ctx
@@ -32,8 +33,9 @@ open class JavaScriptParser {
 
 
         self.esprima = try check(ctx["exports"]["esprima"], isFunction: false)
-        self.parse = try check(esprima["parse"], isFunction: true)
-        self.tokenize = try check(esprima["tokenize"], isFunction: true)
+        self.tokenizeFunction = try check(esprima["tokenize"], isFunction: true)
+        self.parseScriptFunction = try check(esprima["parseScript"], isFunction: true)
+        self.parseModuleFunction = try check(esprima["parseModule"], isFunction: true)
     }
 
     public enum Errors : Error {
@@ -56,7 +58,7 @@ open class JavaScriptParser {
     /// - SeeAlso: `JavaScriptParser.parse`
     open func tokenize(javaScript: String, options: TokenizeOptions = .init()) throws -> [JSToken] {
         return try ctx.trying { // invoke the cached function with the encoded arguments
-            try tokenize.call(withArguments: [ctx.string(javaScript), ctx.encode(options)])
+            try tokenizeFunction.call(withArguments: [ctx.string(javaScript), ctx.encode(options)])
 
         }.toDecodable(ofType: [JSToken].self)
     }
@@ -87,13 +89,24 @@ open class JavaScriptParser {
         }
     }
 
-    /// Parses a JavaScript program.
+    /// Parses a JavaScript script.
     ///
     /// More info: [Syntactic Analysis](https://esprima.readthedocs.io/en/4.0/syntactic-analysis.html)
-    open func parse(javaScript: String, options: ParseOptions = .init()) throws -> JSSyntax.Script {
+    open func parse(script javaScript: String, options: ParseOptions = .init()) throws -> JSSyntax.Script {
         return try ctx.trying { // invoke the cached function with the encoded arguments
-            parse.call(withArguments: [ctx.string(javaScript), try ctx.encode(options)])
+            parseScriptFunction.call(withArguments: [ctx.string(javaScript), try ctx.encode(options)])
         }.toDecodable(ofType: JSSyntax.Script.self)
+    }
+
+    /// Parses a JavaScript module.
+    /// 
+    /// This differs from `parse(script:)` in that it permits module syntax like imports.
+    ///
+    /// More info: [Syntactic Analysis](https://esprima.readthedocs.io/en/4.0/syntactic-analysis.html)
+    open func parse(module javaScript: String, options: ParseOptions = .init()) throws -> JSSyntax.Module {
+        return try ctx.trying { // invoke the cached function with the encoded arguments
+            parseModuleFunction.call(withArguments: [ctx.string(javaScript), try ctx.encode(options)])
+        }.toDecodable(ofType: JSSyntax.Module.self)
     }
 
     /// Options for `JavaScriptParser.parse`

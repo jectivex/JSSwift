@@ -72,32 +72,36 @@ final class JSSwiftTests: XCTestCase {
             try tokenize(js: "1+'x'", tokenTypes: [.NumericLiteral, .Punctuator, .StringLiteral], columns: [0, 1, 2])
             try tokenize(js: "1+[]", tokenTypes: [.NumericLiteral, .Punctuator, .Punctuator, .Punctuator], columns: [0, 1, 2, 3])
 
-            
-            /// AST examples
-
-            XCTAssertEqual(try parser.parse(javaScript: "const answer = 42", options: popts), JSSyntax.Script(type: .Program, body: [
-                .init(.init(JSSyntax.VariableDeclaration(type: .VariableDeclaration, declarations: [
-                    JSSyntax.VariableDeclarator(type: .VariableDeclarator, id: oneOf(JSSyntax.Identifier(type: .Identifier, name: "answer")), init: oneOf(oneOf(oneOf(JSSyntax.Literal(type: .Literal, value: .v2(42.0), raw: "42")))))
-                ], kind: "const")))
-            ], sourceType: "script"))
-
-            XCTAssertEqual(try parser.parse(javaScript: "1.2 + 'ABC'", options: popts), JSSyntax.Script(type: .Program, body: [
-                JSSyntax.StatementListItem(JSSyntax.Statement(oneOf(JSSyntax.ExpressionStatement(type: .ExpressionStatement, expression: JSSyntax.Expression(oneOf(JSSyntax.BinaryExpression(type: .BinaryExpression, operator: "+", left: oneOf(oneOf(JSSyntax.Literal(type: .Literal, value: oneOf(1.2), raw: "1.2"))), right: oneOf(oneOf(JSSyntax.Literal(type: .Literal, value: oneOf("ABC"), raw: "'ABC'"))))))))))
-            ], sourceType: "script"))
 
 
-            XCTAssertEqual(try parser.parse(javaScript: "'XYZ'+1.2", options: popts), JSSyntax.Script(type: .Program, body: [
-                JSSyntax.StatementListItem(JSSyntax.Statement(oneOf(JSSyntax.ExpressionStatement(type: .ExpressionStatement, expression: JSSyntax.Expression(oneOf(JSSyntax.BinaryExpression(type: .BinaryExpression, operator: "+", left: oneOf(oneOf(JSSyntax.Literal(type: .Literal, value: oneOf("XYZ"), raw: "'XYZ'"))), right: oneOf(oneOf(JSSyntax.Literal(type: .Literal, value: oneOf(1.2), raw: "1.2"))))))))))
-            ], sourceType: "script"))
-
-
-            /// Checks that the given JavaScript can be parsed
-            func parse(js javaScript: String, tokenTypes: [JSTokenType]? = nil, tolerant: Bool = false) throws {
+            /// Checks that the given JavaScript script or module can be parsed
+            func parse(js javaScript: String, tokenTypes: [JSTokenType]? = nil, module: Bool = false, tolerant: Bool = false, debug: Bool = false, expect: OneOf<JSSyntax.Script>.Or<JSSyntax.Module>? = nil, line: UInt = #line) throws {
                 var opts = popts
                 opts.tolerant = tolerant
-                opts.loc = true
-                opts.range = true
-                let _ = try parser.parse(javaScript: javaScript, options: opts)
+                if debug {
+                    opts.loc = true
+                    opts.range = true
+                    let raw = try parser.parseScriptFunction.call(withArguments: [parser.ctx.string(javaScript), parser.ctx.encode(opts)])
+                    print(try raw.toJSON(indent: 2))
+                }
+
+                if module {
+                    let module = try parser.parse(module: javaScript, options: opts)
+                    if let expect = expect {
+                        XCTAssertEqual(oneOf(module), expect, line: line)
+                    }
+                } else {
+                    let script = try parser.parse(script: javaScript, options: opts)
+                    if let expect = expect {
+                        XCTAssertEqual(oneOf(script), expect, line: line)
+                    }
+                }
+            }
+
+            do { // demonstrate the difference between parsing a script and a module
+                let js = "export const answer = 42"
+                XCTAssertThrowsError(try parse(js: js, module: false))
+                XCTAssertNoThrow(try parse(js: js, module: true))
             }
 
             try parse(js: "true")
@@ -110,7 +114,7 @@ final class JSSwiftTests: XCTestCase {
             try parse(js: "function doSomething() { return 1 + 'abx'; }")
             try parse(js: "[]")
 
-//            try parse(js: "{}")
+            //try parse(js: "{}", debug: true)
 
 //            try parse(js: "function allTypes() { return { a: 1.2, 'b': null, \"c\": [true, false] }; }", tolerant: true)
 
@@ -133,6 +137,34 @@ final class JSSwiftTests: XCTestCase {
 //                    XCTFail("error measuring performance: \(error)")
 //                }
 //            }
+
+
+            /// AST examples
+
+            try parse(js: "const answer = 42", module: false, expect: oneOf(JSSyntax.Script(body: [
+                .init(.init(JSSyntax.VariableDeclaration(declarations: [
+                    JSSyntax.VariableDeclarator(id: oneOf(JSSyntax.Identifier(name: "answer")), init: oneOf(oneOf(oneOf(JSSyntax.Literal(value: oneOf(42.0), raw: "42")))))
+                ], kind: "const")))
+            ], sourceType: "script")))
+
+
+            try parse(js: "const answer = 42", module: true, expect: oneOf(JSSyntax.Module(body: [
+                .init(.init(.init(JSSyntax.VariableDeclaration(declarations: [
+                    JSSyntax.VariableDeclarator(id: oneOf(JSSyntax.Identifier(name: "answer")), init: oneOf(oneOf(oneOf(JSSyntax.Literal(value: oneOf(42.0), raw: "42")))))
+                ], kind: "const"))))
+            ], sourceType: "module")))
+
+
+            try parse(js: "1.2 + 'ABC'", expect: oneOf(JSSyntax.Script(body: [
+                JSSyntax.StatementListItem(JSSyntax.Statement(oneOf(JSSyntax.ExpressionStatement(expression: JSSyntax.Expression(oneOf(JSSyntax.BinaryExpression(operator: "+", left: oneOf(oneOf(JSSyntax.Literal(value: oneOf(1.2), raw: "1.2"))), right: oneOf(oneOf(JSSyntax.Literal(value: oneOf("ABC"), raw: "'ABC'"))))))))))
+            ], sourceType: "script")))
+
+
+            try parse(js: "'XYZ'+1.2", expect: oneOf(JSSyntax.Script(body: [
+                JSSyntax.StatementListItem(JSSyntax.Statement(oneOf(JSSyntax.ExpressionStatement(expression: JSSyntax.Expression(oneOf(JSSyntax.BinaryExpression(operator: "+", left: oneOf(oneOf(JSSyntax.Literal(value: oneOf("XYZ"), raw: "'XYZ'"))), right: oneOf(oneOf(JSSyntax.Literal(value: oneOf(1.2), raw: "1.2"))))))))))
+            ], sourceType: "script")))
+
         }
     }
 }
+

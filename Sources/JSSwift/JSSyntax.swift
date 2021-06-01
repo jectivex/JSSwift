@@ -1,79 +1,1126 @@
 
-// A JavaScript AST, translated from esprima's `syntax.ts`
+// A JavaScript AST hand-ported from esprima's `syntax.ts`
 
-import Foundation
+/// Namespace for nodes corresponding to `Syntax` cases.
+///
+/// The syntax tree format is derived from the original version of [Mozilla Parser API](https://developer.mozilla.org/en-US/docs/Mozilla/Projects/SpiderMonkey/Parser_API), which is then formalized and expanded as the [ESTree specification](https://github.com/estree/estree).
+public enum JSSyntax {
 
-// MARK: syntax.ts
+    /// https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html#scripts-and-modules
+    public struct Script : JSSyntaxAST {
+        public init(type: ProgramNodeType = .Program, body: [StatementListItem], sourceType: String) {
+            self.type = type
+            self.body = body
+            self.sourceType = sourceType
+        }
 
-enum Syntax {
-    enum AssignmentExpression : String, Codable { case AssignmentExpression = "AssignmentExpression" }
-    enum AssignmentPattern  : String, Codable { case AssignmentPattern = "AssignmentPattern" }
-    enum ArrayExpression : String, Codable { case ArrayExpression = "ArrayExpression" }
-    enum ArrayPattern : String, Codable { case ArrayPattern = "ArrayPattern" }
-    enum ArrowFunctionExpression : String, Codable { case ArrowFunctionExpression = "ArrowFunctionExpression" }
-    enum AwaitExpression : String, Codable { case AwaitExpression = "AwaitExpression" }
-    enum BlockStatement : String, Codable { case BlockStatement = "BlockStatement" }
-    enum BinaryExpression : String, Codable { case BinaryExpression = "BinaryExpression" }
-    enum BreakStatement : String, Codable { case BreakStatement = "BreakStatement" }
-    enum CallExpression : String, Codable { case CallExpression = "CallExpression" }
-    enum CatchClause : String, Codable { case CatchClause = "CatchClause" }
-    enum ClassBody : String, Codable { case ClassBody = "ClassBody" }
-    enum ClassDeclaration : String, Codable { case ClassDeclaration = "ClassDeclaration" }
-    enum ClassExpression : String, Codable { case ClassExpression = "ClassExpression" }
-    enum ConditionalExpression : String, Codable { case ConditionalExpression = "ConditionalExpression" }
-    enum ContinueStatement : String, Codable { case ContinueStatement = "ContinueStatement" }
-    enum DoWhileStatement : String, Codable { case DoWhileStatement = "DoWhileStatement" }
-    enum DebuggerStatement : String, Codable { case DebuggerStatement = "DebuggerStatement" }
-    enum EmptyStatement : String, Codable { case EmptyStatement = "EmptyStatement" }
-    enum ExportAllDeclaration : String, Codable { case ExportAllDeclaration = "ExportAllDeclaration" }
-    enum ExportDefaultDeclaration : String, Codable { case ExportDefaultDeclaration = "ExportDefaultDeclaration" }
-    enum ExportNamedDeclaration : String, Codable { case ExportNamedDeclaration = "ExportNamedDeclaration" }
-    enum ExportSpecifier : String, Codable { case ExportSpecifier = "ExportSpecifier" }
-    enum ExpressionStatement : String, Codable { case ExpressionStatement = "ExpressionStatement" }
-    enum ForStatement : String, Codable { case ForStatement = "ForStatement" }
-    enum ForOfStatement : String, Codable { case ForOfStatement = "ForOfStatement" }
-    enum ForInStatement : String, Codable { case ForInStatement = "ForInStatement" }
-    enum FunctionDeclaration : String, Codable { case FunctionDeclaration = "FunctionDeclaration" }
-    enum FunctionExpression : String, Codable { case FunctionExpression = "FunctionExpression" }
-    enum Identifier : String, Codable { case Identifier = "Identifier" }
-    enum IfStatement : String, Codable { case IfStatement = "IfStatement" }
-    enum Import : String, Codable { case Import = "Import" }
-    enum ImportDeclaration : String, Codable { case ImportDeclaration = "ImportDeclaration" }
-    enum ImportDefaultSpecifier : String, Codable { case ImportDefaultSpecifier = "ImportDefaultSpecifier" }
-    enum ImportNamespaceSpecifier : String, Codable { case ImportNamespaceSpecifier = "ImportNamespaceSpecifier" }
-    enum ImportSpecifier : String, Codable { case ImportSpecifier = "ImportSpecifier" }
-    enum Literal : String, Codable { case Literal = "Literal" }
-    enum LabeledStatement : String, Codable { case LabeledStatement = "LabeledStatement" }
-    enum LogicalExpression : String, Codable { case LogicalExpression = "LogicalExpression" }
-    enum MemberExpression : String, Codable { case MemberExpression = "MemberExpression" }
-    enum MetaProperty : String, Codable { case MetaProperty = "MetaProperty" }
-    enum MethodDefinition : String, Codable { case MethodDefinition = "MethodDefinition" }
-    enum NewExpression : String, Codable { case NewExpression = "NewExpression" }
-    enum ObjectExpression : String, Codable { case ObjectExpression = "ObjectExpression" }
-    enum ObjectPattern : String, Codable { case ObjectPattern = "ObjectPattern" }
-    enum Program : String, Codable { case Program = "Program" }
-    enum Property : String, Codable { case Property = "Property" }
-    enum RestElement : String, Codable { case RestElement = "RestElement" }
-    enum ReturnStatement : String, Codable { case ReturnStatement = "ReturnStatement" }
-    enum SequenceExpression : String, Codable { case SequenceExpression = "SequenceExpression" }
-    enum SpreadElement : String, Codable { case SpreadElement = "SpreadElement" }
-    enum Super : String, Codable { case Super = "Super" }
-    enum SwitchCase : String, Codable { case SwitchCase = "SwitchCase" }
-    enum SwitchStatement : String, Codable { case SwitchStatement = "SwitchStatement" }
-    enum TaggedTemplateExpression : String, Codable { case TaggedTemplateExpression = "TaggedTemplateExpression" }
-    enum TemplateElement : String, Codable { case TemplateElement = "TemplateElement" }
-    enum TemplateLiteral : String, Codable { case TemplateLiteral = "TemplateLiteral" }
-    enum ThisExpression : String, Codable { case ThisExpression = "ThisExpression" }
-    enum ThrowStatement : String, Codable { case ThrowStatement = "ThrowStatement" }
-    enum TryStatement : String, Codable { case TryStatement = "TryStatement" }
-    enum UnaryExpression : String, Codable { case UnaryExpression = "UnaryExpression" }
-    enum UpdateExpression : String, Codable { case UpdateExpression = "UpdateExpression" }
-    enum VariableDeclaration : String, Codable { case VariableDeclaration = "VariableDeclaration" }
-    enum VariableDeclarator : String, Codable { case VariableDeclarator = "VariableDeclarator" }
-    enum WhileStatement : String, Codable { case WhileStatement = "WhileStatement" }
-    enum WithStatement : String, Codable { case WithStatement = "WithStatement" }
-    enum YieldExpression : String, Codable { case YieldExpression = "YieldExpressio" }
+        public var type: ProgramNodeType
+        public enum ProgramNodeType : String, Codable { case Program }
+        public var body: [StatementListItem]
+        public var sourceType: String
+    }
+
+    /// https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html#scripts-and-modules
+    public struct Module : JSSyntaxAST {
+        public init(type: ProgramNodeType = .Program, body: [ModuleItem], sourceType: String) {
+            self.type = type
+            self.body = body
+            self.sourceType = sourceType
+        }
+
+        public var type: ProgramNodeType
+        public enum ProgramNodeType : String, Codable { case Program }
+        public var body: [ModuleItem]
+        public var sourceType: String
+    }
+
+
+    public struct ArrayExpression : JSSyntaxAST {
+        public init(type: ArrayExpressionNodeType = .ArrayExpression, elements: Array<ArrayExpressionElement>) {
+            self.type = type
+            self.elements = elements
+        }
+
+        public var type: ArrayExpressionNodeType
+        public enum ArrayExpressionNodeType : String, Codable { case ArrayExpression }
+        public var elements: Array<ArrayExpressionElement>
+    }
+
+    /// https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html#array-pattern
+    public struct ArrayPattern : JSSyntaxAST {
+        public init(type: ArrayPatternNodeType = .ArrayPattern, elements: [ArrayPatternElement]) {
+            self.type = type
+            self.elements = elements
+        }
+        
+        public var type: ArrayPatternNodeType
+        public enum ArrayPatternNodeType : String, Codable { case ArrayPattern }
+        public var elements: [ArrayPatternElement]
+    }
+
+    public struct ArrowFunctionExpression : JSSyntaxAST {
+        public init(type: ArrowFunctionExpressionNodeType = .ArrowFunctionExpression, id: Nullable<Identifier>, params: [FunctionParameter], body: OneOf<BlockStatement>.Or<Expression>, generator: Bool, expression: Bool, async: Bool) {
+            self.type = type
+            self.id = id
+            self.params = params
+            self.body = body
+            self.generator = generator
+            self.expression = expression
+            self.async = async
+        }
+
+        public var type: ArrowFunctionExpressionNodeType
+        public enum ArrowFunctionExpressionNodeType : String, Codable { case ArrowFunctionExpression }
+        public var id: Nullable<Identifier>
+        public var params: [FunctionParameter]
+        public var body: OneOf<BlockStatement>.Or<Expression>
+        public var generator: Bool
+        public var expression: Bool
+        public var async: Bool
+    }
+
+    public struct AssignmentExpression : JSSyntaxAST {
+        public init(type: AssignmentExpressionNodeType = .AssignmentExpression, operator: String, left: Expression, right: Expression) {
+            self.type = type
+            self.`operator` = `operator`
+            self.left = left
+            self.right = right
+        }
+
+        public var type: AssignmentExpressionNodeType
+        public enum AssignmentExpressionNodeType : String, Codable { case AssignmentExpression}
+        public var `operator`: String
+        public var left: Expression
+        public var right: Expression
+    }
+
+    public struct AssignmentPattern : JSSyntaxAST {
+        public init(type: AssignmentPatternNodeType = .AssignmentPattern, left: OneOf<BindingIdentifier>.Or<BindingPattern>, right: Expression) {
+            self.type = type
+            self.left = left
+            self.right = right
+        }
+
+        public var type: AssignmentPatternNodeType
+        public enum AssignmentPatternNodeType : String, Codable { case AssignmentPattern }
+        public var left: OneOf<BindingIdentifier>.Or<BindingPattern>
+        public var right: Expression
+    }
+
+    public struct AsyncArrowFunctionExpression : JSSyntaxAST {
+        public init(type: AsyncArrowFunctionExpressionNodeType = .AsyncArrowFunctionExpression, id: Nullable<Identifier>, params: [FunctionParameter], body: OneOf<BlockStatement>.Or<Expression>, generator: Bool, expression: Bool, async: Bool) {
+            self.type = type
+            self.id = id
+            self.params = params
+            self.body = body
+            self.generator = generator
+            self.expression = expression
+            self.async = async
+        }
+
+        public var type: AsyncArrowFunctionExpressionNodeType
+        public enum AsyncArrowFunctionExpressionNodeType : String, Codable { case AsyncArrowFunctionExpression }
+        public var id: Nullable<Identifier>
+        public var params: [FunctionParameter]
+        public var body: OneOf<BlockStatement>.Or<Expression>
+        public var generator: Bool
+        public var expression: Bool
+        public var async: Bool
+    }
+
+    public struct AsyncFunctionDeclaration : JSSyntaxAST {
+        public init(type: AsyncFunctionDeclarationNodeType = .AsyncFunctionDeclaration, id: Nullable<Identifier>, params: [FunctionParameter], body: BlockStatement, generator: Bool, expression: Bool, async: Bool) {
+            self.type = type
+            self.id = id
+            self.params = params
+            self.body = body
+            self.generator = generator
+            self.expression = expression
+            self.async = async
+        }
+
+        public var type: AsyncFunctionDeclarationNodeType
+        public enum AsyncFunctionDeclarationNodeType : String, Codable { case AsyncFunctionDeclaration }
+        public var id: Nullable<Identifier>
+        public var params: [FunctionParameter]
+        public var body: BlockStatement
+        public var generator: Bool
+        public var expression: Bool
+        public var async: Bool
+    }
+
+    public struct AsyncFunctionExpression : JSSyntaxAST {
+        public init(type: AsyncFunctionExpressionNodeType = .AsyncFunctionExpression, id: Nullable<Identifier>, params: [FunctionParameter], body: BlockStatement, generator: Bool, expression: Bool, async: Bool) {
+            self.type = type
+            self.id = id
+            self.params = params
+            self.body = body
+            self.generator = generator
+            self.expression = expression
+            self.async = async
+        }
+
+        public var type: AsyncFunctionExpressionNodeType
+        public enum AsyncFunctionExpressionNodeType : String, Codable { case AsyncFunctionExpression }
+        public var id: Nullable<Identifier>
+        public var params: [FunctionParameter]
+        public var body: BlockStatement
+        public var generator: Bool
+        public var expression: Bool
+        public var async: Bool
+    }
+
+    public struct AwaitExpression : JSSyntaxAST {
+        public init(type: AwaitExpressionNodeType = .AwaitExpression, argument: Expression) {
+            self.type = type
+            self.argument = argument
+        }
+
+        public var type: AwaitExpressionNodeType
+        public enum AwaitExpressionNodeType : String, Codable { case AwaitExpression }
+        public var argument: Expression
+    }
+
+    public struct BinaryExpression : JSSyntaxAST {
+        public init(type: BinaryExpressionNodeType = .BinaryExpression, `operator`: String, left: Expression, right: Expression) {
+            self.type = type
+            self.`operator` = `operator`
+            self.left = left
+            self.right = right
+        }
+
+        public var type: BinaryExpressionNodeType
+        public enum BinaryExpressionNodeType : String, Codable { case BinaryExpression }
+        public var `operator`: String
+        public var left: Expression
+        public var right: Expression
+    }
+
+    public struct BlockStatement : JSSyntaxAST {
+        public init(type: BlockStatementNodeType = .BlockStatement, body: [Statement]) {
+            self.type = type
+            self.body = body
+        }
+
+        public var type: BlockStatementNodeType
+        public enum BlockStatementNodeType : String, Codable { case BlockStatement }
+        public var body: [Statement]
+    }
+
+    public struct BreakStatement : JSSyntaxAST {
+        public init(type: BreakStatementNodeType = .BreakStatement, label: Nullable<Identifier>) {
+            self.type = type
+            self.label = label
+        }
+
+        public var type: BreakStatementNodeType
+        public enum BreakStatementNodeType : String, Codable { case BreakStatement }
+        public var label: Nullable<Identifier>
+    }
+
+    public struct CallExpression : JSSyntaxAST {
+        public init(type: CallExpressionNodeType = .CallExpression, callee: OneOf<Expression>.Or<Import>, arguments: [ArgumentListElement]) {
+            self.type = type
+            self.callee = callee
+            self.arguments = arguments
+        }
+
+        public var type: CallExpressionNodeType
+        public enum CallExpressionNodeType : String, Codable { case CallExpression }
+        public var callee: OneOf<Expression>.Or<Import>
+        public var arguments: [ArgumentListElement]
+    }
+
+    public struct CatchClause : JSSyntaxAST {
+        public init(type: CatchClauseNodeType = .CatchClause, param: OneOf<BindingIdentifier>.Or<BindingPattern>, body: BlockStatement) {
+            self.type = type
+            self.param = param
+            self.body = body
+        }
+
+        public var type: CatchClauseNodeType
+        public enum CatchClauseNodeType : String, Codable { case CatchClause }
+        public var param: OneOf<BindingIdentifier>.Or<BindingPattern>
+        public var body: BlockStatement
+    }
+
+    public struct ClassBody : JSSyntaxAST {
+        public init(type: ClassBodyNodeType = .ClassBody, body: [Property]) {
+            self.type = type
+            self.body = body
+        }
+
+        public var type: ClassBodyNodeType
+        public enum ClassBodyNodeType : String, Codable { case ClassBody }
+        public var body: [Property]
+    }
+
+    public struct ClassDeclaration : JSSyntaxAST {
+        public init(type: ClassDeclarationNodeType = .ClassDeclaration, id: Nullable<Identifier>, superClass: Nullable<Identifier>, body: ClassBody) {
+            self.type = type
+            self.id = id
+            self.superClass = superClass
+            self.body = body
+        }
+
+        public var type: ClassDeclarationNodeType
+        public enum ClassDeclarationNodeType : String, Codable { case ClassDeclaration }
+        public var id: Nullable<Identifier>
+        public var superClass: Nullable<Identifier>
+        public var body: ClassBody
+    }
+
+    public struct ClassExpression : JSSyntaxAST {
+        public init(type: ClassExpressionNodeType = .ClassExpression, id: Nullable<Identifier>, superClass: Nullable<Identifier>, body: ClassBody) {
+            self.type = type
+            self.id = id
+            self.superClass = superClass
+            self.body = body
+        }
+
+        public var type: ClassExpressionNodeType
+        public enum ClassExpressionNodeType : String, Codable { case ClassExpression }
+        public var id: Nullable<Identifier>
+        public var superClass: Nullable<Identifier>
+        public var body: ClassBody
+    }
+
+    public struct ComputedMemberExpression : JSSyntaxAST {
+        public init(type: ComputedMemberExpressionNodeType = .ComputedMemberExpression, computed: Bool, object: Expression, property: Expression) {
+            self.type = type
+            self.computed = computed
+            self.object = object
+            self.property = property
+        }
+
+        public var type: ComputedMemberExpressionNodeType
+        public enum ComputedMemberExpressionNodeType : String, Codable { case ComputedMemberExpression }
+        public var computed: Bool
+        public var object: Expression
+        public var property: Expression
+    }
+
+    public struct ConditionalExpression : JSSyntaxAST {
+        public init(type: ConditionalExpressionNodeType = .ConditionalExpression, test: Expression, consequent: Expression, alternate: Expression) {
+            self.type = type
+            self.test = test
+            self.consequent = consequent
+            self.alternate = alternate
+        }
+
+        public var type: ConditionalExpressionNodeType
+        public enum ConditionalExpressionNodeType : String, Codable { case ConditionalExpression }
+        public var test: Expression
+        public var consequent: Expression
+        public var alternate: Expression
+    }
+
+    public struct ContinueStatement : JSSyntaxAST {
+        public init(type: ContinueStatementNodeType = .ContinueStatement, label: Nullable<Identifier>) {
+            self.type = type
+            self.label = label
+        }
+
+        public var type: ContinueStatementNodeType
+        public enum ContinueStatementNodeType : String, Codable { case ContinueStatement }
+        public var label: Nullable<Identifier>
+    }
+
+    public struct DebuggerStatement : JSSyntaxAST {
+        public init(type: DebuggerStatementNodeType = .DebuggerStatement) {
+            self.type = type
+        }
+
+        public var type: DebuggerStatementNodeType
+        public enum DebuggerStatementNodeType : String, Codable { case DebuggerStatement }
+    }
+
+    public struct Directive : JSSyntaxAST {
+        public init(type: DirectiveNodeType = .Directive, expression: Expression, directive: String) {
+            self.type = type
+            self.expression = expression
+            self.directive = directive
+        }
+
+        public var type: DirectiveNodeType
+        public enum DirectiveNodeType : String, Codable { case Directive }
+        public var expression: Expression
+        public var directive: String
+    }
+
+    public struct DoWhileStatement : JSSyntaxAST {
+        public init(type: DoWhileStatementNodeType = .DoWhileStatement, body: Statement, test: Expression) {
+            self.type = type
+            self.body = body
+            self.test = test
+        }
+
+        public var type: DoWhileStatementNodeType
+        public enum DoWhileStatementNodeType : String, Codable { case DoWhileStatement }
+        public var body: Statement
+        public var test: Expression
+    }
+
+    public struct EmptyStatement : JSSyntaxAST {
+        public init(type: EmptyStatementNodeType = .EmptyStatement) {
+            self.type = type
+        }
+
+        public var type: EmptyStatementNodeType
+        public enum EmptyStatementNodeType : String, Codable { case EmptyStatement }
+    }
+
+    public struct ExportAllDeclaration : JSSyntaxAST {
+        public init(type: ExportAllDeclarationNodeType = .ExportAllDeclaration, source: Literal) {
+            self.type = type
+            self.source = source
+        }
+
+        public var type: ExportAllDeclarationNodeType
+        public enum ExportAllDeclarationNodeType : String, Codable { case ExportAllDeclaration }
+        public var source: Literal
+    }
+
+    public struct ExportDefaultDeclaration : JSSyntaxAST {
+        public init(type: ExportDefaultDeclarationNodeType = .ExportDefaultDeclaration, declaration: ExportableDefaultDeclaration) {
+            self.type = type
+            self.declaration = declaration
+        }
+
+        public var type: ExportDefaultDeclarationNodeType
+        public enum ExportDefaultDeclarationNodeType : String, Codable { case ExportDefaultDeclaration }
+        public var declaration: ExportableDefaultDeclaration
+    }
+
+    public struct ExportNamedDeclaration : JSSyntaxAST {
+        public init(type: ExportNamedDeclarationNodeType = .ExportNamedDeclaration, declaration: Nullable<ExportableNamedDeclaration>, specifiers: [ExportSpecifier], source: Nullable<Literal>) {
+            self.type = type
+            self.declaration = declaration
+            self.specifiers = specifiers
+            self.source = source
+        }
+
+        public var type: ExportNamedDeclarationNodeType
+        public enum ExportNamedDeclarationNodeType : String, Codable { case ExportNamedDeclaration }
+        public var declaration: Nullable<ExportableNamedDeclaration>
+        public var specifiers: [ExportSpecifier]
+        public var source: Nullable<Literal>
+    }
+
+    public struct ExportSpecifier : JSSyntaxAST {
+        public init(type: ExportSpecifierNodeType = .ExportSpecifier, exported: Identifier, local: Identifier) {
+            self.type = type
+            self.exported = exported
+            self.local = local
+        }
+
+        public var type: ExportSpecifierNodeType
+        public enum ExportSpecifierNodeType : String, Codable { case ExportSpecifier }
+        public var exported: Identifier
+        public var local: Identifier
+    }
+
+    public struct ExpressionStatement : JSSyntaxAST {
+        public init(type: ExpressionStatementNodeType = .ExpressionStatement, expression: Expression) {
+            self.type = type
+            self.expression = expression
+        }
+
+        public var type: ExpressionStatementNodeType
+        public enum ExpressionStatementNodeType : String, Codable { case ExpressionStatement }
+        public var expression: Expression
+    }
+
+    public struct ForInStatement : JSSyntaxAST {
+        public init(type: ForInStatementNodeType = .ForInStatement, left: Expression, right: Expression, body: Statement, each: Bool) {
+            self.type = type
+            self.left = left
+            self.right = right
+            self.body = body
+            self.each = each
+        }
+
+        public var type: ForInStatementNodeType
+        public enum ForInStatementNodeType : String, Codable { case ForInStatement }
+        public var left: Expression
+        public var right: Expression
+        public var body: Statement
+        public var each: Bool
+    }
+
+    public struct ForOfStatement : JSSyntaxAST {
+        public init(type: ForOfStatementNodeType = .ForOfStatement, left: Expression, right: Expression, body: Statement) {
+            self.type = type
+            self.left = left
+            self.right = right
+            self.body = body
+        }
+
+        public var type: ForOfStatementNodeType
+        public enum ForOfStatementNodeType : String, Codable { case ForOfStatement }
+        public var left: Expression
+        public var right: Expression
+        public var body: Statement
+    }
+
+    public struct ForStatement : JSSyntaxAST {
+        public init(type: ForStatementNodeType = .ForStatement, `init`: Nullable<Expression>, test: Nullable<Expression>, update: Nullable<Expression>, body: Statement) {
+            self.type = type
+            self.`init` = `init`
+            self.test = test
+            self.update = update
+            self.body = body
+        }
+
+        public var type: ForStatementNodeType
+        public enum ForStatementNodeType : String, Codable { case ForStatement }
+        public var `init`: Nullable<Expression>
+        public var test: Nullable<Expression>
+        public var update: Nullable<Expression>
+        public var body: Statement
+    }
+
+    public struct FunctionDeclaration : JSSyntaxAST {
+        public init(type: FunctionDeclarationNodeType = .FunctionDeclaration, id: Nullable<Identifier>, params: [FunctionParameter], body: BlockStatement, generator: Bool, expression: Bool, async: Bool) {
+            self.type = type
+            self.id = id
+            self.params = params
+            self.body = body
+            self.generator = generator
+            self.expression = expression
+            self.async = async
+        }
+
+        public var type: FunctionDeclarationNodeType
+        public enum FunctionDeclarationNodeType : String, Codable { case FunctionDeclaration }
+        public var id: Nullable<Identifier>
+        public var params: [FunctionParameter]
+        public var body: BlockStatement
+        public var generator: Bool
+        public var expression: Bool
+        public var async: Bool
+    }
+
+    public struct FunctionExpression : JSSyntaxAST {
+        public init(type: FunctionExpressionNodeType = .FunctionExpression, id: Nullable<Identifier>, params: [FunctionParameter], body: BlockStatement, generator: Bool, expression: Bool, async: Bool) {
+            self.type = type
+            self.id = id
+            self.params = params
+            self.body = body
+            self.generator = generator
+            self.expression = expression
+            self.async = async
+        }
+
+        public var type: FunctionExpressionNodeType
+        public enum FunctionExpressionNodeType : String, Codable { case FunctionExpression }
+        public var id: Nullable<Identifier>
+        public var params: [FunctionParameter]
+        public var body: BlockStatement
+        public var generator: Bool
+        public var expression: Bool
+        public var async: Bool
+    }
+
+    public struct Identifier : JSSyntaxAST {
+        public init(type: IdentifierNodeType = .Identifier, name: String) {
+            self.type = type
+            self.name = name
+        }
+
+        public var type: IdentifierNodeType
+        public enum IdentifierNodeType : String, Codable { case Identifier }
+        public var name: String
+    }
+
+    public struct IfStatement : JSSyntaxAST {
+        public init(type: IfStatementNodeType = .IfStatement, test: Expression, consequent: Statement, alternate: Nullable<Statement>) {
+            self.type = type
+            self.test = test
+            self.consequent = consequent
+            self.alternate = alternate
+        }
+
+        public var type: IfStatementNodeType
+        public enum IfStatementNodeType : String, Codable { case IfStatement }
+        public var test: Expression
+        public var consequent: Statement
+        public var alternate: Nullable<Statement>
+    }
+
+    public struct Import : JSSyntaxAST {
+        public init(type: ImportNodeType = .Import) {
+            self.type = type
+        }
+
+        public var type: ImportNodeType
+        public enum ImportNodeType : String, Codable { case Import }
+    }
+
+    public struct ImportDeclaration : JSSyntaxAST {
+        public init(type: ImportDeclarationNodeType = .ImportDeclaration, specifiers: [ImportDeclarationSpecifier], source: Literal) {
+            self.type = type
+            self.specifiers = specifiers
+            self.source = source
+        }
+
+        public var type: ImportDeclarationNodeType
+        public enum ImportDeclarationNodeType : String, Codable { case ImportDeclaration }
+        public var specifiers: [ImportDeclarationSpecifier]
+        public var source: Literal
+    }
+
+    public struct ImportDefaultSpecifier : JSSyntaxAST {
+        public init(type: ImportDefaultSpecifierNodeType = .ImportDefaultSpecifier, local: Identifier) {
+            self.type = type
+            self.local = local
+        }
+
+        public var type: ImportDefaultSpecifierNodeType
+        public enum ImportDefaultSpecifierNodeType : String, Codable { case ImportDefaultSpecifier }
+        public var local: Identifier
+    }
+
+    public struct ImportNamespaceSpecifier : JSSyntaxAST {
+        public init(type: ImportNamespaceSpecifierNodeType = .ImportNamespaceSpecifier, local: Identifier) {
+            self.type = type
+            self.local = local
+        }
+
+        public var type: ImportNamespaceSpecifierNodeType
+        public enum ImportNamespaceSpecifierNodeType : String, Codable { case ImportNamespaceSpecifier }
+        public var local: Identifier
+    }
+
+    public struct ImportSpecifier : JSSyntaxAST {
+        public init(type: ImportSpecifierNodeType = .ImportSpecifier, local: Identifier, imported: Identifier) {
+            self.type = type
+            self.local = local
+            self.imported = imported
+        }
+
+        public var type: ImportSpecifierNodeType
+        public enum ImportSpecifierNodeType : String, Codable { case ImportSpecifier }
+        public var local: Identifier
+        public var imported: Identifier
+    }
+
+    public struct LabeledStatement : JSSyntaxAST {
+        public init(type: LabeledStatementNodeType = .LabeledStatement, label: Identifier, body: Statement) {
+            self.type = type
+            self.label = label
+            self.body = body
+        }
+
+        public var type: LabeledStatementNodeType
+        public enum LabeledStatementNodeType : String, Codable { case LabeledStatement }
+        public var label: Identifier
+        public var body: Statement
+    }
+
+    public struct Literal : JSSyntaxAST {
+        public init(type: LiteralNodeType = .Literal, value: OneOf<Bool>.Or<Double>.Or<String>.Or<ExplicitNull>, raw: String) {
+            self.type = type
+            self.value = value
+            self.raw = raw
+        }
+
+        public var type: LiteralNodeType
+        public enum LiteralNodeType : String, Codable { case Literal }
+        public var value: OneOf<Bool>.Or<Double>.Or<String>.Or<ExplicitNull>
+        public var raw: String
+    }
+
+    public struct MetaProperty : JSSyntaxAST {
+        public init(type: MetaPropertyNodeType = .MetaProperty, meta: Identifier, property: Identifier) {
+            self.type = type
+            self.meta = meta
+            self.property = property
+        }
+
+        public var type: MetaPropertyNodeType
+        public enum MetaPropertyNodeType : String, Codable { case MetaProperty }
+        public var meta: Identifier
+        public var property: Identifier
+    }
+
+    public struct MethodDefinition : JSSyntaxAST {
+        public init(type: MethodDefinitionNodeType = .MethodDefinition, key: Nullable<Expression>, computed: Bool, value: OneOf<AsyncFunctionExpression>.Or<FunctionExpression>.Or<ExplicitNull>, kind: String, `static`: Bool) {
+            self.type = type
+            self.key = key
+            self.computed = computed
+            self.value = value
+            self.kind = kind
+            self.`static` = `static`
+        }
+
+        public var type: MethodDefinitionNodeType
+        public enum MethodDefinitionNodeType : String, Codable { case MethodDefinition }
+        public var key: Nullable<Expression>
+        public var computed: Bool
+        public var value: OneOf<AsyncFunctionExpression>.Or<FunctionExpression>.Or<ExplicitNull>
+        public var kind: String
+        public var `static`: Bool
+    }
+
+    public struct NewExpression : JSSyntaxAST {
+        public init(type: NewExpressionNodeType = .NewExpression, callee: Expression, arguments: [ArgumentListElement]) {
+            self.type = type
+            self.callee = callee
+            self.arguments = arguments
+        }
+
+        public var type: NewExpressionNodeType
+        public enum NewExpressionNodeType : String, Codable { case NewExpression }
+        public var callee: Expression
+        public var arguments: [ArgumentListElement]
+    }
+
+    public struct ObjectExpression : JSSyntaxAST {
+        public init(type: ObjectExpressionNodeType = .ObjectExpression, properties: [ObjectExpressionProperty]) {
+            self.type = type
+            self.properties = properties
+        }
+
+        public var type: ObjectExpressionNodeType
+        public enum ObjectExpressionNodeType : String, Codable { case ObjectExpression }
+        public var properties: [ObjectExpressionProperty]
+    }
+
+    public struct ObjectPattern : JSSyntaxAST {
+        public init(type: ObjectPatternNodeType = .ObjectPattern, properties: [ObjectPatternProperty]) {
+            self.type = type
+            self.properties = properties
+        }
+
+        public var type: ObjectPatternNodeType
+        public enum ObjectPatternNodeType : String, Codable { case ObjectPattern }
+        public var properties: [ObjectPatternProperty]
+    }
+
+    public struct Property : JSSyntaxAST {
+        public init(type: PropertyNodeType = .Property, key: PropertyKey, computed: Bool, value: Nullable<PropertyValue>, kind: String, method: Bool, shorthand: Bool) {
+            self.type = type
+            self.key = key
+            self.computed = computed
+            self.value = value
+            self.kind = kind
+            self.method = method
+            self.shorthand = shorthand
+        }
+
+        public var type: PropertyNodeType
+        public enum PropertyNodeType : String, Codable { case Property }
+        public var key: PropertyKey
+        public var computed: Bool
+        public var value: Nullable<PropertyValue>
+        public var kind: String
+        public var method: Bool
+        public var shorthand: Bool
+    }
+
+    public struct RegexLiteral : JSSyntaxAST {
+        public init(type: RegexLiteralNodeType = .RegexLiteral, value: Bric, raw: String, regex: Regex) {
+            self.type = type
+            self.value = value
+            self.raw = raw
+            self.regex = regex
+        }
+
+        public var type: RegexLiteralNodeType
+        public enum RegexLiteralNodeType : String, Codable { case RegexLiteral }
+        public var value: Bric; // RegExp
+        public var raw: String
+        public var regex: Regex
+    }
+
+    public struct RestElement : JSSyntaxAST {
+        public init(type: RestElementNodeType = .RestElement, argument: OneOf<BindingIdentifier>.Or<BindingPattern>) {
+            self.type = type
+            self.argument = argument
+        }
+
+        public var type: RestElementNodeType
+        public enum RestElementNodeType : String, Codable { case RestElement }
+        public var argument: OneOf<BindingIdentifier>.Or<BindingPattern>
+    }
+
+    public struct ReturnStatement : JSSyntaxAST {
+        public init(type: ReturnStatementNodeType = .ReturnStatement, argument: Nullable<Expression>) {
+            self.type = type
+            self.argument = argument
+        }
+
+        public var type: ReturnStatementNodeType
+        public enum ReturnStatementNodeType : String, Codable { case ReturnStatement }
+        public var argument: Nullable<Expression>
+    }
+
+    public struct SequenceExpression : JSSyntaxAST {
+        public init(type: SequenceExpressionNodeType = .SequenceExpression, expressions: [Expression]) {
+            self.type = type
+            self.expressions = expressions
+        }
+
+        public var type: SequenceExpressionNodeType
+        public enum SequenceExpressionNodeType : String, Codable { case SequenceExpression }
+        public var expressions: [Expression]
+    }
+
+    public struct SpreadElement : JSSyntaxAST {
+        public init(type: SpreadElementNodeType = .SpreadElement, argument: Expression) {
+            self.type = type
+            self.argument = argument
+        }
+
+        public var type: SpreadElementNodeType
+        public enum SpreadElementNodeType : String, Codable { case SpreadElement }
+        public var argument: Expression
+    }
+
+    public struct StaticMemberExpression : JSSyntaxAST {
+        public init(type: StaticMemberExpressionNodeType = .StaticMemberExpression, computed: Bool, object: Expression, property: Expression) {
+            self.type = type
+            self.computed = computed
+            self.object = object
+            self.property = property
+        }
+
+        public var type: StaticMemberExpressionNodeType
+        public enum StaticMemberExpressionNodeType : String, Codable { case StaticMemberExpression }
+        public var computed: Bool
+        public var object: Expression
+        public var property: Expression
+    }
+
+    public struct Super : JSSyntaxAST {
+        public init(type: SuperNodeType = .Super) {
+            self.type = type
+        }
+
+        public var type: SuperNodeType
+        public enum SuperNodeType : String, Codable { case Super }
+    }
+
+    public struct SwitchCase : JSSyntaxAST {
+        public init(type: SwitchCaseNodeType = .SwitchCase, test: Nullable<Expression>, consequent: [Statement]) {
+            self.type = type
+            self.test = test
+            self.consequent = consequent
+        }
+
+        public var type: SwitchCaseNodeType
+        public enum SwitchCaseNodeType : String, Codable { case SwitchCase }
+        public var test: Nullable<Expression>
+        public var consequent: [Statement]
+    }
+
+    public struct SwitchStatement : JSSyntaxAST {
+        public init(type: SwitchStatementNodeType = .SwitchStatement, discriminant: Expression, cases: [SwitchCase]) {
+            self.type = type
+            self.discriminant = discriminant
+            self.cases = cases
+        }
+
+        public var type: SwitchStatementNodeType
+        public enum SwitchStatementNodeType : String, Codable { case SwitchStatement }
+        public var discriminant: Expression
+        public var cases: [SwitchCase]
+    }
+
+    public struct TaggedTemplateExpression : JSSyntaxAST {
+        public init(type: TaggedTemplateExpressionNodeType = .TaggedTemplateExpression, tag: Expression, quasi: TemplateLiteral) {
+            self.type = type
+            self.tag = tag
+            self.quasi = quasi
+        }
+
+        public var type: TaggedTemplateExpressionNodeType
+        public enum TaggedTemplateExpressionNodeType : String, Codable { case TaggedTemplateExpression }
+        public var tag: Expression
+        public var quasi: TemplateLiteral
+    }
+
+    public struct TemplateElementValue : Hashable, Codable {
+        public var cooked: String
+        public var raw: String
+    }
+
+    public struct TemplateElement : JSSyntaxAST {
+        public init(type: TemplateElementValueNodeType = .TemplateElement, value: TemplateElementValue, tail: Bool) {
+            self.type = type
+            self.value = value
+            self.tail = tail
+        }
+
+        public var type: TemplateElementValueNodeType
+        public enum TemplateElementValueNodeType : String, Codable { case TemplateElement }
+        public var value: TemplateElementValue
+        public var tail: Bool
+    }
+
+    public struct TemplateLiteral : JSSyntaxAST {
+        public init(type: TemplateLiteralNodeType = .TemplateLiteral, quasis: [TemplateElement], expressions: [Expression]) {
+            self.type = type
+            self.quasis = quasis
+            self.expressions = expressions
+        }
+
+        public var type: TemplateLiteralNodeType
+        public enum TemplateLiteralNodeType : String, Codable { case TemplateLiteral }
+        public var quasis: [TemplateElement]
+        public var expressions: [Expression]
+    }
+
+    public struct ThisExpression : JSSyntaxAST {
+        public init(type: ThisExpressionNodeType = .ThisExpression) {
+            self.type = type
+        }
+
+        public var type: ThisExpressionNodeType
+        public enum ThisExpressionNodeType : String, Codable { case ThisExpression }
+    }
+
+    public struct ThrowStatement : JSSyntaxAST {
+        public init(type: ThrowStatementNodeType = .ThrowStatement, argument: Expression) {
+            self.type = type
+            self.argument = argument
+        }
+
+        public var type: ThrowStatementNodeType
+        public enum ThrowStatementNodeType : String, Codable { case ThrowStatement }
+        public var argument: Expression
+    }
+
+    public struct TryStatement : JSSyntaxAST {
+        public init(type: TryStatementNodeType = .TryStatement, block: BlockStatement, handler: Nullable<CatchClause>, finalizer: Nullable<BlockStatement>) {
+            self.type = type
+            self.block = block
+            self.handler = handler
+            self.finalizer = finalizer
+        }
+
+        public var type: TryStatementNodeType
+        public enum TryStatementNodeType : String, Codable { case TryStatement }
+        public var block: BlockStatement
+        public var handler: Nullable<CatchClause>
+        public var finalizer: Nullable<BlockStatement>
+    }
+
+    public struct UnaryExpression : JSSyntaxAST {
+        public init(type: UnaryExpressionNodeType = .UnaryExpression, `operator`: String, argument: Expression, prefix: Bool) {
+            self.type = type
+            self.`operator` = `operator`
+            self.argument = argument
+            self.prefix = prefix
+        }
+
+        public var type: UnaryExpressionNodeType
+        public enum UnaryExpressionNodeType : String, Codable { case UnaryExpression }
+        public var `operator`: String
+        public var argument: Expression
+        public var prefix: Bool
+    }
+
+    public struct UpdateExpression : JSSyntaxAST {
+        public init(type: UpdateExpressionNodeType = .UpdateExpression, `operator`: String, argument: Expression, prefix: Bool) {
+            self.type = type
+            self.`operator` = `operator`
+            self.argument = argument
+            self.prefix = prefix
+        }
+
+        public var type: UpdateExpressionNodeType
+        public enum UpdateExpressionNodeType : String, Codable { case UpdateExpression }
+        public var `operator`: String
+        public var argument: Expression
+        public var prefix: Bool
+    }
+
+    public struct VariableDeclaration : JSSyntaxAST {
+        public init(type: VariableDeclarationNodeType = .VariableDeclaration, declarations: [VariableDeclarator], kind: String) {
+            self.type = type
+            self.declarations = declarations
+            self.kind = kind
+        }
+
+        public var type: VariableDeclarationNodeType
+        public enum VariableDeclarationNodeType : String, Codable { case VariableDeclaration }
+        public var declarations: [VariableDeclarator]
+        public var kind: String
+    }
+
+    public struct VariableDeclarator : JSSyntaxAST {
+        public init(type: VariableDeclaratorNodeType = .VariableDeclarator, id: OneOf<BindingIdentifier>.Or<BindingPattern>, `init`: Nullable<Expression>) {
+            self.type = type
+            self.id = id
+            self.`init` = `init`
+        }
+
+        public var type: VariableDeclaratorNodeType
+        public enum VariableDeclaratorNodeType : String, Codable { case VariableDeclarator }
+        public var id: OneOf<BindingIdentifier>.Or<BindingPattern>
+        public var `init`: Nullable<Expression>
+    }
+
+    public struct WhileStatement : JSSyntaxAST {
+        public init(type: WhileStatementNodeType = .WhileStatement, test: Expression, body: Statement) {
+            self.type = type
+            self.test = test
+            self.body = body
+        }
+
+        public var type: WhileStatementNodeType
+        public enum WhileStatementNodeType : String, Codable { case WhileStatement }
+        public var test: Expression
+        public var body: Statement
+    }
+
+    public struct WithStatement : JSSyntaxAST {
+        public init(type: WithStatementNodeType = .WithStatement, object: Expression, body: Statement) {
+            self.type = type
+            self.object = object
+            self.body = body
+        }
+
+        public var type: WithStatementNodeType
+        public enum WithStatementNodeType : String, Codable { case WithStatement }
+        public var object: Expression
+        public var body: Statement
+    }
+
+    public struct YieldExpression : JSSyntaxAST {
+        public init(type: YieldExpressionNodeType = .YieldExpression, argument: Nullable<Expression>, delegate: Bool) {
+            self.type = type
+            self.argument = argument
+            self.delegate = delegate
+        }
+
+        public var type: YieldExpressionNodeType
+        public enum YieldExpressionNodeType : String, Codable { case YieldExpression }
+        public var argument: Nullable<Expression>
+        public var delegate: Bool
+    }
 }
+
+extension JSSyntax {
+    public typealias StatementListItem = OneOf<Declaration>
+        .Or<Statement>
+
+    public typealias ModuleItem = OneOf<ImportDeclaration>
+        .Or<ExportDeclaration>
+        .Or<StatementListItem>
+
+    public typealias ArgumentListElement = OneOf<Expression>
+        .Or<SpreadElement>
+
+    public typealias ArrayExpressionElement = OneOf<Expression>
+        .Or<SpreadElement>
+        .Or<ExplicitNull>
+
+    public typealias ArrayPatternElement = OneOf<AssignmentPattern>
+        .Or<BindingIdentifier>
+        .Or<BindingPattern>
+        .Or<RestElement>
+        .Or<ExplicitNull>
+
+    public typealias BindingPattern = OneOf<ArrayPattern>
+        .Or<ObjectPattern>
+
+    public typealias BindingIdentifier = Identifier
+
+    public typealias Declaration = OneOf<AsyncFunctionDeclaration>
+        .Or<ClassDeclaration>
+        .Or<ExportDeclaration>
+        .Or<FunctionDeclaration>
+        .Or<ImportDeclaration>
+        .Or<VariableDeclaration>
+
+    public typealias ExportableDefaultDeclaration = OneOf<BindingIdentifier>
+        .Or<BindingPattern>
+        .Or<ClassDeclaration>
+        .Or<Expression>
+        .Or<FunctionDeclaration>
+
+    public typealias ExportableNamedDeclaration = OneOf<AsyncFunctionDeclaration>
+        .Or<ClassDeclaration>
+        .Or<FunctionDeclaration>
+        .Or<VariableDeclaration>
+
+    public typealias ExportDeclaration = OneOf<ExportAllDeclaration>
+        .Or<ExportDefaultDeclaration>
+        .Or<ExportNamedDeclaration>
+
+    public typealias Expression = OneOf<OneOf<ArrayExpression>
+            .Or<ArrowFunctionExpression>
+            .Or<AssignmentExpression>
+            .Or<AsyncArrowFunctionExpression>
+            .Or<AsyncFunctionExpression>
+            .Or<AwaitExpression>
+            .Or<BinaryExpression>
+            .Or<CallExpression>
+            .Or<ClassExpression>
+            .Or<ComputedMemberExpression>>
+        .Or<OneOf<ConditionalExpression>
+            .Or<Identifier>
+            .Or<FunctionExpression>
+            .Or<Literal>
+            .Or<NewExpression>
+            .Or<ObjectExpression>
+            .Or<RegexLiteral>
+            .Or<SequenceExpression>
+            .Or<StaticMemberExpression>
+            .Or<TaggedTemplateExpression>>
+        .Or<OneOf<ThisExpression>
+            .Or<UnaryExpression>
+            .Or<UpdateExpression>
+            .Or<YieldExpression>>
+
+    public typealias FunctionParameter = OneOf<AssignmentPattern>
+        .Or<BindingIdentifier>
+        .Or<BindingPattern>
+
+    public typealias ImportDeclarationSpecifier = OneOf<ImportDefaultSpecifier>
+        .Or<ImportNamespaceSpecifier>
+        .Or<ImportSpecifier>
+
+    public typealias ObjectExpressionProperty = OneOf<Property>
+        .Or<SpreadElement>
+
+    public typealias ObjectPatternProperty = OneOf<Property>
+        .Or<RestElement>
+
+    public typealias Statement = OneOf<OneOf<AsyncFunctionDeclaration>
+            .Or<BreakStatement>
+            .Or<ContinueStatement>
+            .Or<DebuggerStatement>
+            .Or<DoWhileStatement>
+            .Or<EmptyStatement>
+            .Or<ExpressionStatement>
+            .Or<Directive>
+            .Or<ForStatement>
+            .Or<ForInStatement>>
+        .Or<OneOf<ForOfStatement>
+            .Or<FunctionDeclaration>
+            .Or<IfStatement>
+            .Or<ReturnStatement>
+            .Or<SwitchStatement>
+            .Or<ThrowStatement>
+            .Or<TryStatement>
+            .Or<VariableDeclaration>
+            .Or<WhileStatement>
+            .Or<WithStatement>>
+
+    public typealias PropertyKey = OneOf<Identifier>
+        .Or<Literal>
+
+    public typealias PropertyValue = OneOf<AssignmentPattern>
+        .Or<AsyncFunctionExpression>
+        .Or<BindingIdentifier>
+        .Or<BindingPattern>
+        .Or<FunctionExpression>
+}
+
 
 
 // - MARK: messages.ts
@@ -229,17 +1276,17 @@ public enum JSTokenType : String, Hashable, Codable {
 // MARK: tokenizer.ts
 
 public struct Regex : Hashable, Codable {
-    public let pattern: String
-    public let flags: String
+    public var pattern: String
+    public var flags: String
 }
 
 /// A lexical token from a JS program or fragment
 public struct JSToken : Hashable, Codable {
-    public let type: JSTokenType
-    public let value: String
-    public let regex: Regex?
-    public let range: ClosedRange<Int>?
-    public let loc: SourceLocation?
+    public var type: JSTokenType
+    public var value: String
+    public var regex: Regex?
+    public var range: ClosedRange<Int>?
+    public var loc: SourceLocation?
 }
 
 typealias BufferEntry = JSToken
@@ -307,8 +1354,8 @@ class ErrorHandler {
 // MARK: scanner.ts
 
 public struct Position : Hashable, Codable {
-    public let line: Int?
-    public let column: Int?
+    public var line: Int?
+    public var column: Int?
 }
 
 public struct SourceLocation : Hashable, Codable {
@@ -376,629 +1423,3 @@ extension OneOf10 : JSSyntaxASTType where T1: JSSyntaxASTType, T2: JSSyntaxASTTy
         self[routing: (\.typeName, \.typeName, \.typeName, \.typeName, \.typeName, \.typeName, \.typeName, \.typeName, \.typeName, \.typeName)]
     }
 }
-
-/// Namespace for nodes corresponding to `Syntax` cases.
-public enum JSSyntax {
-
-    public typealias ArgumentListElement = OneOf2<Expression, SpreadElement>
-    public typealias ArrayExpressionElement = OneOf3<Expression, SpreadElement, ExplicitNull>
-    public typealias ArrayPatternElement = OneOf5<AssignmentPattern, BindingIdentifier, BindingPattern, RestElement, ExplicitNull>
-    public typealias BindingPattern = OneOf2<ArrayPattern, ObjectPattern>
-    public typealias BindingIdentifier = Identifier
-    public typealias Declaration = OneOf6<AsyncFunctionDeclaration, ClassDeclaration, ExportDeclaration, FunctionDeclaration, ImportDeclaration, VariableDeclaration>
-    public typealias ExportableDefaultDeclaration = OneOf5<BindingIdentifier, BindingPattern, ClassDeclaration, Expression, FunctionDeclaration>
-    public typealias ExportableNamedDeclaration = OneOf4<AsyncFunctionDeclaration, ClassDeclaration, FunctionDeclaration, VariableDeclaration>
-    public typealias ExportDeclaration = OneOf3<ExportAllDeclaration, ExportDefaultDeclaration, ExportNamedDeclaration>
-    public typealias Expression = OneOf3<OneOf10<ArrayExpression, ArrowFunctionExpression, AssignmentExpression, AsyncArrowFunctionExpression, AsyncFunctionExpression, AwaitExpression, BinaryExpression, CallExpression, ClassExpression, ComputedMemberExpression>, OneOf10<ConditionalExpression, Identifier, FunctionExpression, Literal, NewExpression, ObjectExpression, RegexLiteral, SequenceExpression, StaticMemberExpression, TaggedTemplateExpression>, OneOf4<ThisExpression, UnaryExpression, UpdateExpression, YieldExpression>>
-    public typealias FunctionParameter = OneOf3<AssignmentPattern, BindingIdentifier, BindingPattern>
-    public typealias ImportDeclarationSpecifier = OneOf3<ImportDefaultSpecifier, ImportNamespaceSpecifier, ImportSpecifier>
-    public typealias ObjectExpressionProperty = OneOf2<Property, SpreadElement>
-    public typealias ObjectPatternProperty = OneOf2<Property, RestElement>
-    public typealias Statement = OneOf2<OneOf10<AsyncFunctionDeclaration, BreakStatement, ContinueStatement, DebuggerStatement, DoWhileStatement, EmptyStatement, ExpressionStatement, Directive, ForStatement, ForInStatement>, OneOf10<ForOfStatement, FunctionDeclaration, IfStatement, ReturnStatement, SwitchStatement, ThrowStatement, TryStatement, VariableDeclaration, WhileStatement, WithStatement>>
-    public typealias PropertyKey = OneOf2<Identifier, Literal>
-    public typealias PropertyValue = OneOf5<AssignmentPattern, AsyncFunctionExpression, BindingIdentifier, BindingPattern, FunctionExpression>
-    public typealias StatementListItem = OneOf2<Declaration, Statement>
-
-    public struct ArrayExpression : JSSyntaxAST {
-        public let type: NodeType
-        public enum NodeType : String, Codable { case ArrayExpression }
-        public let elements: Array<ArrayExpressionElement>
-    }
-
-    public struct ArrayPattern : JSSyntaxAST {
-        public let type: NodeType
-        public enum NodeType : String, Codable { case ArrayPattern }
-        public let elements: [ArrayPatternElement]
-    }
-
-    public struct ArrowFunctionExpression : JSSyntaxAST {
-        public let type: NodeType
-        public enum NodeType : String, Codable { case ArrowFunctionExpression }
-        public let id: Nullable<Identifier>
-        public let params: [FunctionParameter]
-        public let body: OneOf2<BlockStatement, Expression>
-        public let generator: Bool
-        public let expression: Bool
-        public let async: Bool
-
-    }
-
-    public struct AssignmentExpression : JSSyntaxAST {
-        public let type: NodeType
-        public enum NodeType : String, Codable { case AssignmentExpression}
-        public let `operator`: String
-        public let left: Expression
-        public let right: Expression
-    }
-
-    public struct AssignmentPattern : JSSyntaxAST {
-        public let type: NodeType
-        public enum NodeType : String, Codable { case AssignmentPattern }
-        public let left: OneOf2<BindingIdentifier, BindingPattern>
-        public let right: Expression
-    }
-
-    public struct AsyncArrowFunctionExpression : JSSyntaxAST {
-        public let type: NodeType
-        public enum NodeType : String, Codable { case AsyncArrowFunctionExpression }
-        public let id: Nullable<Identifier>
-        public let params: [FunctionParameter]
-        public let body: OneOf2<BlockStatement, Expression>
-        public let generator: Bool
-        public let expression: Bool
-        public let async: Bool
-    }
-
-    public struct AsyncFunctionDeclaration : JSSyntaxAST {
-        public let type: NodeType
-        public enum NodeType : String, Codable { case AsyncFunctionDeclaration }
-        public let id: Nullable<Identifier>
-        public let params: [FunctionParameter]
-        public let body: BlockStatement
-        public let generator: Bool
-        public let expression: Bool
-        public let async: Bool
-    }
-
-    public struct AsyncFunctionExpression : JSSyntaxAST {
-        public let type: NodeType
-        public enum NodeType : String, Codable { case AsyncFunctionExpression }
-        public let id: Nullable<Identifier>
-        public let params: [FunctionParameter]
-        public let body: BlockStatement
-        public let generator: Bool
-        public let expression: Bool
-        public let async: Bool
-    }
-
-    public struct AwaitExpression : JSSyntaxAST {
-        public let type: NodeType
-        public enum NodeType : String, Codable { case AwaitExpression }
-        public let argument: Expression
-    }
-
-    public struct BinaryExpression : JSSyntaxAST {
-        public let type: NodeType
-        public enum NodeType : String, Codable { case BinaryExpression }
-        public let `operator`: String
-        public let left: Expression
-        public let right: Expression
-    }
-
-    public struct BlockStatement : JSSyntaxAST {
-        public let type: NodeType
-        public enum NodeType : String, Codable { case BlockStatement }
-        public let body: [Statement]
-
-    }
-
-    public struct BreakStatement : JSSyntaxAST {
-        public let type: NodeType
-        public enum NodeType : String, Codable { case BreakStatement }
-        public let label: Nullable<Identifier>
-
-    }
-
-    public struct CallExpression : JSSyntaxAST {
-        public let type: NodeType
-        public enum NodeType : String, Codable { case CallExpression }
-        public let callee: OneOf2<Expression, Import>
-        public let arguments: [ArgumentListElement]
-
-    }
-
-    public struct CatchClause : JSSyntaxAST {
-        public let type: NodeType
-        public enum NodeType : String, Codable { case CatchClause }
-        public let param: OneOf2<BindingIdentifier, BindingPattern>
-        public let body: BlockStatement
-
-    }
-
-    public struct ClassBody : JSSyntaxAST {
-        public let type: NodeType
-        public enum NodeType : String, Codable { case ClassBody }
-        public let body: [Property]
-
-    }
-
-    public struct ClassDeclaration : JSSyntaxAST {
-        public let type: NodeType
-        public enum NodeType : String, Codable { case ClassDeclaration }
-        public let id: Nullable<Identifier>
-        public let superClass: Nullable<Identifier>
-        public let body: ClassBody
-
-    }
-
-    public struct ClassExpression : JSSyntaxAST {
-        public let type: NodeType
-        public enum NodeType : String, Codable { case ClassExpression }
-        public let id: Nullable<Identifier>
-        public let superClass: Nullable<Identifier>
-        public let body: ClassBody
-
-    }
-
-    public struct ComputedMemberExpression : JSSyntaxAST {
-        public let type: NodeType
-        public enum NodeType : String, Codable { case ComputedMemberExpression }
-        public let computed: Bool
-        public let object: Expression
-        public let property: Expression
-
-    }
-
-    public struct ConditionalExpression : JSSyntaxAST {
-        public let type: NodeType
-        public enum NodeType : String, Codable { case ConditionalExpression }
-        public let test: Expression
-        public let consequent: Expression
-        public let alternate: Expression
-
-    }
-
-    public struct ContinueStatement : JSSyntaxAST {
-        public let type: NodeType
-        public enum NodeType : String, Codable { case ContinueStatement }
-        public let label: Nullable<Identifier>
-
-    }
-
-    public struct DebuggerStatement : JSSyntaxAST {
-        public let type: NodeType
-        public enum NodeType : String, Codable { case DebuggerStatement }
-
-    }
-
-    public struct Directive : JSSyntaxAST {
-        public let type: NodeType
-        public enum NodeType : String, Codable { case Directive }
-        public let expression: Expression
-        public let directive: String
-
-    }
-
-    public struct DoWhileStatement : JSSyntaxAST {
-        public let type: NodeType
-        public enum NodeType : String, Codable { case DoWhileStatement }
-        public let body: Statement
-        public let test: Expression
-
-    }
-
-    public struct EmptyStatement : JSSyntaxAST {
-        public let type: NodeType
-        public enum NodeType : String, Codable { case EmptyStatement }
-
-    }
-
-    public struct ExportAllDeclaration : JSSyntaxAST {
-        public let type: NodeType
-        public enum NodeType : String, Codable { case ExportAllDeclaration }
-        public let source: Literal
-
-    }
-
-    public struct ExportDefaultDeclaration : JSSyntaxAST {
-        public let type: NodeType
-        public enum NodeType : String, Codable { case ExportDefaultDeclaration }
-        public let declaration: ExportableDefaultDeclaration
-
-    }
-
-    public struct ExportNamedDeclaration : JSSyntaxAST {
-        public let type: NodeType
-        public enum NodeType : String, Codable { case ExportNamedDeclaration }
-        public let declaration: Nullable<ExportableNamedDeclaration>
-        public let specifiers: [ExportSpecifier]
-        public let source: Nullable<Literal>
-
-    }
-
-    public struct ExportSpecifier : JSSyntaxAST {
-        public let type: NodeType
-        public enum NodeType : String, Codable { case ExportSpecifier }
-        public let exported: Identifier
-        public let local: Identifier
-
-    }
-
-    public struct ExpressionStatement : JSSyntaxAST {
-        public let type: NodeType
-        public enum NodeType : String, Codable { case ExpressionStatement }
-        public let expression: Expression
-
-    }
-
-    public struct ForInStatement : JSSyntaxAST {
-        public let type: NodeType
-        public enum NodeType : String, Codable { case ForInStatement }
-        public let left: Expression
-        public let right: Expression
-        public let body: Statement
-        public let each: Bool
-
-    }
-
-    public struct ForOfStatement : JSSyntaxAST {
-        public let type: NodeType
-        public enum NodeType : String, Codable { case ForOfStatement }
-        public let left: Expression
-        public let right: Expression
-        public let body: Statement
-
-    }
-
-    public struct ForStatement : JSSyntaxAST {
-        public let type: NodeType
-        public enum NodeType : String, Codable { case ForStatement }
-        public let `init`: Nullable<Expression>
-        public let test: Nullable<Expression>
-        public let update: Nullable<Expression>
-        public let body: Statement
-
-    }
-
-    public struct FunctionDeclaration : JSSyntaxAST {
-        public let type: NodeType
-        public enum NodeType : String, Codable { case FunctionDeclaration }
-        public let id: Nullable<Identifier>
-        public let params: [FunctionParameter]
-        public let body: BlockStatement
-        public let generator: Bool
-        public let expression: Bool
-        public let async: Bool
-
-    }
-
-    public struct FunctionExpression : JSSyntaxAST {
-        public let type: NodeType
-        public enum NodeType : String, Codable { case FunctionExpression }
-        public let id: Nullable<Identifier>
-        public let params: [FunctionParameter]
-        public let body: BlockStatement
-        public let generator: Bool
-        public let expression: Bool
-        public let async: Bool
-
-    }
-
-    public struct Identifier : JSSyntaxAST {
-        public let type: NodeType
-        public enum NodeType : String, Codable { case Identifier }
-        public let name: String
-
-    }
-
-    public struct IfStatement : JSSyntaxAST {
-        public let type: NodeType
-        public enum NodeType : String, Codable { case IfStatement }
-        public let test: Expression
-        public let consequent: Statement
-        public let alternate: Nullable<Statement>
-
-    }
-
-    public struct Import : JSSyntaxAST {
-        public let type: NodeType
-        public enum NodeType : String, Codable { case Import }
-
-    }
-
-    public struct ImportDeclaration : JSSyntaxAST {
-        public let type: NodeType
-        public enum NodeType : String, Codable { case ImportDeclaration }
-        public let specifiers: [ImportDeclarationSpecifier]
-        public let source: Literal
-
-    }
-
-    public struct ImportDefaultSpecifier : JSSyntaxAST {
-        public let type: NodeType
-        public enum NodeType : String, Codable { case ImportDefaultSpecifier }
-        public let local: Identifier
-
-    }
-
-    public struct ImportNamespaceSpecifier : JSSyntaxAST {
-        public let type: NodeType
-        public enum NodeType : String, Codable { case ImportNamespaceSpecifier }
-        public let local: Identifier
-
-    }
-
-    public struct ImportSpecifier : JSSyntaxAST {
-        public let type: NodeType
-        public enum NodeType : String, Codable { case ImportSpecifier }
-        public let local: Identifier
-        public let imported: Identifier
-
-    }
-
-    public struct LabeledStatement : JSSyntaxAST {
-        public let type: NodeType
-        public enum NodeType : String, Codable { case LabeledStatement }
-        public let label: Identifier
-        public let body: Statement
-
-    }
-
-    public struct Literal : JSSyntaxAST {
-        public let type: NodeType
-        public enum NodeType : String, Codable { case Literal }
-        public let value: OneOf4<Bool, Double, String, ExplicitNull>
-        public let raw: String
-
-    }
-
-    public struct MetaProperty : JSSyntaxAST {
-        public let type: NodeType
-        public enum NodeType : String, Codable { case MetaProperty }
-        public let meta: Identifier
-        public let property: Identifier
-
-    }
-
-    public struct MethodDefinition : JSSyntaxAST {
-        public let type: NodeType
-        public enum NodeType : String, Codable { case MethodDefinition }
-        public let key: Nullable<Expression>
-        public let computed: Bool
-        public let value: OneOf3<AsyncFunctionExpression, FunctionExpression, ExplicitNull>
-        public let kind: String
-        public let `static`: Bool
-
-    }
-
-    public struct Module : JSSyntaxAST {
-        public let type: NodeType
-        public enum NodeType : String, Codable { case Module }
-        public let body: [StatementListItem]
-        public let sourceType: String
-
-    }
-
-    public struct NewExpression : JSSyntaxAST {
-        public let type: NodeType
-        public enum NodeType : String, Codable { case NewExpression }
-        public let callee: Expression
-        public let arguments: [ArgumentListElement]
-
-    }
-
-    public struct ObjectExpression : JSSyntaxAST {
-        public let type: NodeType
-        public enum NodeType : String, Codable { case ObjectExpression }
-        public let properties: [ObjectExpressionProperty]
-
-    }
-
-    public struct ObjectPattern : JSSyntaxAST {
-        public let type: NodeType
-        public enum NodeType : String, Codable { case ObjectPattern }
-        public let properties: [ObjectPatternProperty]
-
-    }
-
-    public struct Property : JSSyntaxAST {
-        public let type: NodeType
-        public enum NodeType : String, Codable { case Property }
-        public let key: PropertyKey
-        public let computed: Bool
-        public let value: Nullable<PropertyValue>
-        public let kind: String
-        public let method: Bool
-        public let shorthand: Bool
-
-    }
-
-    public struct RegexLiteral : JSSyntaxAST {
-        public let type: NodeType
-        public enum NodeType : String, Codable { case RegexLiteral }
-        public let value: Bric; // RegExp
-        public let raw: String
-        public let regex: Regex
-
-    }
-
-    public struct RestElement : JSSyntaxAST {
-        public let type: NodeType
-        public enum NodeType : String, Codable { case RestElement }
-        public let argument: OneOf2<BindingIdentifier, BindingPattern>
-
-    }
-
-    public struct ReturnStatement : JSSyntaxAST {
-        public let type: NodeType
-        public enum NodeType : String, Codable { case ReturnStatement }
-        public let argument: Nullable<Expression>
-
-    }
-
-    public struct Script : JSSyntaxAST {
-        public let type: NodeType
-        // this was "Script", but the parser seems to want to return "Program"
-        public enum NodeType : String, Codable { case Program }
-        public let body: [StatementListItem]
-        public let sourceType: String
-
-    }
-
-    public struct SequenceExpression : JSSyntaxAST {
-        public let type: NodeType
-        public enum NodeType : String, Codable { case SequenceExpression }
-        public let expressions: [Expression]
-
-    }
-
-    public struct SpreadElement : JSSyntaxAST {
-        public let type: NodeType
-        public enum NodeType : String, Codable { case SpreadElement }
-        public let argument: Expression
-
-    }
-
-    public struct StaticMemberExpression : JSSyntaxAST {
-        public let type: NodeType
-        public enum NodeType : String, Codable { case StaticMemberExpression }
-        public let computed: Bool
-        public let object: Expression
-        public let property: Expression
-
-    }
-
-    public struct Super : JSSyntaxAST {
-        public let type: NodeType
-        public enum NodeType : String, Codable { case Super }
-
-    }
-
-    public struct SwitchCase : JSSyntaxAST {
-        public let type: NodeType
-        public enum NodeType : String, Codable { case SwitchCase }
-        public let test: Nullable<Expression>
-        public let consequent: [Statement]
-
-    }
-
-    public struct SwitchStatement : JSSyntaxAST {
-        public let type: NodeType
-        public enum NodeType : String, Codable { case SwitchStatement }
-        public let discriminant: Expression
-        public let cases: [SwitchCase]
-
-    }
-
-    public struct TaggedTemplateExpression : JSSyntaxAST {
-        public let type: NodeType
-        public enum NodeType : String, Codable { case TaggedTemplateExpression }
-        public let tag: Expression
-        public let quasi: TemplateLiteral
-
-    }
-
-    public struct TemplateElementValue : Hashable, Codable {
-        public let cooked: String
-        public let raw: String
-    }
-
-    public struct TemplateElement : JSSyntaxAST {
-        public let type: NodeType
-        public enum NodeType : String, Codable { case TemplateElement }
-        public let value: TemplateElementValue
-        public let tail: Bool
-
-    }
-
-    public struct TemplateLiteral : JSSyntaxAST {
-        public let type: NodeType
-        public enum NodeType : String, Codable { case TemplateLiteral }
-        public let quasis: [TemplateElement]
-        public let expressions: [Expression]
-
-    }
-
-    public struct ThisExpression : JSSyntaxAST {
-        public let type: NodeType
-        public enum NodeType : String, Codable { case ThisExpression }
-
-    }
-
-    public struct ThrowStatement : JSSyntaxAST {
-        public let type: NodeType
-        public enum NodeType : String, Codable { case ThrowStatement }
-        public let argument: Expression
-
-    }
-
-    public struct TryStatement : JSSyntaxAST {
-        public let type: NodeType
-        public enum NodeType : String, Codable { case TryStatement }
-        public let block: BlockStatement
-        public let handler: Nullable<CatchClause>
-        public let finalizer: Nullable<BlockStatement>
-
-    }
-
-    public struct UnaryExpression : JSSyntaxAST {
-        public let type: NodeType
-        public enum NodeType : String, Codable { case UnaryExpression }
-        public let `operator`: String
-        public let argument: Expression
-        public let prefix: Bool
-
-    }
-
-    public struct UpdateExpression : JSSyntaxAST {
-        public let type: NodeType
-        public enum NodeType : String, Codable { case UpdateExpression }
-        public let `operator`: String
-        public let argument: Expression
-        public let prefix: Bool
-
-    }
-
-    public struct VariableDeclaration : JSSyntaxAST {
-        public let type: NodeType
-        public enum NodeType : String, Codable { case VariableDeclaration }
-        public let declarations: [VariableDeclarator]
-        public let kind: String
-
-    }
-
-    public struct VariableDeclarator : JSSyntaxAST {
-        public let type: NodeType
-        public enum NodeType : String, Codable { case VariableDeclarator }
-        public let id: OneOf2<BindingIdentifier, BindingPattern>
-        public let `init`: Nullable<Expression>
-
-    }
-
-    public struct WhileStatement : JSSyntaxAST {
-        public let type: NodeType
-        public enum NodeType : String, Codable { case WhileStatement }
-        public let test: Expression
-        public let body: Statement
-
-    }
-
-    public struct WithStatement : JSSyntaxAST {
-        public let type: NodeType
-        public enum NodeType : String, Codable { case WithStatement }
-        public let object: Expression
-        public let body: Statement
-
-    }
-
-    public struct YieldExpression : JSSyntaxAST {
-        public let type: NodeType
-        public enum NodeType : String, Codable { case YieldExpression }
-        public let argument: Nullable<Expression>
-        public let delegate: Bool
-    }
-}
-
-
-
-
