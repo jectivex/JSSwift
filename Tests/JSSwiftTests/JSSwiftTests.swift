@@ -75,6 +75,12 @@ final class JSSwiftTests: XCTestCase {
             
             /// AST examples
 
+            XCTAssertEqual(try parser.parse(javaScript: "const answer = 42", options: popts), JSSyntax.Script(type: .Program, body: [
+                .init(.init(JSSyntax.VariableDeclaration(type: .VariableDeclaration, declarations: [
+                    JSSyntax.VariableDeclarator(type: .VariableDeclarator, id: oneOf(JSSyntax.Identifier(type: .Identifier, name: "answer")), init: oneOf(oneOf(oneOf(JSSyntax.Literal(type: .Literal, value: .v2(42.0), raw: "42")))))
+                ], kind: "const")))
+            ], sourceType: "script"))
+
             XCTAssertEqual(try parser.parse(javaScript: "1.2 + 'ABC'", options: popts), JSSyntax.Script(type: .Program, body: [
                 JSSyntax.StatementListItem(JSSyntax.Statement(oneOf(JSSyntax.ExpressionStatement(type: .ExpressionStatement, expression: JSSyntax.Expression(oneOf(JSSyntax.BinaryExpression(type: .BinaryExpression, operator: "+", left: oneOf(oneOf(JSSyntax.Literal(type: .Literal, value: oneOf(1.2), raw: "1.2"))), right: oneOf(oneOf(JSSyntax.Literal(type: .Literal, value: oneOf("ABC"), raw: "'ABC'"))))))))))
             ], sourceType: "script"))

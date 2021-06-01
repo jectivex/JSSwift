@@ -1,6 +1,5 @@
 import JXKit
 import Foundation
-import MiscKit
 
 /// A tokenizer and parser for JavaScript, based on [Esprima](https://esprima.org).
 ///
@@ -56,8 +55,10 @@ open class JavaScriptParser {
     /// - Returns: the list of tokens
     /// - SeeAlso: `JavaScriptParser.parse`
     open func tokenize(javaScript: String, options: TokenizeOptions = .init()) throws -> [JSToken] {
-        try ctx.trying { try tokenize.call(withArguments: [ctx.string(javaScript), ctx.encode(options)]) }
-            .toDecodable(ofType: [JSToken].self)
+        return try ctx.trying { // invoke the cached function with the encoded arguments
+            try tokenize.call(withArguments: [ctx.string(javaScript), ctx.encode(options)])
+
+        }.toDecodable(ofType: [JSToken].self)
     }
 
     /// Options for `JavaScriptParser.tokenize`
@@ -90,8 +91,9 @@ open class JavaScriptParser {
     ///
     /// More info: [Syntactic Analysis](https://esprima.readthedocs.io/en/4.0/syntactic-analysis.html)
     open func parse(javaScript: String, options: ParseOptions = .init()) throws -> JSSyntax.Script {
-        try ctx.trying { parse.call(withArguments: [ctx.string(javaScript), try ctx.encode(options)]) }
-            .toDecodable(ofType: JSSyntax.Script.self)
+        return try ctx.trying { // invoke the cached function with the encoded arguments
+            parse.call(withArguments: [ctx.string(javaScript), try ctx.encode(options)])
+        }.toDecodable(ofType: JSSyntax.Script.self)
     }
 
     /// Options for `JavaScriptParser.parse`
