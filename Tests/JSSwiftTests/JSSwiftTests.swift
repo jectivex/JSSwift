@@ -87,13 +87,13 @@ final class JSSwiftTests: XCTestCase {
 
                 if module {
                     let module = try parser.parse(module: javaScript, options: opts)
-                    if let expect = expect {
-                        XCTAssertEqual(oneOf(module), expect, line: line)
+                    if let expectModule = expect {
+                        XCTAssertEqual(oneOf(module), expectModule, line: line)
                     }
                 } else {
                     let script = try parser.parse(script: javaScript, options: opts)
-                    if let expect = expect {
-                        XCTAssertEqual(oneOf(script), expect, line: line)
+                    if let expectScript = expect {
+                        XCTAssertEqual(oneOf(script), expectScript, line: line)
                     }
                 }
             }
@@ -114,10 +114,9 @@ final class JSSwiftTests: XCTestCase {
             try parse(js: "function doSomething() { return 1 + 'abx'; }")
             try parse(js: "[]")
 
-            //try parse(js: "{}", debug: true)
+//            try parse(js: "{}", debug: true)
 
 //            try parse(js: "function allTypes() { return { a: 1.2, 'b': null, \"c\": [true, false] }; }", tolerant: true)
-
 //            try parse(js: "{[[0]]}")
 
 //            try parse(js: "{{}}")
@@ -125,19 +124,19 @@ final class JSSwiftTests: XCTestCase {
 //            try parse(js: "function doSomething() { { } }")
 //            try parse(js: "function doSomething() { for (var i = 0; i < 10; i++) { } }")
 
-//            guard let url = JXContext.SwiftJSResourceURL else {
-//                return XCTFail("no resource URL")
-//            }
-//
-//            let scriptString = try String(contentsOf: url)
-//            measure {
+            guard let url = JXContext.SwiftJSResourceURL else {
+                return XCTFail("no resource URL")
+            }
+
+            let scriptString = try String(contentsOf: url)
+//            let _ = try parser.parse(module: scriptString) // make sure we can parse the script once
+//            measure { // then profile the script parsing
 //                do {
-//                    try parser.parse(javaScript: scriptString)
+//                    let _ = try parser.parse(module: scriptString)
 //                } catch {
 //                    XCTFail("error measuring performance: \(error)")
 //                }
 //            }
-
 
             /// AST examples
 
@@ -167,4 +166,116 @@ final class JSSwiftTests: XCTestCase {
         }
     }
 }
+
+
+/*
+
+
+ Test Case '-[JSSwiftTests.JSSwiftTests testJSSwiftContext]' started.
+ {
+   "type": "Program",
+   "body": [
+     {
+       "type": "BlockStatement",
+       "body": [],
+       "range": [
+         0,
+         2
+       ],
+       "loc": {
+         "start": {
+           "line": 1,
+           "column": 0
+         },
+         "end": {
+           "line": 1,
+           "column": 2
+         }
+       }
+     }
+   ],
+   "sourceType": "script",
+   "range": [
+     0,
+     2
+   ],
+   "loc": {
+     "start": {
+       "line": 1,
+       "column": 0
+     },
+     "end": {
+       "line": 1,
+       "column": 2
+     }
+   }
+ }
+
+ OneOfDecodingError(errors: [
+
+ BricBrac.OneOfDecodingError(errors: [
+
+ Swift.DecodingError.dataCorrupted(Swift.DecodingError.Context(codingPath: [CodingKeys(stringValue: "body", intValue: nil), _JSKey(stringValue: "Index 0", intValue: 0), CodingKeys(stringValue: "type", intValue: nil)], debugDescription: "Cannot initialize AsyncFunctionDeclarationNodeType from invalid String value BlockStatement", underlyingError: nil))
+
+ Swift.DecodingError.dataCorrupted(Swift.DecodingError.Context(codingPath: [CodingKeys(stringValue: "body", intValue: nil), _JSKey(stringValue: "Index 0", intValue: 0), CodingKeys(stringValue: "type", intValue: nil)], debugDescription: "Cannot initialize ClassDeclarationNodeType from invalid String value BlockStatement", underlyingError: nil))
+
+ BricBrac.OneOfDecodingError(errors: [
+
+
+ Swift.DecodingError.dataCorrupted(Swift.DecodingError.Context(codingPath: [CodingKeys(stringValue: "body", intValue: nil), _JSKey(stringValue: "Index 0", intValue: 0), CodingKeys(stringValue: "type", intValue: nil)], debugDescription: "Cannot initialize ExportAllDeclarationNodeType from invalid String value BlockStatement", underlyingError: nil))
+
+ Swift.DecodingError.dataCorrupted(Swift.DecodingError.Context(codingPath: [CodingKeys(stringValue: "body", intValue: nil), _JSKey(stringValue: "Index 0", intValue: 0), CodingKeys(stringValue: "type", intValue: nil)], debugDescription: "Cannot initialize ExportDefaultDeclarationNodeType from invalid String value BlockStatement", underlyingError: nil))
+
+ Swift.DecodingError.dataCorrupted(Swift.DecodingError.Context(codingPath: [CodingKeys(stringValue: "body", intValue: nil), _JSKey(stringValue: "Index 0", intValue: 0), CodingKeys(stringValue: "type", intValue: nil)], debugDescription: "Cannot initialize ExportNamedDeclarationNodeType from invalid String value BlockStatement", underlyingError: nil))])
+
+ 
+ Swift.DecodingError.dataCorrupted(Swift.DecodingError.Context(codingPath: [CodingKeys(stringValue: "body", intValue: nil), _JSKey(stringValue: "Index 0", intValue: 0), CodingKeys(stringValue: "type", intValue: nil)], debugDescription: "Cannot initialize FunctionDeclarationNodeType from invalid String value BlockStatement", underlyingError: nil))
+
+ Swift.DecodingError.dataCorrupted(Swift.DecodingError.Context(codingPath: [CodingKeys(stringValue: "body", intValue: nil), _JSKey(stringValue: "Index 0", intValue: 0), CodingKeys(stringValue: "type", intValue: nil)], debugDescription: "Cannot initialize ImportDeclarationNodeType from invalid String value BlockStatement", underlyingError: nil))
+
+ Swift.DecodingError.dataCorrupted(Swift.DecodingError.Context(codingPath: [CodingKeys(stringValue: "body", intValue: nil), _JSKey(stringValue: "Index 0", intValue: 0), CodingKeys(stringValue: "type", intValue: nil)], debugDescription: "Cannot initialize VariableDeclarationNodeType from invalid String value BlockStatement", underlyingError: nil))])
+
+ BricBrac.OneOfDecodingError(errors: [BricBrac.OneOfDecodingError(errors: [
+
+ Swift.DecodingError.dataCorrupted(Swift.DecodingError.Context(codingPath: [CodingKeys(stringValue: "body", intValue: nil), _JSKey(stringValue: "Index 0", intValue: 0), CodingKeys(stringValue: "type", intValue: nil)], debugDescription: "Cannot initialize AsyncFunctionDeclarationNodeType from invalid String value BlockStatement", underlyingError: nil))
+
+ Swift.DecodingError.dataCorrupted(Swift.DecodingError.Context(codingPath: [CodingKeys(stringValue: "body", intValue: nil), _JSKey(stringValue: "Index 0", intValue: 0), CodingKeys(stringValue: "type", intValue: nil)], debugDescription: "Cannot initialize BreakStatementNodeType from invalid String value BlockStatement", underlyingError: nil))
+
+ Swift.DecodingError.dataCorrupted(Swift.DecodingError.Context(codingPath: [CodingKeys(stringValue: "body", intValue: nil), _JSKey(stringValue: "Index 0", intValue: 0), CodingKeys(stringValue: "type", intValue: nil)], debugDescription: "Cannot initialize ContinueStatementNodeType from invalid String value BlockStatement", underlyingError: nil))
+
+ Swift.DecodingError.dataCorrupted(Swift.DecodingError.Context(codingPath: [CodingKeys(stringValue: "body", intValue: nil), _JSKey(stringValue: "Index 0", intValue: 0), CodingKeys(stringValue: "type", intValue: nil)], debugDescription: "Cannot initialize DebuggerStatementNodeType from invalid String value BlockStatement", underlyingError: nil))
+
+ Swift.DecodingError.dataCorrupted(Swift.DecodingError.Context(codingPath: [CodingKeys(stringValue: "body", intValue: nil), _JSKey(stringValue: "Index 0", intValue: 0), CodingKeys(stringValue: "type", intValue: nil)], debugDescription: "Cannot initialize DoWhileStatementNodeType from invalid String value BlockStatement", underlyingError: nil))
+
+ Swift.DecodingError.dataCorrupted(Swift.DecodingError.Context(codingPath: [CodingKeys(stringValue: "body", intValue: nil), _JSKey(stringValue: "Index 0", intValue: 0), CodingKeys(stringValue: "type", intValue: nil)], debugDescription: "Cannot initialize EmptyStatementNodeType from invalid String value BlockStatement", underlyingError: nil))
+
+ Swift.DecodingError.dataCorrupted(Swift.DecodingError.Context(codingPath: [CodingKeys(stringValue: "body", intValue: nil), _JSKey(stringValue: "Index 0", intValue: 0), CodingKeys(stringValue: "type", intValue: nil)], debugDescription: "Cannot initialize ExpressionStatementNodeType from invalid String value BlockStatement", underlyingError: nil))
+
+ Swift.DecodingError.dataCorrupted(Swift.DecodingError.Context(codingPath: [CodingKeys(stringValue: "body", intValue: nil), _JSKey(stringValue: "Index 0", intValue: 0), CodingKeys(stringValue: "type", intValue: nil)], debugDescription: "Cannot initialize DirectiveNodeType from invalid String value BlockStatement", underlyingError: nil))
+
+ Swift.DecodingError.dataCorrupted(Swift.DecodingError.Context(codingPath: [CodingKeys(stringValue: "body", intValue: nil), _JSKey(stringValue: "Index 0", intValue: 0), CodingKeys(stringValue: "type", intValue: nil)], debugDescription: "Cannot initialize ForStatementNodeType from invalid String value BlockStatement", underlyingError: nil))
+
+ Swift.DecodingError.dataCorrupted(Swift.DecodingError.Context(codingPath: [CodingKeys(stringValue: "body", intValue: nil), _JSKey(stringValue: "Index 0", intValue: 0), CodingKeys(stringValue: "type", intValue: nil)], debugDescription: "Cannot initialize ForInStatementNodeType from invalid String value BlockStatement", underlyingError: nil))])
+
+ BricBrac.OneOfDecodingError(errors: [Swift.DecodingError.dataCorrupted(Swift.DecodingError.Context(codingPath: [CodingKeys(stringValue: "body", intValue: nil), _JSKey(stringValue: "Index 0", intValue: 0), CodingKeys(stringValue: "type", intValue: nil)], debugDescription: "Cannot initialize ForOfStatementNodeType from invalid String value BlockStatement", underlyingError: nil))
+
+ Swift.DecodingError.dataCorrupted(Swift.DecodingError.Context(codingPath: [CodingKeys(stringValue: "body", intValue: nil), _JSKey(stringValue: "Index 0", intValue: 0), CodingKeys(stringValue: "type", intValue: nil)], debugDescription: "Cannot initialize FunctionDeclarationNodeType from invalid String value BlockStatement", underlyingError: nil))
+
+ Swift.DecodingError.dataCorrupted(Swift.DecodingError.Context(codingPath: [CodingKeys(stringValue: "body", intValue: nil), _JSKey(stringValue: "Index 0", intValue: 0), CodingKeys(stringValue: "type", intValue: nil)], debugDescription: "Cannot initialize IfStatementNodeType from invalid String value BlockStatement", underlyingError: nil))
+
+ Swift.DecodingError.dataCorrupted(Swift.DecodingError.Context(codingPath: [CodingKeys(stringValue: "body", intValue: nil), _JSKey(stringValue: "Index 0", intValue: 0), CodingKeys(stringValue: "type", intValue: nil)], debugDescription: "Cannot initialize ReturnStatementNodeType from invalid String value BlockStatement", underlyingError: nil))
+
+ Swift.DecodingError.dataCorrupted(Swift.DecodingError.Context(codingPath: [CodingKeys(stringValue: "body", intValue: nil), _JSKey(stringValue: "Index 0", intValue: 0), CodingKeys(stringValue: "type", intValue: nil)], debugDescription: "Cannot initialize SwitchStatementNodeType from invalid String value BlockStatement", underlyingError: nil))
+
+ Swift.DecodingError.dataCorrupted(Swift.DecodingError.Context(codingPath: [CodingKeys(stringValue: "body", intValue: nil), _JSKey(stringValue: "Index 0", intValue: 0), CodingKeys(stringValue: "type", intValue: nil)], debugDescription: "Cannot initialize ThrowStatementNodeType from invalid String value BlockStatement", underlyingError: nil))
+
+ Swift.DecodingError.dataCorrupted(Swift.DecodingError.Context(codingPath: [CodingKeys(stringValue: "body", intValue: nil), _JSKey(stringValue: "Index 0", intValue: 0), CodingKeys(stringValue: "type", intValue: nil)], debugDescription: "Cannot initialize TryStatementNodeType from invalid String value BlockStatement", underlyingError: nil))
+
+ Swift.DecodingError.dataCorrupted(Swift.DecodingError.Context(codingPath: [CodingKeys(stringValue: "body", intValue: nil), _JSKey(stringValue: "Index 0", intValue: 0), CodingKeys(stringValue: "type", intValue: nil)], debugDescription: "Cannot initialize VariableDeclarationNodeType from invalid String value BlockStatement", underlyingError: nil))
+
+ Swift.DecodingError.dataCorrupted(Swift.DecodingError.Context(codingPath: [CodingKeys(stringValue: "body", intValue: nil), _JSKey(stringValue: "Index 0", intValue: 0), CodingKeys(stringValue: "type", intValue: nil)], debugDescription: "Cannot initialize WhileStatementNodeType from invalid String value BlockStatement", underlyingError: nil))
+
+ Swift.DecodingError.dataCorrupted(Swift.DecodingError.Context(codingPath: [CodingKeys(stringValue: "body", intValue: nil), _JSKey(stringValue: "Index 0", intValue: 0), CodingKeys(stringValue: "type", intValue: nil)], debugDescription: "Cannot initialize WithStatementNodeType from invalid String value BlockStatement", underlyingError: nil))])])])"
+
+ */
 

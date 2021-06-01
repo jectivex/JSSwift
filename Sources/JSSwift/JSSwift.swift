@@ -5,7 +5,7 @@ import Foundation
 ///
 /// Performs lexical analysis (tokenization) or syntactic analysis (parsing) of a JavaScript program.
 ///
-/// See also: `JXContext.installJSSwift`
+/// See also: `JXContext.installJavaScriptParser`
 open class JavaScriptParser {
     open var ctx: JXContext
 
@@ -18,7 +18,7 @@ open class JavaScriptParser {
     public init(ctx: JXContext = JXContext()) throws {
         self.ctx = ctx
 
-        try ctx.installJSSwift()
+        try ctx.installJavaScriptParser()
 
 
         func check(_ value: JXValue, isFunction shouldBeFunction: Bool) throws -> JXValue {
@@ -151,11 +151,11 @@ open class JavaScriptParser {
 }
 
 extension JXContext {
-    @available(*, deprecated, message: "use installJSSwift instead")
+    @available(*, deprecated, message: "use installJavaScriptParser instead")
     public static let SwiftJSResourceURL = Bundle.module.url(forResource: "esprima", withExtension: "js", subdirectory: "Resources/JavaScript")
 
     /// Installs the `esprima.js` JavaScript parser into `exports.esprima`
-    @discardableResult public func installJSSwift() throws -> JXValType {
+    @discardableResult public func installJavaScriptParser() throws -> JXValType {
         let exports = self.globalObject(property: "exports")
         let esprimaProp = "esprima" // this is hardwired by `esprima.js`, so there's no point in customizing it
         if exports[esprimaProp].isObject == false {

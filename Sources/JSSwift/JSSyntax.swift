@@ -6,7 +6,7 @@
 /// The syntax tree format is derived from the original version of [Mozilla Parser API](https://developer.mozilla.org/en-US/docs/Mozilla/Projects/SpiderMonkey/Parser_API), which is then formalized and expanded as the [ESTree specification](https://github.com/estree/estree).
 public enum JSSyntax {
 
-    /// https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html#scripts-and-modules
+    /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct Script : JSSyntaxAST {
         public init(type: ProgramNodeType = .Program, body: [StatementListItem], sourceType: String) {
             self.type = type
@@ -20,7 +20,7 @@ public enum JSSyntax {
         public var sourceType: String
     }
 
-    /// https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html#scripts-and-modules
+    /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct Module : JSSyntaxAST {
         public init(type: ProgramNodeType = .Program, body: [ModuleItem], sourceType: String) {
             self.type = type
@@ -35,6 +35,7 @@ public enum JSSyntax {
     }
 
 
+    /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct ArrayExpression : JSSyntaxAST {
         public init(type: ArrayExpressionNodeType = .ArrayExpression, elements: Array<ArrayExpressionElement>) {
             self.type = type
@@ -58,6 +59,7 @@ public enum JSSyntax {
         public var elements: [ArrayPatternElement]
     }
 
+    /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct ArrowFunctionExpression : JSSyntaxAST {
         public init(type: ArrowFunctionExpressionNodeType = .ArrowFunctionExpression, id: Nullable<Identifier>, params: [FunctionParameter], body: OneOf<BlockStatement>.Or<Expression>, generator: Bool, expression: Bool, async: Bool) {
             self.type = type
@@ -79,6 +81,7 @@ public enum JSSyntax {
         public var async: Bool
     }
 
+    /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct AssignmentExpression : JSSyntaxAST {
         public init(type: AssignmentExpressionNodeType = .AssignmentExpression, operator: String, left: Expression, right: Expression) {
             self.type = type
@@ -94,6 +97,7 @@ public enum JSSyntax {
         public var right: Expression
     }
 
+    /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct AssignmentPattern : JSSyntaxAST {
         public init(type: AssignmentPatternNodeType = .AssignmentPattern, left: OneOf<BindingIdentifier>.Or<BindingPattern>, right: Expression) {
             self.type = type
@@ -107,6 +111,7 @@ public enum JSSyntax {
         public var right: Expression
     }
 
+    /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct AsyncArrowFunctionExpression : JSSyntaxAST {
         public init(type: AsyncArrowFunctionExpressionNodeType = .AsyncArrowFunctionExpression, id: Nullable<Identifier>, params: [FunctionParameter], body: OneOf<BlockStatement>.Or<Expression>, generator: Bool, expression: Bool, async: Bool) {
             self.type = type
@@ -128,6 +133,7 @@ public enum JSSyntax {
         public var async: Bool
     }
 
+    /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct AsyncFunctionDeclaration : JSSyntaxAST {
         public init(type: AsyncFunctionDeclarationNodeType = .AsyncFunctionDeclaration, id: Nullable<Identifier>, params: [FunctionParameter], body: BlockStatement, generator: Bool, expression: Bool, async: Bool) {
             self.type = type
@@ -149,6 +155,7 @@ public enum JSSyntax {
         public var async: Bool
     }
 
+    /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct AsyncFunctionExpression : JSSyntaxAST {
         public init(type: AsyncFunctionExpressionNodeType = .AsyncFunctionExpression, id: Nullable<Identifier>, params: [FunctionParameter], body: BlockStatement, generator: Bool, expression: Bool, async: Bool) {
             self.type = type
@@ -170,6 +177,7 @@ public enum JSSyntax {
         public var async: Bool
     }
 
+    /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct AwaitExpression : JSSyntaxAST {
         public init(type: AwaitExpressionNodeType = .AwaitExpression, argument: Expression) {
             self.type = type
@@ -181,6 +189,7 @@ public enum JSSyntax {
         public var argument: Expression
     }
 
+    /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct BinaryExpression : JSSyntaxAST {
         public init(type: BinaryExpressionNodeType = .BinaryExpression, `operator`: String, left: Expression, right: Expression) {
             self.type = type
@@ -196,6 +205,7 @@ public enum JSSyntax {
         public var right: Expression
     }
 
+    /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct BlockStatement : JSSyntaxAST {
         public init(type: BlockStatementNodeType = .BlockStatement, body: [Statement]) {
             self.type = type
@@ -207,6 +217,7 @@ public enum JSSyntax {
         public var body: [Statement]
     }
 
+    /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct BreakStatement : JSSyntaxAST {
         public init(type: BreakStatementNodeType = .BreakStatement, label: Nullable<Identifier>) {
             self.type = type
@@ -218,6 +229,7 @@ public enum JSSyntax {
         public var label: Nullable<Identifier>
     }
 
+    /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct CallExpression : JSSyntaxAST {
         public init(type: CallExpressionNodeType = .CallExpression, callee: OneOf<Expression>.Or<Import>, arguments: [ArgumentListElement]) {
             self.type = type
@@ -231,6 +243,7 @@ public enum JSSyntax {
         public var arguments: [ArgumentListElement]
     }
 
+    /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct CatchClause : JSSyntaxAST {
         public init(type: CatchClauseNodeType = .CatchClause, param: OneOf<BindingIdentifier>.Or<BindingPattern>, body: BlockStatement) {
             self.type = type
@@ -244,6 +257,7 @@ public enum JSSyntax {
         public var body: BlockStatement
     }
 
+    /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct ClassBody : JSSyntaxAST {
         public init(type: ClassBodyNodeType = .ClassBody, body: [Property]) {
             self.type = type
@@ -255,6 +269,7 @@ public enum JSSyntax {
         public var body: [Property]
     }
 
+    /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct ClassDeclaration : JSSyntaxAST {
         public init(type: ClassDeclarationNodeType = .ClassDeclaration, id: Nullable<Identifier>, superClass: Nullable<Identifier>, body: ClassBody) {
             self.type = type
@@ -270,6 +285,7 @@ public enum JSSyntax {
         public var body: ClassBody
     }
 
+    /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct ClassExpression : JSSyntaxAST {
         public init(type: ClassExpressionNodeType = .ClassExpression, id: Nullable<Identifier>, superClass: Nullable<Identifier>, body: ClassBody) {
             self.type = type
@@ -285,6 +301,7 @@ public enum JSSyntax {
         public var body: ClassBody
     }
 
+    /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct ComputedMemberExpression : JSSyntaxAST {
         public init(type: ComputedMemberExpressionNodeType = .ComputedMemberExpression, computed: Bool, object: Expression, property: Expression) {
             self.type = type
@@ -300,6 +317,7 @@ public enum JSSyntax {
         public var property: Expression
     }
 
+    /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct ConditionalExpression : JSSyntaxAST {
         public init(type: ConditionalExpressionNodeType = .ConditionalExpression, test: Expression, consequent: Expression, alternate: Expression) {
             self.type = type
@@ -315,6 +333,7 @@ public enum JSSyntax {
         public var alternate: Expression
     }
 
+    /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct ContinueStatement : JSSyntaxAST {
         public init(type: ContinueStatementNodeType = .ContinueStatement, label: Nullable<Identifier>) {
             self.type = type
@@ -326,6 +345,7 @@ public enum JSSyntax {
         public var label: Nullable<Identifier>
     }
 
+    /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct DebuggerStatement : JSSyntaxAST {
         public init(type: DebuggerStatementNodeType = .DebuggerStatement) {
             self.type = type
@@ -335,6 +355,7 @@ public enum JSSyntax {
         public enum DebuggerStatementNodeType : String, Codable { case DebuggerStatement }
     }
 
+    /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct Directive : JSSyntaxAST {
         public init(type: DirectiveNodeType = .Directive, expression: Expression, directive: String) {
             self.type = type
@@ -348,6 +369,7 @@ public enum JSSyntax {
         public var directive: String
     }
 
+    /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct DoWhileStatement : JSSyntaxAST {
         public init(type: DoWhileStatementNodeType = .DoWhileStatement, body: Statement, test: Expression) {
             self.type = type
@@ -361,6 +383,7 @@ public enum JSSyntax {
         public var test: Expression
     }
 
+    /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct EmptyStatement : JSSyntaxAST {
         public init(type: EmptyStatementNodeType = .EmptyStatement) {
             self.type = type
@@ -370,6 +393,7 @@ public enum JSSyntax {
         public enum EmptyStatementNodeType : String, Codable { case EmptyStatement }
     }
 
+    /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct ExportAllDeclaration : JSSyntaxAST {
         public init(type: ExportAllDeclarationNodeType = .ExportAllDeclaration, source: Literal) {
             self.type = type
@@ -381,6 +405,7 @@ public enum JSSyntax {
         public var source: Literal
     }
 
+    /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct ExportDefaultDeclaration : JSSyntaxAST {
         public init(type: ExportDefaultDeclarationNodeType = .ExportDefaultDeclaration, declaration: ExportableDefaultDeclaration) {
             self.type = type
@@ -392,6 +417,7 @@ public enum JSSyntax {
         public var declaration: ExportableDefaultDeclaration
     }
 
+    /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct ExportNamedDeclaration : JSSyntaxAST {
         public init(type: ExportNamedDeclarationNodeType = .ExportNamedDeclaration, declaration: Nullable<ExportableNamedDeclaration>, specifiers: [ExportSpecifier], source: Nullable<Literal>) {
             self.type = type
@@ -407,6 +433,7 @@ public enum JSSyntax {
         public var source: Nullable<Literal>
     }
 
+    /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct ExportSpecifier : JSSyntaxAST {
         public init(type: ExportSpecifierNodeType = .ExportSpecifier, exported: Identifier, local: Identifier) {
             self.type = type
@@ -420,6 +447,7 @@ public enum JSSyntax {
         public var local: Identifier
     }
 
+    /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct ExpressionStatement : JSSyntaxAST {
         public init(type: ExpressionStatementNodeType = .ExpressionStatement, expression: Expression) {
             self.type = type
@@ -431,6 +459,7 @@ public enum JSSyntax {
         public var expression: Expression
     }
 
+    /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct ForInStatement : JSSyntaxAST {
         public init(type: ForInStatementNodeType = .ForInStatement, left: Expression, right: Expression, body: Statement, each: Bool) {
             self.type = type
@@ -448,6 +477,7 @@ public enum JSSyntax {
         public var each: Bool
     }
 
+    /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct ForOfStatement : JSSyntaxAST {
         public init(type: ForOfStatementNodeType = .ForOfStatement, left: Expression, right: Expression, body: Statement) {
             self.type = type
@@ -463,6 +493,7 @@ public enum JSSyntax {
         public var body: Statement
     }
 
+    /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct ForStatement : JSSyntaxAST {
         public init(type: ForStatementNodeType = .ForStatement, `init`: Nullable<Expression>, test: Nullable<Expression>, update: Nullable<Expression>, body: Statement) {
             self.type = type
@@ -480,6 +511,7 @@ public enum JSSyntax {
         public var body: Statement
     }
 
+    /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct FunctionDeclaration : JSSyntaxAST {
         public init(type: FunctionDeclarationNodeType = .FunctionDeclaration, id: Nullable<Identifier>, params: [FunctionParameter], body: BlockStatement, generator: Bool, expression: Bool, async: Bool) {
             self.type = type
@@ -501,6 +533,7 @@ public enum JSSyntax {
         public var async: Bool
     }
 
+    /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct FunctionExpression : JSSyntaxAST {
         public init(type: FunctionExpressionNodeType = .FunctionExpression, id: Nullable<Identifier>, params: [FunctionParameter], body: BlockStatement, generator: Bool, expression: Bool, async: Bool) {
             self.type = type
@@ -522,6 +555,7 @@ public enum JSSyntax {
         public var async: Bool
     }
 
+    /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct Identifier : JSSyntaxAST {
         public init(type: IdentifierNodeType = .Identifier, name: String) {
             self.type = type
@@ -533,6 +567,7 @@ public enum JSSyntax {
         public var name: String
     }
 
+    /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct IfStatement : JSSyntaxAST {
         public init(type: IfStatementNodeType = .IfStatement, test: Expression, consequent: Statement, alternate: Nullable<Statement>) {
             self.type = type
@@ -548,6 +583,7 @@ public enum JSSyntax {
         public var alternate: Nullable<Statement>
     }
 
+    /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct Import : JSSyntaxAST {
         public init(type: ImportNodeType = .Import) {
             self.type = type
@@ -557,6 +593,7 @@ public enum JSSyntax {
         public enum ImportNodeType : String, Codable { case Import }
     }
 
+    /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct ImportDeclaration : JSSyntaxAST {
         public init(type: ImportDeclarationNodeType = .ImportDeclaration, specifiers: [ImportDeclarationSpecifier], source: Literal) {
             self.type = type
@@ -570,6 +607,7 @@ public enum JSSyntax {
         public var source: Literal
     }
 
+    /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct ImportDefaultSpecifier : JSSyntaxAST {
         public init(type: ImportDefaultSpecifierNodeType = .ImportDefaultSpecifier, local: Identifier) {
             self.type = type
@@ -581,6 +619,7 @@ public enum JSSyntax {
         public var local: Identifier
     }
 
+    /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct ImportNamespaceSpecifier : JSSyntaxAST {
         public init(type: ImportNamespaceSpecifierNodeType = .ImportNamespaceSpecifier, local: Identifier) {
             self.type = type
@@ -592,6 +631,7 @@ public enum JSSyntax {
         public var local: Identifier
     }
 
+    /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct ImportSpecifier : JSSyntaxAST {
         public init(type: ImportSpecifierNodeType = .ImportSpecifier, local: Identifier, imported: Identifier) {
             self.type = type
@@ -605,6 +645,7 @@ public enum JSSyntax {
         public var imported: Identifier
     }
 
+    /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct LabeledStatement : JSSyntaxAST {
         public init(type: LabeledStatementNodeType = .LabeledStatement, label: Identifier, body: Statement) {
             self.type = type
@@ -618,6 +659,7 @@ public enum JSSyntax {
         public var body: Statement
     }
 
+    /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct Literal : JSSyntaxAST {
         public init(type: LiteralNodeType = .Literal, value: OneOf<Bool>.Or<Double>.Or<String>.Or<ExplicitNull>, raw: String) {
             self.type = type
@@ -631,6 +673,7 @@ public enum JSSyntax {
         public var raw: String
     }
 
+    /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct MetaProperty : JSSyntaxAST {
         public init(type: MetaPropertyNodeType = .MetaProperty, meta: Identifier, property: Identifier) {
             self.type = type
@@ -644,6 +687,7 @@ public enum JSSyntax {
         public var property: Identifier
     }
 
+    /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct MethodDefinition : JSSyntaxAST {
         public init(type: MethodDefinitionNodeType = .MethodDefinition, key: Nullable<Expression>, computed: Bool, value: OneOf<AsyncFunctionExpression>.Or<FunctionExpression>.Or<ExplicitNull>, kind: String, `static`: Bool) {
             self.type = type
@@ -663,6 +707,7 @@ public enum JSSyntax {
         public var `static`: Bool
     }
 
+    /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct NewExpression : JSSyntaxAST {
         public init(type: NewExpressionNodeType = .NewExpression, callee: Expression, arguments: [ArgumentListElement]) {
             self.type = type
@@ -676,6 +721,7 @@ public enum JSSyntax {
         public var arguments: [ArgumentListElement]
     }
 
+    /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct ObjectExpression : JSSyntaxAST {
         public init(type: ObjectExpressionNodeType = .ObjectExpression, properties: [ObjectExpressionProperty]) {
             self.type = type
@@ -687,6 +733,7 @@ public enum JSSyntax {
         public var properties: [ObjectExpressionProperty]
     }
 
+    /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct ObjectPattern : JSSyntaxAST {
         public init(type: ObjectPatternNodeType = .ObjectPattern, properties: [ObjectPatternProperty]) {
             self.type = type
@@ -698,6 +745,7 @@ public enum JSSyntax {
         public var properties: [ObjectPatternProperty]
     }
 
+    /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct Property : JSSyntaxAST {
         public init(type: PropertyNodeType = .Property, key: PropertyKey, computed: Bool, value: Nullable<PropertyValue>, kind: String, method: Bool, shorthand: Bool) {
             self.type = type
@@ -719,6 +767,7 @@ public enum JSSyntax {
         public var shorthand: Bool
     }
 
+    /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct RegexLiteral : JSSyntaxAST {
         public init(type: RegexLiteralNodeType = .RegexLiteral, value: Bric, raw: String, regex: Regex) {
             self.type = type
@@ -734,6 +783,7 @@ public enum JSSyntax {
         public var regex: Regex
     }
 
+    /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct RestElement : JSSyntaxAST {
         public init(type: RestElementNodeType = .RestElement, argument: OneOf<BindingIdentifier>.Or<BindingPattern>) {
             self.type = type
@@ -745,6 +795,7 @@ public enum JSSyntax {
         public var argument: OneOf<BindingIdentifier>.Or<BindingPattern>
     }
 
+    /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct ReturnStatement : JSSyntaxAST {
         public init(type: ReturnStatementNodeType = .ReturnStatement, argument: Nullable<Expression>) {
             self.type = type
@@ -756,6 +807,7 @@ public enum JSSyntax {
         public var argument: Nullable<Expression>
     }
 
+    /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct SequenceExpression : JSSyntaxAST {
         public init(type: SequenceExpressionNodeType = .SequenceExpression, expressions: [Expression]) {
             self.type = type
@@ -767,6 +819,7 @@ public enum JSSyntax {
         public var expressions: [Expression]
     }
 
+    /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct SpreadElement : JSSyntaxAST {
         public init(type: SpreadElementNodeType = .SpreadElement, argument: Expression) {
             self.type = type
@@ -778,6 +831,7 @@ public enum JSSyntax {
         public var argument: Expression
     }
 
+    /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct StaticMemberExpression : JSSyntaxAST {
         public init(type: StaticMemberExpressionNodeType = .StaticMemberExpression, computed: Bool, object: Expression, property: Expression) {
             self.type = type
@@ -793,6 +847,7 @@ public enum JSSyntax {
         public var property: Expression
     }
 
+    /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct Super : JSSyntaxAST {
         public init(type: SuperNodeType = .Super) {
             self.type = type
@@ -802,6 +857,7 @@ public enum JSSyntax {
         public enum SuperNodeType : String, Codable { case Super }
     }
 
+    /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct SwitchCase : JSSyntaxAST {
         public init(type: SwitchCaseNodeType = .SwitchCase, test: Nullable<Expression>, consequent: [Statement]) {
             self.type = type
@@ -815,6 +871,7 @@ public enum JSSyntax {
         public var consequent: [Statement]
     }
 
+    /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct SwitchStatement : JSSyntaxAST {
         public init(type: SwitchStatementNodeType = .SwitchStatement, discriminant: Expression, cases: [SwitchCase]) {
             self.type = type
@@ -828,6 +885,7 @@ public enum JSSyntax {
         public var cases: [SwitchCase]
     }
 
+    /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct TaggedTemplateExpression : JSSyntaxAST {
         public init(type: TaggedTemplateExpressionNodeType = .TaggedTemplateExpression, tag: Expression, quasi: TemplateLiteral) {
             self.type = type
@@ -841,11 +899,13 @@ public enum JSSyntax {
         public var quasi: TemplateLiteral
     }
 
+    /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct TemplateElementValue : Hashable, Codable {
         public var cooked: String
         public var raw: String
     }
 
+    /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct TemplateElement : JSSyntaxAST {
         public init(type: TemplateElementValueNodeType = .TemplateElement, value: TemplateElementValue, tail: Bool) {
             self.type = type
@@ -859,6 +919,7 @@ public enum JSSyntax {
         public var tail: Bool
     }
 
+    /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct TemplateLiteral : JSSyntaxAST {
         public init(type: TemplateLiteralNodeType = .TemplateLiteral, quasis: [TemplateElement], expressions: [Expression]) {
             self.type = type
@@ -872,6 +933,7 @@ public enum JSSyntax {
         public var expressions: [Expression]
     }
 
+    /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct ThisExpression : JSSyntaxAST {
         public init(type: ThisExpressionNodeType = .ThisExpression) {
             self.type = type
@@ -881,6 +943,7 @@ public enum JSSyntax {
         public enum ThisExpressionNodeType : String, Codable { case ThisExpression }
     }
 
+    /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct ThrowStatement : JSSyntaxAST {
         public init(type: ThrowStatementNodeType = .ThrowStatement, argument: Expression) {
             self.type = type
@@ -892,6 +955,7 @@ public enum JSSyntax {
         public var argument: Expression
     }
 
+    /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct TryStatement : JSSyntaxAST {
         public init(type: TryStatementNodeType = .TryStatement, block: BlockStatement, handler: Nullable<CatchClause>, finalizer: Nullable<BlockStatement>) {
             self.type = type
@@ -907,6 +971,7 @@ public enum JSSyntax {
         public var finalizer: Nullable<BlockStatement>
     }
 
+    /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct UnaryExpression : JSSyntaxAST {
         public init(type: UnaryExpressionNodeType = .UnaryExpression, `operator`: String, argument: Expression, prefix: Bool) {
             self.type = type
@@ -922,6 +987,7 @@ public enum JSSyntax {
         public var prefix: Bool
     }
 
+    /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct UpdateExpression : JSSyntaxAST {
         public init(type: UpdateExpressionNodeType = .UpdateExpression, `operator`: String, argument: Expression, prefix: Bool) {
             self.type = type
@@ -937,6 +1003,7 @@ public enum JSSyntax {
         public var prefix: Bool
     }
 
+    /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct VariableDeclaration : JSSyntaxAST {
         public init(type: VariableDeclarationNodeType = .VariableDeclaration, declarations: [VariableDeclarator], kind: String) {
             self.type = type
@@ -950,6 +1017,7 @@ public enum JSSyntax {
         public var kind: String
     }
 
+    /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct VariableDeclarator : JSSyntaxAST {
         public init(type: VariableDeclaratorNodeType = .VariableDeclarator, id: OneOf<BindingIdentifier>.Or<BindingPattern>, `init`: Nullable<Expression>) {
             self.type = type
@@ -963,6 +1031,7 @@ public enum JSSyntax {
         public var `init`: Nullable<Expression>
     }
 
+    /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct WhileStatement : JSSyntaxAST {
         public init(type: WhileStatementNodeType = .WhileStatement, test: Expression, body: Statement) {
             self.type = type
@@ -976,6 +1045,7 @@ public enum JSSyntax {
         public var body: Statement
     }
 
+    /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct WithStatement : JSSyntaxAST {
         public init(type: WithStatementNodeType = .WithStatement, object: Expression, body: Statement) {
             self.type = type
@@ -989,6 +1059,7 @@ public enum JSSyntax {
         public var body: Statement
     }
 
+    /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct YieldExpression : JSSyntaxAST {
         public init(type: YieldExpressionNodeType = .YieldExpression, argument: Nullable<Expression>, delegate: Bool) {
             self.type = type
@@ -1354,11 +1425,22 @@ class ErrorHandler {
 // MARK: scanner.ts
 
 public struct Position : Hashable, Codable {
+    public init(line: Int? = nil, column: Int? = nil) {
+        self.line = line
+        self.column = column
+    }
+
     public var line: Int?
     public var column: Int?
 }
 
 public struct SourceLocation : Hashable, Codable {
+    public init(start: Position, end: Position, source: String? = nil) {
+        self.start = start
+        self.end = end
+        self.source = source
+    }
+
     public var start: Position
     public var end: Position
     public var source: String? = nil
