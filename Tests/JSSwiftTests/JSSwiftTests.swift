@@ -92,14 +92,30 @@ final class JSSwiftTests: XCTestCase {
 
 
             /// Checks that the given JavaScript can be parsed
-            func parse(js javaScript: String, tokenTypes: [JSTokenType]? = nil, tolerant: Bool = false, columns: [Int]? = nil, line: UInt = #line) throws {
+            func parse(js javaScript: String, tokenTypes: [JSTokenType]? = nil, tolerant: Bool = false) throws {
                 var opts = popts
                 opts.tolerant = tolerant
+                opts.loc = true
+                opts.range = true
                 let _ = try parser.parse(javaScript: javaScript, options: opts)
             }
 
+            try parse(js: "true")
+            try parse(js: "false")
+            try parse(js: "true")
+            try parse(js: "[]")
+            try parse(js: "1")
+            try parse(js: "1.1")
+            try parse(js: "1.01")
             try parse(js: "function doSomething() { return 1 + 'abx'; }")
+            try parse(js: "[]")
+
 //            try parse(js: "{}")
+
+//            try parse(js: "function allTypes() { return { a: 1.2, 'b': null, \"c\": [true, false] }; }", tolerant: true)
+
+//            try parse(js: "{[[0]]}")
+
 //            try parse(js: "{{}}")
 //            try parse(js: "function doSomething() { abc(); }")
 //            try parse(js: "function doSomething() { { } }")

@@ -144,10 +144,11 @@ extension JXContext {
     /// Installs the `esprima.js` JavaScript parser into `exports.esprima`
     @discardableResult public func installJSSwift() throws -> JXValType {
         let exports = self.globalObject(property: "exports")
-        if exports["esprima"].isObject == false {
+        let esprimaProp = "esprima" // this is hardwired by `esprima.js`, so there's no point in customizing it
+        if exports[esprimaProp].isObject == false {
             let _ = try installModule(named: "esprima", in: .module)
         }
-        let esprima = exports["esprima"] // esprima installs itself into the literal "exports", so fetch it from there
+        let esprima = exports[esprimaProp] // esprima installs itself into the literal "exports", so fetch it from there
         if esprima.isObject == false {
             throw Errors.evaluationError(esprima)
         }
