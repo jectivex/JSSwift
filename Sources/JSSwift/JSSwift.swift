@@ -4,13 +4,13 @@ import Dispatch
 
 extension JXContext {
     /// Installs the `esprima.js` JavaScript parser into `exports.esprima`
-    @discardableResult public func installEsprima() throws -> JXValType {
+    @discardableResult public func installJSSwift() throws -> JXValType {
         let exports = self.globalObject(property: "exports")
-        if exports["esprima"].isUndefined {
+        if exports["esprima"].isObject == false {
             let _ = try installModule(named: "esprima", in: .module)
         }
         let esprima = exports["esprima"] // esprima installs itself into "exports", so fetch it from there
-        if !esprima.isObject {
+        if esprima.isObject == false {
             throw Errors.evaluationError(esprima)
         }
         return esprima

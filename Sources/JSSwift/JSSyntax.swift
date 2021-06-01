@@ -393,7 +393,7 @@ extension OneOf10 : EsprimaASTType where T1: EsprimaASTType, T2: EsprimaASTType,
 }
 
 /// Namespace for nodes corresponding to `Syntax` cases.
-public enum EsprimaASTNode {
+public enum JSSyntax {
 
     public typealias ArgumentListElement = OneOf2<Expression, SpreadElement>
     public typealias ArrayExpressionElement = OneOf3<Expression, SpreadElement, ExplicitNull>
