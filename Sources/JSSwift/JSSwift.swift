@@ -3,6 +3,9 @@ import Foundation
 import Dispatch
 
 extension JXContext {
+    @available(*, deprecated, message: "use installJSSwift instead")
+    public static let esprimaURL = Bundle.module.url(forResource: "esprima", withExtension: "js", subdirectory: "Resources/JavaScript")
+
     /// Installs the `esprima.js` JavaScript parser into `exports.esprima`
     @discardableResult public func installJSSwift() throws -> JXValType {
         let exports = self.globalObject(property: "exports")
