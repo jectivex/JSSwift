@@ -212,8 +212,6 @@ public enum Messages {
 
 // MARK: token.ts
 
-typealias Token = JSTokenType
-
 public enum JSTokenType : String, Hashable, Codable {
     case BooleanLiteral = "Boolean"
     case EOF = "<end>"
@@ -226,19 +224,6 @@ public enum JSTokenType : String, Hashable, Codable {
     case RegularExpression = "RegularExpression"
     case Template = "Template"
 }
-
-let TokenName = [
-    Token.BooleanLiteral: "Boolean",
-    Token.EOF: "<end>",
-    Token.Identifier: "Identifier",
-    Token.Keyword: "Keyword",
-    Token.NullLiteral: "Null",
-    Token.NumericLiteral: "Numeric",
-    Token.Punctuator: "Punctuator",
-    Token.StringLiteral: "String",
-    Token.RegularExpression: "RegularExpression",
-    Token.Template: "Template",
-]
 
 
 // MARK: tokenizer.ts
@@ -269,7 +254,7 @@ struct Config : Hashable, Codable {
 
 // MARK: error-handler.ts
 
-public struct EsprimaError : Error {
+public struct JSSyntaxError : Error {
     public private(set) var name: String;
     public private(set) var message: String;
     public private(set) var index: Int;
@@ -279,7 +264,7 @@ public struct EsprimaError : Error {
 }
 
 class ErrorHandler {
-    var errors: [EsprimaError];
+    var errors: [JSSyntaxError];
     var tolerant: Bool;
 
     init() {
@@ -287,11 +272,11 @@ class ErrorHandler {
         self.tolerant = false;
     }
 
-    func recordError(error: EsprimaError) {
+    func recordError(error: JSSyntaxError) {
         self.errors.append(error);
     }
 
-    func tolerate(error: EsprimaError) throws {
+    func tolerate(error: JSSyntaxError) throws {
         if (self.tolerant) {
             self.recordError(error: error);
         } else {
@@ -299,8 +284,8 @@ class ErrorHandler {
         }
     }
 
-    func createError(index: Int, line: Int, col: Int, description: Messages) -> EsprimaError {
-        EsprimaError(name: "", message: "Line \(line): \(description)", index: index, lineNumber: line, column: col, description: description)
+    func createError(index: Int, line: Int, col: Int, description: Messages) -> JSSyntaxError {
+        JSSyntaxError(name: "", message: "Line \(line): \(description)", index: index, lineNumber: line, column: col, description: description)
     }
 
     func throwError(index: Int, line: Int, col: Int, description: Messages) throws {
@@ -336,57 +321,57 @@ public struct SourceLocation : Hashable, Codable {
 
 // - MARK: nodes.ts
 
-public protocol EsprimaASTType : Codable {
+public protocol JSSyntaxASTType : Codable {
     /// The name of the AST Type
     var typeName: String { get }
 }
 
-public protocol EsprimaAST : Hashable, EsprimaASTType {
+public protocol JSSyntaxAST : Hashable, JSSyntaxASTType {
     associatedtype NodeType : RawRepresentable where NodeType.RawValue == String
     var type: NodeType { get }
 }
 
-public extension EsprimaAST {
+public extension JSSyntaxAST {
     var typeName: String { type.rawValue }
 }
 
-extension Never : EsprimaASTType {
+extension Never : JSSyntaxASTType {
     public var typeName: String { fatalError("never") }
 }
 
-extension OneOf2 : EsprimaASTType where T1: EsprimaASTType, T2: EsprimaASTType {
+extension OneOf2 : JSSyntaxASTType where T1: JSSyntaxASTType, T2: JSSyntaxASTType {
     public var typeName: String { expanded.typeName }
 }
 
-extension OneOf3 : EsprimaASTType where T1: EsprimaASTType, T2: EsprimaASTType, T3: EsprimaASTType {
+extension OneOf3 : JSSyntaxASTType where T1: JSSyntaxASTType, T2: JSSyntaxASTType, T3: JSSyntaxASTType {
     public var typeName: String { expanded.typeName }
 }
 
-extension OneOf4 : EsprimaASTType where T1: EsprimaASTType, T2: EsprimaASTType, T3: EsprimaASTType, T4: EsprimaASTType {
+extension OneOf4 : JSSyntaxASTType where T1: JSSyntaxASTType, T2: JSSyntaxASTType, T3: JSSyntaxASTType, T4: JSSyntaxASTType {
     public var typeName: String { expanded.typeName }
 }
 
-extension OneOf5 : EsprimaASTType where T1: EsprimaASTType, T2: EsprimaASTType, T3: EsprimaASTType, T4: EsprimaASTType, T5: EsprimaASTType {
+extension OneOf5 : JSSyntaxASTType where T1: JSSyntaxASTType, T2: JSSyntaxASTType, T3: JSSyntaxASTType, T4: JSSyntaxASTType, T5: JSSyntaxASTType {
     public var typeName: String { expanded.typeName }
 }
 
-extension OneOf6 : EsprimaASTType where T1: EsprimaASTType, T2: EsprimaASTType, T3: EsprimaASTType, T4: EsprimaASTType, T5: EsprimaASTType, T6: EsprimaASTType {
+extension OneOf6 : JSSyntaxASTType where T1: JSSyntaxASTType, T2: JSSyntaxASTType, T3: JSSyntaxASTType, T4: JSSyntaxASTType, T5: JSSyntaxASTType, T6: JSSyntaxASTType {
     public var typeName: String { expanded.typeName }
 }
 
-extension OneOf7 : EsprimaASTType where T1: EsprimaASTType, T2: EsprimaASTType, T3: EsprimaASTType, T4: EsprimaASTType, T5: EsprimaASTType, T6: EsprimaASTType, T7: EsprimaASTType {
+extension OneOf7 : JSSyntaxASTType where T1: JSSyntaxASTType, T2: JSSyntaxASTType, T3: JSSyntaxASTType, T4: JSSyntaxASTType, T5: JSSyntaxASTType, T6: JSSyntaxASTType, T7: JSSyntaxASTType {
     public var typeName: String { expanded.typeName }
 }
 
-extension OneOf8 : EsprimaASTType where T1: EsprimaASTType, T2: EsprimaASTType, T3: EsprimaASTType, T4: EsprimaASTType, T5: EsprimaASTType, T6: EsprimaASTType, T7: EsprimaASTType, T8: EsprimaASTType {
+extension OneOf8 : JSSyntaxASTType where T1: JSSyntaxASTType, T2: JSSyntaxASTType, T3: JSSyntaxASTType, T4: JSSyntaxASTType, T5: JSSyntaxASTType, T6: JSSyntaxASTType, T7: JSSyntaxASTType, T8: JSSyntaxASTType {
     public var typeName: String { expanded.typeName }
 }
 
-extension OneOf9 : EsprimaASTType where T1: EsprimaASTType, T2: EsprimaASTType, T3: EsprimaASTType, T4: EsprimaASTType, T5: EsprimaASTType, T6: EsprimaASTType, T7: EsprimaASTType, T8: EsprimaASTType, T9: EsprimaASTType {
+extension OneOf9 : JSSyntaxASTType where T1: JSSyntaxASTType, T2: JSSyntaxASTType, T3: JSSyntaxASTType, T4: JSSyntaxASTType, T5: JSSyntaxASTType, T6: JSSyntaxASTType, T7: JSSyntaxASTType, T8: JSSyntaxASTType, T9: JSSyntaxASTType {
     public var typeName: String { expanded.typeName }
 }
 
-extension OneOf10 : EsprimaASTType where T1: EsprimaASTType, T2: EsprimaASTType, T3: EsprimaASTType, T4: EsprimaASTType, T5: EsprimaASTType, T6: EsprimaASTType, T7: EsprimaASTType, T8: EsprimaASTType, T9: EsprimaASTType, T10: EsprimaASTType {
+extension OneOf10 : JSSyntaxASTType where T1: JSSyntaxASTType, T2: JSSyntaxASTType, T3: JSSyntaxASTType, T4: JSSyntaxASTType, T5: JSSyntaxASTType, T6: JSSyntaxASTType, T7: JSSyntaxASTType, T8: JSSyntaxASTType, T9: JSSyntaxASTType, T10: JSSyntaxASTType {
     public var typeName: String {
         self[routing: (\.typeName, \.typeName, \.typeName, \.typeName, \.typeName, \.typeName, \.typeName, \.typeName, \.typeName, \.typeName)]
     }
@@ -414,19 +399,19 @@ public enum JSSyntax {
     public typealias PropertyValue = OneOf5<AssignmentPattern, AsyncFunctionExpression, BindingIdentifier, BindingPattern, FunctionExpression>
     public typealias StatementListItem = OneOf2<Declaration, Statement>
 
-    public struct ArrayExpression : EsprimaAST {
+    public struct ArrayExpression : JSSyntaxAST {
         public let type: NodeType
         public enum NodeType : String, Codable { case ArrayExpression }
         public let elements: Array<ArrayExpressionElement>
     }
 
-    public struct ArrayPattern : EsprimaAST {
+    public struct ArrayPattern : JSSyntaxAST {
         public let type: NodeType
         public enum NodeType : String, Codable { case ArrayPattern }
         public let elements: [ArrayPatternElement]
     }
 
-    public struct ArrowFunctionExpression : EsprimaAST {
+    public struct ArrowFunctionExpression : JSSyntaxAST {
         public let type: NodeType
         public enum NodeType : String, Codable { case ArrowFunctionExpression }
         public let id: Nullable<Identifier>
@@ -438,7 +423,7 @@ public enum JSSyntax {
 
     }
 
-    public struct AssignmentExpression : EsprimaAST {
+    public struct AssignmentExpression : JSSyntaxAST {
         public let type: NodeType
         public enum NodeType : String, Codable { case AssignmentExpression}
         public let `operator`: String
@@ -446,14 +431,14 @@ public enum JSSyntax {
         public let right: Expression
     }
 
-    public struct AssignmentPattern : EsprimaAST {
+    public struct AssignmentPattern : JSSyntaxAST {
         public let type: NodeType
         public enum NodeType : String, Codable { case AssignmentPattern }
         public let left: OneOf2<BindingIdentifier, BindingPattern>
         public let right: Expression
     }
 
-    public struct AsyncArrowFunctionExpression : EsprimaAST {
+    public struct AsyncArrowFunctionExpression : JSSyntaxAST {
         public let type: NodeType
         public enum NodeType : String, Codable { case AsyncArrowFunctionExpression }
         public let id: Nullable<Identifier>
@@ -464,7 +449,7 @@ public enum JSSyntax {
         public let async: Bool
     }
 
-    public struct AsyncFunctionDeclaration : EsprimaAST {
+    public struct AsyncFunctionDeclaration : JSSyntaxAST {
         public let type: NodeType
         public enum NodeType : String, Codable { case AsyncFunctionDeclaration }
         public let id: Nullable<Identifier>
@@ -475,7 +460,7 @@ public enum JSSyntax {
         public let async: Bool
     }
 
-    public struct AsyncFunctionExpression : EsprimaAST {
+    public struct AsyncFunctionExpression : JSSyntaxAST {
         public let type: NodeType
         public enum NodeType : String, Codable { case AsyncFunctionExpression }
         public let id: Nullable<Identifier>
@@ -486,13 +471,13 @@ public enum JSSyntax {
         public let async: Bool
     }
 
-    public struct AwaitExpression : EsprimaAST {
+    public struct AwaitExpression : JSSyntaxAST {
         public let type: NodeType
         public enum NodeType : String, Codable { case AwaitExpression }
         public let argument: Expression
     }
 
-    public struct BinaryExpression : EsprimaAST {
+    public struct BinaryExpression : JSSyntaxAST {
         public let type: NodeType
         public enum NodeType : String, Codable { case BinaryExpression }
         public let `operator`: String
@@ -500,21 +485,21 @@ public enum JSSyntax {
         public let right: Expression
     }
 
-    public struct BlockStatement : EsprimaAST {
+    public struct BlockStatement : JSSyntaxAST {
         public let type: NodeType
         public enum NodeType : String, Codable { case BlockStatement }
         public let body: [Statement]
 
     }
 
-    public struct BreakStatement : EsprimaAST {
+    public struct BreakStatement : JSSyntaxAST {
         public let type: NodeType
         public enum NodeType : String, Codable { case BreakStatement }
         public let label: Nullable<Identifier>
 
     }
 
-    public struct CallExpression : EsprimaAST {
+    public struct CallExpression : JSSyntaxAST {
         public let type: NodeType
         public enum NodeType : String, Codable { case CallExpression }
         public let callee: OneOf2<Expression, Import>
@@ -522,7 +507,7 @@ public enum JSSyntax {
 
     }
 
-    public struct CatchClause : EsprimaAST {
+    public struct CatchClause : JSSyntaxAST {
         public let type: NodeType
         public enum NodeType : String, Codable { case CatchClause }
         public let param: OneOf2<BindingIdentifier, BindingPattern>
@@ -530,14 +515,14 @@ public enum JSSyntax {
 
     }
 
-    public struct ClassBody : EsprimaAST {
+    public struct ClassBody : JSSyntaxAST {
         public let type: NodeType
         public enum NodeType : String, Codable { case ClassBody }
         public let body: [Property]
 
     }
 
-    public struct ClassDeclaration : EsprimaAST {
+    public struct ClassDeclaration : JSSyntaxAST {
         public let type: NodeType
         public enum NodeType : String, Codable { case ClassDeclaration }
         public let id: Nullable<Identifier>
@@ -546,7 +531,7 @@ public enum JSSyntax {
 
     }
 
-    public struct ClassExpression : EsprimaAST {
+    public struct ClassExpression : JSSyntaxAST {
         public let type: NodeType
         public enum NodeType : String, Codable { case ClassExpression }
         public let id: Nullable<Identifier>
@@ -555,7 +540,7 @@ public enum JSSyntax {
 
     }
 
-    public struct ComputedMemberExpression : EsprimaAST {
+    public struct ComputedMemberExpression : JSSyntaxAST {
         public let type: NodeType
         public enum NodeType : String, Codable { case ComputedMemberExpression }
         public let computed: Bool
@@ -564,7 +549,7 @@ public enum JSSyntax {
 
     }
 
-    public struct ConditionalExpression : EsprimaAST {
+    public struct ConditionalExpression : JSSyntaxAST {
         public let type: NodeType
         public enum NodeType : String, Codable { case ConditionalExpression }
         public let test: Expression
@@ -573,20 +558,20 @@ public enum JSSyntax {
 
     }
 
-    public struct ContinueStatement : EsprimaAST {
+    public struct ContinueStatement : JSSyntaxAST {
         public let type: NodeType
         public enum NodeType : String, Codable { case ContinueStatement }
         public let label: Nullable<Identifier>
 
     }
 
-    public struct DebuggerStatement : EsprimaAST {
+    public struct DebuggerStatement : JSSyntaxAST {
         public let type: NodeType
         public enum NodeType : String, Codable { case DebuggerStatement }
 
     }
 
-    public struct Directive : EsprimaAST {
+    public struct Directive : JSSyntaxAST {
         public let type: NodeType
         public enum NodeType : String, Codable { case Directive }
         public let expression: Expression
@@ -594,7 +579,7 @@ public enum JSSyntax {
 
     }
 
-    public struct DoWhileStatement : EsprimaAST {
+    public struct DoWhileStatement : JSSyntaxAST {
         public let type: NodeType
         public enum NodeType : String, Codable { case DoWhileStatement }
         public let body: Statement
@@ -602,27 +587,27 @@ public enum JSSyntax {
 
     }
 
-    public struct EmptyStatement : EsprimaAST {
+    public struct EmptyStatement : JSSyntaxAST {
         public let type: NodeType
         public enum NodeType : String, Codable { case EmptyStatement }
 
     }
 
-    public struct ExportAllDeclaration : EsprimaAST {
+    public struct ExportAllDeclaration : JSSyntaxAST {
         public let type: NodeType
         public enum NodeType : String, Codable { case ExportAllDeclaration }
         public let source: Literal
 
     }
 
-    public struct ExportDefaultDeclaration : EsprimaAST {
+    public struct ExportDefaultDeclaration : JSSyntaxAST {
         public let type: NodeType
         public enum NodeType : String, Codable { case ExportDefaultDeclaration }
         public let declaration: ExportableDefaultDeclaration
 
     }
 
-    public struct ExportNamedDeclaration : EsprimaAST {
+    public struct ExportNamedDeclaration : JSSyntaxAST {
         public let type: NodeType
         public enum NodeType : String, Codable { case ExportNamedDeclaration }
         public let declaration: Nullable<ExportableNamedDeclaration>
@@ -631,7 +616,7 @@ public enum JSSyntax {
 
     }
 
-    public struct ExportSpecifier : EsprimaAST {
+    public struct ExportSpecifier : JSSyntaxAST {
         public let type: NodeType
         public enum NodeType : String, Codable { case ExportSpecifier }
         public let exported: Identifier
@@ -639,14 +624,14 @@ public enum JSSyntax {
 
     }
 
-    public struct ExpressionStatement : EsprimaAST {
+    public struct ExpressionStatement : JSSyntaxAST {
         public let type: NodeType
         public enum NodeType : String, Codable { case ExpressionStatement }
         public let expression: Expression
 
     }
 
-    public struct ForInStatement : EsprimaAST {
+    public struct ForInStatement : JSSyntaxAST {
         public let type: NodeType
         public enum NodeType : String, Codable { case ForInStatement }
         public let left: Expression
@@ -656,7 +641,7 @@ public enum JSSyntax {
 
     }
 
-    public struct ForOfStatement : EsprimaAST {
+    public struct ForOfStatement : JSSyntaxAST {
         public let type: NodeType
         public enum NodeType : String, Codable { case ForOfStatement }
         public let left: Expression
@@ -665,7 +650,7 @@ public enum JSSyntax {
 
     }
 
-    public struct ForStatement : EsprimaAST {
+    public struct ForStatement : JSSyntaxAST {
         public let type: NodeType
         public enum NodeType : String, Codable { case ForStatement }
         public let `init`: Nullable<Expression>
@@ -675,7 +660,7 @@ public enum JSSyntax {
 
     }
 
-    public struct FunctionDeclaration : EsprimaAST {
+    public struct FunctionDeclaration : JSSyntaxAST {
         public let type: NodeType
         public enum NodeType : String, Codable { case FunctionDeclaration }
         public let id: Nullable<Identifier>
@@ -687,7 +672,7 @@ public enum JSSyntax {
 
     }
 
-    public struct FunctionExpression : EsprimaAST {
+    public struct FunctionExpression : JSSyntaxAST {
         public let type: NodeType
         public enum NodeType : String, Codable { case FunctionExpression }
         public let id: Nullable<Identifier>
@@ -699,14 +684,14 @@ public enum JSSyntax {
 
     }
 
-    public struct Identifier : EsprimaAST {
+    public struct Identifier : JSSyntaxAST {
         public let type: NodeType
         public enum NodeType : String, Codable { case Identifier }
         public let name: String
 
     }
 
-    public struct IfStatement : EsprimaAST {
+    public struct IfStatement : JSSyntaxAST {
         public let type: NodeType
         public enum NodeType : String, Codable { case IfStatement }
         public let test: Expression
@@ -715,13 +700,13 @@ public enum JSSyntax {
 
     }
 
-    public struct Import : EsprimaAST {
+    public struct Import : JSSyntaxAST {
         public let type: NodeType
         public enum NodeType : String, Codable { case Import }
 
     }
 
-    public struct ImportDeclaration : EsprimaAST {
+    public struct ImportDeclaration : JSSyntaxAST {
         public let type: NodeType
         public enum NodeType : String, Codable { case ImportDeclaration }
         public let specifiers: [ImportDeclarationSpecifier]
@@ -729,21 +714,21 @@ public enum JSSyntax {
 
     }
 
-    public struct ImportDefaultSpecifier : EsprimaAST {
+    public struct ImportDefaultSpecifier : JSSyntaxAST {
         public let type: NodeType
         public enum NodeType : String, Codable { case ImportDefaultSpecifier }
         public let local: Identifier
 
     }
 
-    public struct ImportNamespaceSpecifier : EsprimaAST {
+    public struct ImportNamespaceSpecifier : JSSyntaxAST {
         public let type: NodeType
         public enum NodeType : String, Codable { case ImportNamespaceSpecifier }
         public let local: Identifier
 
     }
 
-    public struct ImportSpecifier : EsprimaAST {
+    public struct ImportSpecifier : JSSyntaxAST {
         public let type: NodeType
         public enum NodeType : String, Codable { case ImportSpecifier }
         public let local: Identifier
@@ -751,7 +736,7 @@ public enum JSSyntax {
 
     }
 
-    public struct LabeledStatement : EsprimaAST {
+    public struct LabeledStatement : JSSyntaxAST {
         public let type: NodeType
         public enum NodeType : String, Codable { case LabeledStatement }
         public let label: Identifier
@@ -759,7 +744,7 @@ public enum JSSyntax {
 
     }
 
-    public struct Literal : EsprimaAST {
+    public struct Literal : JSSyntaxAST {
         public let type: NodeType
         public enum NodeType : String, Codable { case Literal }
         public let value: OneOf4<Bool, Double, String, ExplicitNull>
@@ -767,7 +752,7 @@ public enum JSSyntax {
 
     }
 
-    public struct MetaProperty : EsprimaAST {
+    public struct MetaProperty : JSSyntaxAST {
         public let type: NodeType
         public enum NodeType : String, Codable { case MetaProperty }
         public let meta: Identifier
@@ -775,7 +760,7 @@ public enum JSSyntax {
 
     }
 
-    public struct MethodDefinition : EsprimaAST {
+    public struct MethodDefinition : JSSyntaxAST {
         public let type: NodeType
         public enum NodeType : String, Codable { case MethodDefinition }
         public let key: Nullable<Expression>
@@ -786,7 +771,7 @@ public enum JSSyntax {
 
     }
 
-    public struct Module : EsprimaAST {
+    public struct Module : JSSyntaxAST {
         public let type: NodeType
         public enum NodeType : String, Codable { case Module }
         public let body: [StatementListItem]
@@ -794,7 +779,7 @@ public enum JSSyntax {
 
     }
 
-    public struct NewExpression : EsprimaAST {
+    public struct NewExpression : JSSyntaxAST {
         public let type: NodeType
         public enum NodeType : String, Codable { case NewExpression }
         public let callee: Expression
@@ -802,21 +787,21 @@ public enum JSSyntax {
 
     }
 
-    public struct ObjectExpression : EsprimaAST {
+    public struct ObjectExpression : JSSyntaxAST {
         public let type: NodeType
         public enum NodeType : String, Codable { case ObjectExpression }
         public let properties: [ObjectExpressionProperty]
 
     }
 
-    public struct ObjectPattern : EsprimaAST {
+    public struct ObjectPattern : JSSyntaxAST {
         public let type: NodeType
         public enum NodeType : String, Codable { case ObjectPattern }
         public let properties: [ObjectPatternProperty]
 
     }
 
-    public struct Property : EsprimaAST {
+    public struct Property : JSSyntaxAST {
         public let type: NodeType
         public enum NodeType : String, Codable { case Property }
         public let key: PropertyKey
@@ -828,7 +813,7 @@ public enum JSSyntax {
 
     }
 
-    public struct RegexLiteral : EsprimaAST {
+    public struct RegexLiteral : JSSyntaxAST {
         public let type: NodeType
         public enum NodeType : String, Codable { case RegexLiteral }
         public let value: Bric; // RegExp
@@ -837,21 +822,21 @@ public enum JSSyntax {
 
     }
 
-    public struct RestElement : EsprimaAST {
+    public struct RestElement : JSSyntaxAST {
         public let type: NodeType
         public enum NodeType : String, Codable { case RestElement }
         public let argument: OneOf2<BindingIdentifier, BindingPattern>
 
     }
 
-    public struct ReturnStatement : EsprimaAST {
+    public struct ReturnStatement : JSSyntaxAST {
         public let type: NodeType
         public enum NodeType : String, Codable { case ReturnStatement }
         public let argument: Nullable<Expression>
 
     }
 
-    public struct Script : EsprimaAST {
+    public struct Script : JSSyntaxAST {
         public let type: NodeType
         // this was "Script", but the parser seems to want to return "Program"
         public enum NodeType : String, Codable { case Program }
@@ -860,21 +845,21 @@ public enum JSSyntax {
 
     }
 
-    public struct SequenceExpression : EsprimaAST {
+    public struct SequenceExpression : JSSyntaxAST {
         public let type: NodeType
         public enum NodeType : String, Codable { case SequenceExpression }
         public let expressions: [Expression]
 
     }
 
-    public struct SpreadElement : EsprimaAST {
+    public struct SpreadElement : JSSyntaxAST {
         public let type: NodeType
         public enum NodeType : String, Codable { case SpreadElement }
         public let argument: Expression
 
     }
 
-    public struct StaticMemberExpression : EsprimaAST {
+    public struct StaticMemberExpression : JSSyntaxAST {
         public let type: NodeType
         public enum NodeType : String, Codable { case StaticMemberExpression }
         public let computed: Bool
@@ -883,13 +868,13 @@ public enum JSSyntax {
 
     }
 
-    public struct Super : EsprimaAST {
+    public struct Super : JSSyntaxAST {
         public let type: NodeType
         public enum NodeType : String, Codable { case Super }
 
     }
 
-    public struct SwitchCase : EsprimaAST {
+    public struct SwitchCase : JSSyntaxAST {
         public let type: NodeType
         public enum NodeType : String, Codable { case SwitchCase }
         public let test: Nullable<Expression>
@@ -897,7 +882,7 @@ public enum JSSyntax {
 
     }
 
-    public struct SwitchStatement : EsprimaAST {
+    public struct SwitchStatement : JSSyntaxAST {
         public let type: NodeType
         public enum NodeType : String, Codable { case SwitchStatement }
         public let discriminant: Expression
@@ -905,7 +890,7 @@ public enum JSSyntax {
 
     }
 
-    public struct TaggedTemplateExpression : EsprimaAST {
+    public struct TaggedTemplateExpression : JSSyntaxAST {
         public let type: NodeType
         public enum NodeType : String, Codable { case TaggedTemplateExpression }
         public let tag: Expression
@@ -918,7 +903,7 @@ public enum JSSyntax {
         public let raw: String
     }
 
-    public struct TemplateElement : EsprimaAST {
+    public struct TemplateElement : JSSyntaxAST {
         public let type: NodeType
         public enum NodeType : String, Codable { case TemplateElement }
         public let value: TemplateElementValue
@@ -926,7 +911,7 @@ public enum JSSyntax {
 
     }
 
-    public struct TemplateLiteral : EsprimaAST {
+    public struct TemplateLiteral : JSSyntaxAST {
         public let type: NodeType
         public enum NodeType : String, Codable { case TemplateLiteral }
         public let quasis: [TemplateElement]
@@ -934,20 +919,20 @@ public enum JSSyntax {
 
     }
 
-    public struct ThisExpression : EsprimaAST {
+    public struct ThisExpression : JSSyntaxAST {
         public let type: NodeType
         public enum NodeType : String, Codable { case ThisExpression }
 
     }
 
-    public struct ThrowStatement : EsprimaAST {
+    public struct ThrowStatement : JSSyntaxAST {
         public let type: NodeType
         public enum NodeType : String, Codable { case ThrowStatement }
         public let argument: Expression
 
     }
 
-    public struct TryStatement : EsprimaAST {
+    public struct TryStatement : JSSyntaxAST {
         public let type: NodeType
         public enum NodeType : String, Codable { case TryStatement }
         public let block: BlockStatement
@@ -956,7 +941,7 @@ public enum JSSyntax {
 
     }
 
-    public struct UnaryExpression : EsprimaAST {
+    public struct UnaryExpression : JSSyntaxAST {
         public let type: NodeType
         public enum NodeType : String, Codable { case UnaryExpression }
         public let `operator`: String
@@ -965,7 +950,7 @@ public enum JSSyntax {
 
     }
 
-    public struct UpdateExpression : EsprimaAST {
+    public struct UpdateExpression : JSSyntaxAST {
         public let type: NodeType
         public enum NodeType : String, Codable { case UpdateExpression }
         public let `operator`: String
@@ -974,7 +959,7 @@ public enum JSSyntax {
 
     }
 
-    public struct VariableDeclaration : EsprimaAST {
+    public struct VariableDeclaration : JSSyntaxAST {
         public let type: NodeType
         public enum NodeType : String, Codable { case VariableDeclaration }
         public let declarations: [VariableDeclarator]
@@ -982,7 +967,7 @@ public enum JSSyntax {
 
     }
 
-    public struct VariableDeclarator : EsprimaAST {
+    public struct VariableDeclarator : JSSyntaxAST {
         public let type: NodeType
         public enum NodeType : String, Codable { case VariableDeclarator }
         public let id: OneOf2<BindingIdentifier, BindingPattern>
@@ -990,7 +975,7 @@ public enum JSSyntax {
 
     }
 
-    public struct WhileStatement : EsprimaAST {
+    public struct WhileStatement : JSSyntaxAST {
         public let type: NodeType
         public enum NodeType : String, Codable { case WhileStatement }
         public let test: Expression
@@ -998,7 +983,7 @@ public enum JSSyntax {
 
     }
 
-    public struct WithStatement : EsprimaAST {
+    public struct WithStatement : JSSyntaxAST {
         public let type: NodeType
         public enum NodeType : String, Codable { case WithStatement }
         public let object: Expression
@@ -1006,7 +991,7 @@ public enum JSSyntax {
 
     }
 
-    public struct YieldExpression : EsprimaAST {
+    public struct YieldExpression : JSSyntaxAST {
         public let type: NodeType
         public enum NodeType : String, Codable { case YieldExpression }
         public let argument: Nullable<Expression>

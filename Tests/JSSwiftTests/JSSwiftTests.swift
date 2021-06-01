@@ -34,58 +34,23 @@ private final class JXDebugValue : JXValue {
     }
 }
 
-/// Options for parsing
-public struct ParserOptions : Encodable {
-    /// Whether the parser should include the source location
-    ///
-    /// - SeeAlso: JSToken.loc
-    public var loc: Bool?
-
-    /// Whether the parser should include the range
-    ///
-    /// - SeeAlso: JSToken.range
-
-    public var range: Bool?
-
-    /// Whether the parser should include comments AST nodes
-    public var comment: Bool?
-
-    public init(loc: Bool? = nil, range: Bool? = nil, comment: Bool? = nil) {
-        self.loc = loc
-        self.range = range
-        self.comment = comment
-    }
-}
-
 final class JSSwiftTests: XCTestCase {
     /// Ensure that contexts are destroued as expected
     func testJSSwiftContext() throws {
         XCTAssertEqual(0, JXDebugContext.debugContextCount)
-
-        defer {
-            XCTAssertEqual(0, JXDebugContext.debugContextCount, "context did not deinit")
-        }
+        defer { XCTAssertEqual(0, JXDebugContext.debugContextCount, "context did not deinit") }
 
         do {
             let ctx = JXDebugContext()
             XCTAssertEqual(1, JXDebugContext.debugContextCount)
 
-            let esprima = try ctx.installJSSwift()
-            //debugPrint("installed", esprima)
+            let parser = try JavaScriptParser(ctx: ctx)
 
+            let topts = JavaScriptParser.TokenizeOptions(loc: true)
+            let popts = JavaScriptParser.ParseOptions(loc: true)
 
             func tokenize(js javaScript: String, tokenTypes: [JSTokenType]? = nil, columns: [Int]? = nil, line: UInt = #line) throws {
-                let opts = ParserOptions(loc: true)
-
-                XCTAssertTrue(esprima.isObject)
-                let tokenize = esprima["tokenize"]
-                XCTAssertTrue(tokenize.isFunction)
-
-                let tokenized = try ctx.trying { try tokenize.call(withArguments: [ctx.string(javaScript), ctx.encode(opts)]) }
-
-                //print("received", try! tokenized.toJSON(indent: 2))
-                let tokenList = try tokenized.toDecodable(ofType: [JSToken].self)
-                //print("tokens", tokens)
+                let tokenList = try parser.tokenize(javaScript: javaScript, options: topts)
 
                 if let tokenTypes = tokenTypes {
                     XCTAssertEqual(tokenTypes, tokenList.map(\.type), line: line)
@@ -95,6 +60,8 @@ final class JSSwiftTests: XCTestCase {
                     XCTAssertEqual(columns, tokenList.map(\.loc?.start.column), line: line)
                 }
             }
+
+            // tokenization tests
 
             try tokenize(js: "1.2", tokenTypes: [.NumericLiteral])
             try tokenize(js: "'WAT'", tokenTypes: [.StringLiteral])
@@ -106,32 +73,44 @@ final class JSSwiftTests: XCTestCase {
             try tokenize(js: "1+[]", tokenTypes: [.NumericLiteral, .Punctuator, .Punctuator, .Punctuator], columns: [0, 1, 2, 3])
 
             
+            /// AST examples
 
-            func parse(js javaScript: String, line: UInt = #line) throws -> JSSyntax.Script {
-                XCTAssertTrue(esprima.isObject)
-                let parse = esprima["parse"]
-                XCTAssertTrue(parse.isFunction)
-
-                let parsed = try ctx.trying { parse.call(withArguments: [ctx.string(javaScript)]) }
-
-                print("parsed", try! parsed.toJSON(indent: 2))
-                let script = try parsed.toDecodable(ofType: JSSyntax.Script.self)
-                print("script", script)
-                return script
-            }
-
-            XCTAssertEqual(try parse(js: "1.2 + 'ABC'"), JSSyntax.Script(type: .Program, body: [
+            XCTAssertEqual(try parser.parse(javaScript: "1.2 + 'ABC'", options: popts), JSSyntax.Script(type: .Program, body: [
                 JSSyntax.StatementListItem(JSSyntax.Statement(oneOf(JSSyntax.ExpressionStatement(type: .ExpressionStatement, expression: JSSyntax.Expression(oneOf(JSSyntax.BinaryExpression(type: .BinaryExpression, operator: "+", left: oneOf(oneOf(JSSyntax.Literal(type: .Literal, value: oneOf(1.2), raw: "1.2"))), right: oneOf(oneOf(JSSyntax.Literal(type: .Literal, value: oneOf("ABC"), raw: "'ABC'"))))))))))
             ], sourceType: "script"))
 
 
-            XCTAssertEqual(try parse(js: "'XYZ'+1.2"), JSSyntax.Script(type: .Program, body: [
+            XCTAssertEqual(try parser.parse(javaScript: "'XYZ'+1.2", options: popts), JSSyntax.Script(type: .Program, body: [
                 JSSyntax.StatementListItem(JSSyntax.Statement(oneOf(JSSyntax.ExpressionStatement(type: .ExpressionStatement, expression: JSSyntax.Expression(oneOf(JSSyntax.BinaryExpression(type: .BinaryExpression, operator: "+", left: oneOf(oneOf(JSSyntax.Literal(type: .Literal, value: oneOf("XYZ"), raw: "'XYZ'"))), right: oneOf(oneOf(JSSyntax.Literal(type: .Literal, value: oneOf(1.2), raw: "1.2"))))))))))
             ], sourceType: "script"))
 
+
+            /// Checks that the given JavaScript can be parsed
+            func parse(js javaScript: String, tokenTypes: [JSTokenType]? = nil, tolerant: Bool = false, columns: [Int]? = nil, line: UInt = #line) throws {
+                var opts = popts
+                opts.tolerant = tolerant
+                let _ = try parser.parse(javaScript: javaScript, options: opts)
+            }
+
+            try parse(js: "function doSomething() { return 1 + 'abx'; }")
+//            try parse(js: "{}")
+//            try parse(js: "{{}}")
+//            try parse(js: "function doSomething() { abc(); }")
+//            try parse(js: "function doSomething() { { } }")
+//            try parse(js: "function doSomething() { for (var i = 0; i < 10; i++) { } }")
+
+//            guard let url = JXContext.SwiftJSResourceURL else {
+//                return XCTFail("no resource URL")
+//            }
+//
+//            let scriptString = try String(contentsOf: url)
+//            measure {
+//                do {
+//                    try parser.parse(javaScript: scriptString)
+//                } catch {
+//                    XCTFail("error measuring performance: \(error)")
+//                }
+//            }
         }
     }
-
 }
-
-
