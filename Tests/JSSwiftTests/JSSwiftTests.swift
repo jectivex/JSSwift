@@ -113,8 +113,7 @@ final class JSSwiftTests: XCTestCase {
             try parse(js: "1.01")
             try parse(js: "function doSomething() { return 1 + 'abx'; }")
             try parse(js: "[]")
-
-//            try parse(js: "{}", debug: true)
+            try parse(js: "{}", debug: true)
 
 //            try parse(js: "function allTypes() { return { a: 1.2, 'b': null, \"c\": [true, false] }; }", tolerant: true)
 //            try parse(js: "{[[0]]}")
@@ -129,7 +128,7 @@ final class JSSwiftTests: XCTestCase {
             }
 
             let scriptString = try String(contentsOf: url)
-//            let _ = try parser.parse(module: scriptString) // make sure we can parse the script once
+//            let _ = try parser.parse(script: scriptString) // make sure we can parse the script once
 //            measure { // then profile the script parsing
 //                do {
 //                    let _ = try parser.parse(module: scriptString)

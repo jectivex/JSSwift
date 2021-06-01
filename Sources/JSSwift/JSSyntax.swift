@@ -1161,15 +1161,15 @@ extension JSSyntax {
     public typealias ObjectPatternProperty = OneOf<Property>
         .Or<RestElement>
 
-    public typealias Statement = OneOf<OneOf<AsyncFunctionDeclaration>
+    public typealias Statement = OneOf<OneOf<BlockStatement>
             .Or<BreakStatement>
             .Or<ContinueStatement>
             .Or<DebuggerStatement>
             .Or<DoWhileStatement>
             .Or<EmptyStatement>
+            .Or<ForStatement>
             .Or<ExpressionStatement>
             .Or<Directive>
-            .Or<ForStatement>
             .Or<ForInStatement>>
         .Or<OneOf<ForOfStatement>
             .Or<FunctionDeclaration>
