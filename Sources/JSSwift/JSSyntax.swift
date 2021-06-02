@@ -18,6 +18,8 @@ public enum JSSyntax {
         public enum ProgramNodeType : String, Codable { case Program }
         public var body: [StatementListItem]
         public var sourceType: String
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
@@ -32,6 +34,8 @@ public enum JSSyntax {
         public enum ProgramNodeType : String, Codable { case Program }
         public var body: [ModuleItem]
         public var sourceType: String
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
     }
 
 
@@ -45,6 +49,8 @@ public enum JSSyntax {
         public var type: ArrayExpressionNodeType
         public enum ArrayExpressionNodeType : String, Codable { case ArrayExpression }
         public var elements: Array<ArrayExpressionElement>
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
     }
 
     /// https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html#array-pattern
@@ -57,11 +63,13 @@ public enum JSSyntax {
         public var type: ArrayPatternNodeType
         public enum ArrayPatternNodeType : String, Codable { case ArrayPattern }
         public var elements: [ArrayPatternElement]
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct ArrowFunctionExpression : JSSyntaxAST {
-        public init(type: ArrowFunctionExpressionNodeType = .ArrowFunctionExpression, id: Nullable<Identifier>, params: [FunctionParameter], body: OneOf<BlockStatement>.Or<Expression>, generator: Bool, expression: Bool, async: Bool) {
+        public init(type: ArrowFunctionExpressionNodeType = .ArrowFunctionExpression, id: Optional<Identifier>, params: [FunctionParameter], body: OneOf<BlockStatement>.Or<Expression>, generator: Bool, expression: Bool, async: Bool) {
             self.type = type
             self.id = id
             self.params = params
@@ -73,12 +81,14 @@ public enum JSSyntax {
 
         public var type: ArrowFunctionExpressionNodeType
         public enum ArrowFunctionExpressionNodeType : String, Codable { case ArrowFunctionExpression }
-        public var id: Nullable<Identifier>
+        public var id: Optional<Identifier>
         public var params: [FunctionParameter]
         public var body: OneOf<BlockStatement>.Or<Expression>
         public var generator: Bool
         public var expression: Bool
         public var async: Bool
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
@@ -95,6 +105,8 @@ public enum JSSyntax {
         public var `operator`: String
         public var left: Expression
         public var right: Expression
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
@@ -109,11 +121,13 @@ public enum JSSyntax {
         public enum AssignmentPatternNodeType : String, Codable { case AssignmentPattern }
         public var left: OneOf<BindingIdentifier>.Or<BindingPattern>
         public var right: Expression
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct AsyncArrowFunctionExpression : JSSyntaxAST {
-        public init(type: AsyncArrowFunctionExpressionNodeType = .AsyncArrowFunctionExpression, id: Nullable<Identifier>, params: [FunctionParameter], body: OneOf<BlockStatement>.Or<Expression>, generator: Bool, expression: Bool, async: Bool) {
+        public init(type: AsyncArrowFunctionExpressionNodeType = .AsyncArrowFunctionExpression, id: Optional<Identifier>, params: [FunctionParameter], body: OneOf<BlockStatement>.Or<Expression>, generator: Bool, expression: Bool, async: Bool) {
             self.type = type
             self.id = id
             self.params = params
@@ -125,17 +139,19 @@ public enum JSSyntax {
 
         public var type: AsyncArrowFunctionExpressionNodeType
         public enum AsyncArrowFunctionExpressionNodeType : String, Codable { case AsyncArrowFunctionExpression }
-        public var id: Nullable<Identifier>
+        public var id: Optional<Identifier>
         public var params: [FunctionParameter]
         public var body: OneOf<BlockStatement>.Or<Expression>
         public var generator: Bool
         public var expression: Bool
         public var async: Bool
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct AsyncFunctionDeclaration : JSSyntaxAST {
-        public init(type: AsyncFunctionDeclarationNodeType = .AsyncFunctionDeclaration, id: Nullable<Identifier>, params: [FunctionParameter], body: BlockStatement, generator: Bool, expression: Bool, async: Bool) {
+        public init(type: AsyncFunctionDeclarationNodeType = .AsyncFunctionDeclaration, id: Optional<Identifier>, params: [FunctionParameter], body: BlockStatement, generator: Bool, expression: Bool, async: Bool) {
             self.type = type
             self.id = id
             self.params = params
@@ -147,17 +163,19 @@ public enum JSSyntax {
 
         public var type: AsyncFunctionDeclarationNodeType
         public enum AsyncFunctionDeclarationNodeType : String, Codable { case AsyncFunctionDeclaration }
-        public var id: Nullable<Identifier>
+        public var id: Optional<Identifier>
         public var params: [FunctionParameter]
         public var body: BlockStatement
         public var generator: Bool
         public var expression: Bool
         public var async: Bool
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct AsyncFunctionExpression : JSSyntaxAST {
-        public init(type: AsyncFunctionExpressionNodeType = .AsyncFunctionExpression, id: Nullable<Identifier>, params: [FunctionParameter], body: BlockStatement, generator: Bool, expression: Bool, async: Bool) {
+        public init(type: AsyncFunctionExpressionNodeType = .AsyncFunctionExpression, id: Optional<Identifier>, params: [FunctionParameter], body: BlockStatement, generator: Bool, expression: Bool, async: Bool) {
             self.type = type
             self.id = id
             self.params = params
@@ -169,12 +187,14 @@ public enum JSSyntax {
 
         public var type: AsyncFunctionExpressionNodeType
         public enum AsyncFunctionExpressionNodeType : String, Codable { case AsyncFunctionExpression }
-        public var id: Nullable<Identifier>
+        public var id: Optional<Identifier>
         public var params: [FunctionParameter]
         public var body: BlockStatement
         public var generator: Bool
         public var expression: Bool
         public var async: Bool
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
@@ -187,6 +207,8 @@ public enum JSSyntax {
         public var type: AwaitExpressionNodeType
         public enum AwaitExpressionNodeType : String, Codable { case AwaitExpression }
         public var argument: Expression
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
@@ -203,30 +225,54 @@ public enum JSSyntax {
         public var `operator`: String
         public var left: Expression
         public var right: Expression
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
+    }
+
+    /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
+    public struct LogicalExpression : JSSyntaxAST {
+        public init(type: LogicalExpressionNodeType = .LogicalExpression, `operator`: String, left: Expression, right: Expression) {
+            self.type = type
+            self.`operator` = `operator`
+            self.left = left
+            self.right = right
+        }
+
+        public var type: LogicalExpressionNodeType
+        public enum LogicalExpressionNodeType : String, Codable { case LogicalExpression }
+        public var `operator`: String
+        public var left: Expression
+        public var right: Expression
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct BlockStatement : JSSyntaxAST {
-        public init(type: BlockStatementNodeType = .BlockStatement, body: [Statement]) {
+        public init(type: BlockStatementNodeType = .BlockStatement, body: [StatementListItem]) {
             self.type = type
             self.body = body
         }
 
         public var type: BlockStatementNodeType
         public enum BlockStatementNodeType : String, Codable { case BlockStatement }
-        public var body: [Statement]
+        public var body: [StatementListItem]
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct BreakStatement : JSSyntaxAST {
-        public init(type: BreakStatementNodeType = .BreakStatement, label: Nullable<Identifier>) {
+        public init(type: BreakStatementNodeType = .BreakStatement, label: Optional<Identifier>) {
             self.type = type
             self.label = label
         }
 
         public var type: BreakStatementNodeType
         public enum BreakStatementNodeType : String, Codable { case BreakStatement }
-        public var label: Nullable<Identifier>
+        public var label: Optional<Identifier>
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
@@ -241,6 +287,8 @@ public enum JSSyntax {
         public enum CallExpressionNodeType : String, Codable { case CallExpression }
         public var callee: OneOf<Expression>.Or<Import>
         public var arguments: [ArgumentListElement]
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
@@ -255,23 +303,41 @@ public enum JSSyntax {
         public enum CatchClauseNodeType : String, Codable { case CatchClause }
         public var param: OneOf<BindingIdentifier>.Or<BindingPattern>
         public var body: BlockStatement
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
+    }
+
+    /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
+    public struct ChainExpression : JSSyntaxAST {
+        public init(type: ChainExpressionNodeType = .ChainExpression, expression: ChainElement) {
+            self.type = type
+            self.expression = expression
+        }
+
+        public var type: ChainExpressionNodeType
+        public enum ChainExpressionNodeType : String, Codable { case ChainExpression }
+        public var expression: ChainElement
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct ClassBody : JSSyntaxAST {
-        public init(type: ClassBodyNodeType = .ClassBody, body: [Property]) {
+        public init(type: ClassBodyNodeType = .ClassBody, body: [MethodDefinition]) {
             self.type = type
             self.body = body
         }
 
         public var type: ClassBodyNodeType
         public enum ClassBodyNodeType : String, Codable { case ClassBody }
-        public var body: [Property]
+        public var body: [MethodDefinition]
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct ClassDeclaration : JSSyntaxAST {
-        public init(type: ClassDeclarationNodeType = .ClassDeclaration, id: Nullable<Identifier>, superClass: Nullable<Identifier>, body: ClassBody) {
+        public init(type: ClassDeclarationNodeType = .ClassDeclaration, id: Optional<Identifier>, superClass: Optional<Identifier>, body: ClassBody) {
             self.type = type
             self.id = id
             self.superClass = superClass
@@ -280,14 +346,16 @@ public enum JSSyntax {
 
         public var type: ClassDeclarationNodeType
         public enum ClassDeclarationNodeType : String, Codable { case ClassDeclaration }
-        public var id: Nullable<Identifier>
-        public var superClass: Nullable<Identifier>
+        public var id: Optional<Identifier>
+        public var superClass: Optional<Identifier>
         public var body: ClassBody
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct ClassExpression : JSSyntaxAST {
-        public init(type: ClassExpressionNodeType = .ClassExpression, id: Nullable<Identifier>, superClass: Nullable<Identifier>, body: ClassBody) {
+        public init(type: ClassExpressionNodeType = .ClassExpression, id: Optional<Identifier>, superClass: Optional<Identifier>, body: ClassBody) {
             self.type = type
             self.id = id
             self.superClass = superClass
@@ -296,9 +364,11 @@ public enum JSSyntax {
 
         public var type: ClassExpressionNodeType
         public enum ClassExpressionNodeType : String, Codable { case ClassExpression }
-        public var id: Nullable<Identifier>
-        public var superClass: Nullable<Identifier>
+        public var id: Optional<Identifier>
+        public var superClass: Optional<Identifier>
         public var body: ClassBody
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
@@ -315,6 +385,8 @@ public enum JSSyntax {
         public var computed: Bool
         public var object: Expression
         public var property: Expression
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
@@ -331,18 +403,22 @@ public enum JSSyntax {
         public var test: Expression
         public var consequent: Expression
         public var alternate: Expression
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct ContinueStatement : JSSyntaxAST {
-        public init(type: ContinueStatementNodeType = .ContinueStatement, label: Nullable<Identifier>) {
+        public init(type: ContinueStatementNodeType = .ContinueStatement, label: Optional<Identifier>) {
             self.type = type
             self.label = label
         }
 
         public var type: ContinueStatementNodeType
         public enum ContinueStatementNodeType : String, Codable { case ContinueStatement }
-        public var label: Nullable<Identifier>
+        public var label: Optional<Identifier>
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
@@ -353,6 +429,8 @@ public enum JSSyntax {
 
         public var type: DebuggerStatementNodeType
         public enum DebuggerStatementNodeType : String, Codable { case DebuggerStatement }
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
@@ -367,6 +445,8 @@ public enum JSSyntax {
         public enum DirectiveNodeType : String, Codable { case Directive }
         public var expression: Expression
         public var directive: String
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
@@ -381,6 +461,8 @@ public enum JSSyntax {
         public enum DoWhileStatementNodeType : String, Codable { case DoWhileStatement }
         public var body: Statement
         public var test: Expression
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
@@ -391,6 +473,8 @@ public enum JSSyntax {
 
         public var type: EmptyStatementNodeType
         public enum EmptyStatementNodeType : String, Codable { case EmptyStatement }
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
@@ -403,6 +487,8 @@ public enum JSSyntax {
         public var type: ExportAllDeclarationNodeType
         public enum ExportAllDeclarationNodeType : String, Codable { case ExportAllDeclaration }
         public var source: Literal
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
@@ -415,11 +501,13 @@ public enum JSSyntax {
         public var type: ExportDefaultDeclarationNodeType
         public enum ExportDefaultDeclarationNodeType : String, Codable { case ExportDefaultDeclaration }
         public var declaration: ExportableDefaultDeclaration
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct ExportNamedDeclaration : JSSyntaxAST {
-        public init(type: ExportNamedDeclarationNodeType = .ExportNamedDeclaration, declaration: Nullable<ExportableNamedDeclaration>, specifiers: [ExportSpecifier], source: Nullable<Literal>) {
+        public init(type: ExportNamedDeclarationNodeType = .ExportNamedDeclaration, declaration: Optional<ExportableNamedDeclaration>, specifiers: [ExportSpecifier], source: Optional<Literal>) {
             self.type = type
             self.declaration = declaration
             self.specifiers = specifiers
@@ -428,9 +516,11 @@ public enum JSSyntax {
 
         public var type: ExportNamedDeclarationNodeType
         public enum ExportNamedDeclarationNodeType : String, Codable { case ExportNamedDeclaration }
-        public var declaration: Nullable<ExportableNamedDeclaration>
+        public var declaration: Optional<ExportableNamedDeclaration>
         public var specifiers: [ExportSpecifier]
-        public var source: Nullable<Literal>
+        public var source: Optional<Literal>
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
@@ -445,23 +535,29 @@ public enum JSSyntax {
         public enum ExportSpecifierNodeType : String, Codable { case ExportSpecifier }
         public var exported: Identifier
         public var local: Identifier
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct ExpressionStatement : JSSyntaxAST {
-        public init(type: ExpressionStatementNodeType = .ExpressionStatement, expression: Expression) {
+        public init(type: ExpressionStatementNodeType = .ExpressionStatement, expression: Expression, directive: String?) {
             self.type = type
             self.expression = expression
+            self.directive = directive
         }
 
         public var type: ExpressionStatementNodeType
         public enum ExpressionStatementNodeType : String, Codable { case ExpressionStatement }
         public var expression: Expression
+        public var directive: String?
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct ForInStatement : JSSyntaxAST {
-        public init(type: ForInStatementNodeType = .ForInStatement, left: Expression, right: Expression, body: Statement, each: Bool) {
+        public init(type: ForInStatementNodeType = .ForInStatement, left: OneOf<VariableDeclaration>.Or<Expression>, right: Expression, body: Statement, each: Bool) {
             self.type = type
             self.left = left
             self.right = right
@@ -471,15 +567,17 @@ public enum JSSyntax {
 
         public var type: ForInStatementNodeType
         public enum ForInStatementNodeType : String, Codable { case ForInStatement }
-        public var left: Expression
+        public var left: OneOf<VariableDeclaration>.Or<Expression>
         public var right: Expression
         public var body: Statement
         public var each: Bool
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct ForOfStatement : JSSyntaxAST {
-        public init(type: ForOfStatementNodeType = .ForOfStatement, left: Expression, right: Expression, body: Statement) {
+        public init(type: ForOfStatementNodeType = .ForOfStatement, left: OneOf<VariableDeclaration>.Or<Expression>, right: Expression, body: Statement) {
             self.type = type
             self.left = left
             self.right = right
@@ -488,14 +586,16 @@ public enum JSSyntax {
 
         public var type: ForOfStatementNodeType
         public enum ForOfStatementNodeType : String, Codable { case ForOfStatement }
-        public var left: Expression
+        public var left: OneOf<VariableDeclaration>.Or<Expression>
         public var right: Expression
         public var body: Statement
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct ForStatement : JSSyntaxAST {
-        public init(type: ForStatementNodeType = .ForStatement, `init`: Nullable<Expression>, test: Nullable<Expression>, update: Nullable<Expression>, body: Statement) {
+        public init(type: ForStatementNodeType = .ForStatement, `init`: Optional<OneOf<VariableDeclaration>.Or<Expression>>, test: Optional<Expression>, update: Optional<Expression>, body: Statement) {
             self.type = type
             self.`init` = `init`
             self.test = test
@@ -505,15 +605,17 @@ public enum JSSyntax {
 
         public var type: ForStatementNodeType
         public enum ForStatementNodeType : String, Codable { case ForStatement }
-        public var `init`: Nullable<Expression>
-        public var test: Nullable<Expression>
-        public var update: Nullable<Expression>
+        public var `init`: Optional<OneOf<VariableDeclaration>.Or<Expression>>
+        public var test: Optional<Expression>
+        public var update: Optional<Expression>
         public var body: Statement
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct FunctionDeclaration : JSSyntaxAST {
-        public init(type: FunctionDeclarationNodeType = .FunctionDeclaration, id: Nullable<Identifier>, params: [FunctionParameter], body: BlockStatement, generator: Bool, expression: Bool, async: Bool) {
+        public init(type: FunctionDeclarationNodeType = .FunctionDeclaration, id: Optional<Identifier>, params: [FunctionParameter], body: BlockStatement, generator: Bool, expression: Bool, async: Bool) {
             self.type = type
             self.id = id
             self.params = params
@@ -525,17 +627,19 @@ public enum JSSyntax {
 
         public var type: FunctionDeclarationNodeType
         public enum FunctionDeclarationNodeType : String, Codable { case FunctionDeclaration }
-        public var id: Nullable<Identifier>
+        public var id: Optional<Identifier>
         public var params: [FunctionParameter]
         public var body: BlockStatement
         public var generator: Bool
         public var expression: Bool
         public var async: Bool
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct FunctionExpression : JSSyntaxAST {
-        public init(type: FunctionExpressionNodeType = .FunctionExpression, id: Nullable<Identifier>, params: [FunctionParameter], body: BlockStatement, generator: Bool, expression: Bool, async: Bool) {
+        public init(type: FunctionExpressionNodeType = .FunctionExpression, id: Optional<Identifier>, params: [FunctionParameter], body: BlockStatement, generator: Bool, expression: Bool, async: Bool) {
             self.type = type
             self.id = id
             self.params = params
@@ -547,12 +651,14 @@ public enum JSSyntax {
 
         public var type: FunctionExpressionNodeType
         public enum FunctionExpressionNodeType : String, Codable { case FunctionExpression }
-        public var id: Nullable<Identifier>
+        public var id: Optional<Identifier>
         public var params: [FunctionParameter]
         public var body: BlockStatement
         public var generator: Bool
         public var expression: Bool
         public var async: Bool
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
@@ -565,11 +671,13 @@ public enum JSSyntax {
         public var type: IdentifierNodeType
         public enum IdentifierNodeType : String, Codable { case Identifier }
         public var name: String
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct IfStatement : JSSyntaxAST {
-        public init(type: IfStatementNodeType = .IfStatement, test: Expression, consequent: Statement, alternate: Nullable<Statement>) {
+        public init(type: IfStatementNodeType = .IfStatement, test: Expression, consequent: Statement, alternate: Optional<Statement>) {
             self.type = type
             self.test = test
             self.consequent = consequent
@@ -580,7 +688,9 @@ public enum JSSyntax {
         public enum IfStatementNodeType : String, Codable { case IfStatement }
         public var test: Expression
         public var consequent: Statement
-        public var alternate: Nullable<Statement>
+        public var alternate: Optional<Statement>
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
@@ -591,6 +701,8 @@ public enum JSSyntax {
 
         public var type: ImportNodeType
         public enum ImportNodeType : String, Codable { case Import }
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
@@ -605,6 +717,8 @@ public enum JSSyntax {
         public enum ImportDeclarationNodeType : String, Codable { case ImportDeclaration }
         public var specifiers: [ImportDeclarationSpecifier]
         public var source: Literal
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
@@ -617,6 +731,8 @@ public enum JSSyntax {
         public var type: ImportDefaultSpecifierNodeType
         public enum ImportDefaultSpecifierNodeType : String, Codable { case ImportDefaultSpecifier }
         public var local: Identifier
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
@@ -629,6 +745,8 @@ public enum JSSyntax {
         public var type: ImportNamespaceSpecifierNodeType
         public enum ImportNamespaceSpecifierNodeType : String, Codable { case ImportNamespaceSpecifier }
         public var local: Identifier
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
@@ -643,6 +761,8 @@ public enum JSSyntax {
         public enum ImportSpecifierNodeType : String, Codable { case ImportSpecifier }
         public var local: Identifier
         public var imported: Identifier
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
@@ -657,21 +777,51 @@ public enum JSSyntax {
         public enum LabeledStatementNodeType : String, Codable { case LabeledStatement }
         public var label: Identifier
         public var body: Statement
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct Literal : JSSyntaxAST {
-        public init(type: LiteralNodeType = .Literal, value: OneOf<Bool>.Or<Double>.Or<String>.Or<ExplicitNull>, raw: String) {
+        public init(type: LiteralNodeType = .Literal, value: Optional<OneOf<Bool>.Or<Double>.Or<String>.Or<RegExp>>, raw: String, regex: Optional<Regex>) {
             self.type = type
             self.value = value
             self.raw = raw
+            self.regex = regex
         }
 
         public var type: LiteralNodeType
         public enum LiteralNodeType : String, Codable { case Literal }
-        public var value: OneOf<Bool>.Or<Double>.Or<String>.Or<ExplicitNull>
+        public var value: Optional<OneOf<Bool>.Or<Double>.Or<String>.Or<RegExp>>
         public var raw: String
+        public var regex: Optional<Regex>
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
+
+        /// Hollow object signifying a regexp
+        public struct RegExp : Codable, Hashable {
+            public init() { }
+        }
     }
+
+    /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
+    public struct MemberExpression : JSSyntaxAST {
+        public init(type: MemberExpressionNodeType = .MemberExpression, computed: Bool, object: Expression, property: Expression) {
+            self.type = type
+            self.computed = computed
+            self.object = object
+            self.property = property
+        }
+
+        public var type: MemberExpressionNodeType
+        public enum MemberExpressionNodeType : String, Codable { case MemberExpression }
+        public var computed: Bool
+        public var object: Expression
+        public var property: Expression
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
+    }
+
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct MetaProperty : JSSyntaxAST {
@@ -685,11 +835,13 @@ public enum JSSyntax {
         public enum MetaPropertyNodeType : String, Codable { case MetaProperty }
         public var meta: Identifier
         public var property: Identifier
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct MethodDefinition : JSSyntaxAST {
-        public init(type: MethodDefinitionNodeType = .MethodDefinition, key: Nullable<Expression>, computed: Bool, value: OneOf<AsyncFunctionExpression>.Or<FunctionExpression>.Or<ExplicitNull>, kind: String, `static`: Bool) {
+        public init(type: MethodDefinitionNodeType = .MethodDefinition, key: Optional<Expression>, computed: Bool, value: Optional<OneOf<AsyncFunctionExpression>.Or<FunctionExpression>>, kind: MethodDefinitionKind, `static`: Bool) {
             self.type = type
             self.key = key
             self.computed = computed
@@ -700,11 +852,14 @@ public enum JSSyntax {
 
         public var type: MethodDefinitionNodeType
         public enum MethodDefinitionNodeType : String, Codable { case MethodDefinition }
-        public var key: Nullable<Expression>
+        public var key: Optional<Expression>
         public var computed: Bool
-        public var value: OneOf<AsyncFunctionExpression>.Or<FunctionExpression>.Or<ExplicitNull>
-        public var kind: String
+        public var value: Optional<OneOf<AsyncFunctionExpression>.Or<FunctionExpression>>
+        public var kind: MethodDefinitionKind
+        public enum MethodDefinitionKind : String, Codable { case method, constructor }
         public var `static`: Bool
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
@@ -719,6 +874,8 @@ public enum JSSyntax {
         public enum NewExpressionNodeType : String, Codable { case NewExpression }
         public var callee: Expression
         public var arguments: [ArgumentListElement]
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
@@ -731,6 +888,8 @@ public enum JSSyntax {
         public var type: ObjectExpressionNodeType
         public enum ObjectExpressionNodeType : String, Codable { case ObjectExpression }
         public var properties: [ObjectExpressionProperty]
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
@@ -743,11 +902,13 @@ public enum JSSyntax {
         public var type: ObjectPatternNodeType
         public enum ObjectPatternNodeType : String, Codable { case ObjectPattern }
         public var properties: [ObjectPatternProperty]
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct Property : JSSyntaxAST {
-        public init(type: PropertyNodeType = .Property, key: PropertyKey, computed: Bool, value: Nullable<PropertyValue>, kind: String, method: Bool, shorthand: Bool) {
+        public init(type: PropertyNodeType = .Property, key: PropertyKey, computed: Bool, value: Optional<Expression>, kind: String, method: Bool, shorthand: Bool) {
             self.type = type
             self.key = key
             self.computed = computed
@@ -761,10 +922,12 @@ public enum JSSyntax {
         public enum PropertyNodeType : String, Codable { case Property }
         public var key: PropertyKey
         public var computed: Bool
-        public var value: Nullable<PropertyValue>
+        public var value: Optional<Expression>
         public var kind: String
         public var method: Bool
         public var shorthand: Bool
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
@@ -781,6 +944,8 @@ public enum JSSyntax {
         public var value: Bric; // RegExp
         public var raw: String
         public var regex: Regex
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
@@ -793,18 +958,22 @@ public enum JSSyntax {
         public var type: RestElementNodeType
         public enum RestElementNodeType : String, Codable { case RestElement }
         public var argument: OneOf<BindingIdentifier>.Or<BindingPattern>
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct ReturnStatement : JSSyntaxAST {
-        public init(type: ReturnStatementNodeType = .ReturnStatement, argument: Nullable<Expression>) {
+        public init(type: ReturnStatementNodeType = .ReturnStatement, argument: Optional<Expression>) {
             self.type = type
             self.argument = argument
         }
 
         public var type: ReturnStatementNodeType
         public enum ReturnStatementNodeType : String, Codable { case ReturnStatement }
-        public var argument: Nullable<Expression>
+        public var argument: Optional<Expression>
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
@@ -817,6 +986,8 @@ public enum JSSyntax {
         public var type: SequenceExpressionNodeType
         public enum SequenceExpressionNodeType : String, Codable { case SequenceExpression }
         public var expressions: [Expression]
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
@@ -829,6 +1000,8 @@ public enum JSSyntax {
         public var type: SpreadElementNodeType
         public enum SpreadElementNodeType : String, Codable { case SpreadElement }
         public var argument: Expression
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
@@ -845,6 +1018,8 @@ public enum JSSyntax {
         public var computed: Bool
         public var object: Expression
         public var property: Expression
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
@@ -855,11 +1030,13 @@ public enum JSSyntax {
 
         public var type: SuperNodeType
         public enum SuperNodeType : String, Codable { case Super }
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct SwitchCase : JSSyntaxAST {
-        public init(type: SwitchCaseNodeType = .SwitchCase, test: Nullable<Expression>, consequent: [Statement]) {
+        public init(type: SwitchCaseNodeType = .SwitchCase, test: Optional<Expression>, consequent: [Statement]) {
             self.type = type
             self.test = test
             self.consequent = consequent
@@ -867,8 +1044,10 @@ public enum JSSyntax {
 
         public var type: SwitchCaseNodeType
         public enum SwitchCaseNodeType : String, Codable { case SwitchCase }
-        public var test: Nullable<Expression>
+        public var test: Optional<Expression>
         public var consequent: [Statement]
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
@@ -883,6 +1062,8 @@ public enum JSSyntax {
         public enum SwitchStatementNodeType : String, Codable { case SwitchStatement }
         public var discriminant: Expression
         public var cases: [SwitchCase]
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
@@ -897,6 +1078,8 @@ public enum JSSyntax {
         public enum TaggedTemplateExpressionNodeType : String, Codable { case TaggedTemplateExpression }
         public var tag: Expression
         public var quasi: TemplateLiteral
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
@@ -917,6 +1100,8 @@ public enum JSSyntax {
         public enum TemplateElementValueNodeType : String, Codable { case TemplateElement }
         public var value: TemplateElementValue
         public var tail: Bool
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
@@ -931,6 +1116,8 @@ public enum JSSyntax {
         public enum TemplateLiteralNodeType : String, Codable { case TemplateLiteral }
         public var quasis: [TemplateElement]
         public var expressions: [Expression]
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
@@ -941,6 +1128,8 @@ public enum JSSyntax {
 
         public var type: ThisExpressionNodeType
         public enum ThisExpressionNodeType : String, Codable { case ThisExpression }
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
@@ -953,11 +1142,13 @@ public enum JSSyntax {
         public var type: ThrowStatementNodeType
         public enum ThrowStatementNodeType : String, Codable { case ThrowStatement }
         public var argument: Expression
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct TryStatement : JSSyntaxAST {
-        public init(type: TryStatementNodeType = .TryStatement, block: BlockStatement, handler: Nullable<CatchClause>, finalizer: Nullable<BlockStatement>) {
+        public init(type: TryStatementNodeType = .TryStatement, block: BlockStatement, handler: Optional<CatchClause>, finalizer: Optional<BlockStatement>) {
             self.type = type
             self.block = block
             self.handler = handler
@@ -967,8 +1158,10 @@ public enum JSSyntax {
         public var type: TryStatementNodeType
         public enum TryStatementNodeType : String, Codable { case TryStatement }
         public var block: BlockStatement
-        public var handler: Nullable<CatchClause>
-        public var finalizer: Nullable<BlockStatement>
+        public var handler: Optional<CatchClause>
+        public var finalizer: Optional<BlockStatement>
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
@@ -985,6 +1178,8 @@ public enum JSSyntax {
         public var `operator`: String
         public var argument: Expression
         public var prefix: Bool
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
@@ -1001,6 +1196,8 @@ public enum JSSyntax {
         public var `operator`: String
         public var argument: Expression
         public var prefix: Bool
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
@@ -1015,11 +1212,13 @@ public enum JSSyntax {
         public enum VariableDeclarationNodeType : String, Codable { case VariableDeclaration }
         public var declarations: [VariableDeclarator]
         public var kind: String
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct VariableDeclarator : JSSyntaxAST {
-        public init(type: VariableDeclaratorNodeType = .VariableDeclarator, id: OneOf<BindingIdentifier>.Or<BindingPattern>, `init`: Nullable<Expression>) {
+        public init(type: VariableDeclaratorNodeType = .VariableDeclarator, id: OneOf<BindingIdentifier>.Or<BindingPattern>, `init`: Optional<Expression>) {
             self.type = type
             self.id = id
             self.`init` = `init`
@@ -1028,7 +1227,9 @@ public enum JSSyntax {
         public var type: VariableDeclaratorNodeType
         public enum VariableDeclaratorNodeType : String, Codable { case VariableDeclarator }
         public var id: OneOf<BindingIdentifier>.Or<BindingPattern>
-        public var `init`: Nullable<Expression>
+        public var `init`: Optional<Expression>
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
@@ -1043,6 +1244,8 @@ public enum JSSyntax {
         public enum WhileStatementNodeType : String, Codable { case WhileStatement }
         public var test: Expression
         public var body: Statement
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
@@ -1057,11 +1260,13 @@ public enum JSSyntax {
         public enum WithStatementNodeType : String, Codable { case WithStatement }
         public var object: Expression
         public var body: Statement
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
     public struct YieldExpression : JSSyntaxAST {
-        public init(type: YieldExpressionNodeType = .YieldExpression, argument: Nullable<Expression>, delegate: Bool) {
+        public init(type: YieldExpressionNodeType = .YieldExpression, argument: Optional<Expression>, delegate: Bool) {
             self.type = type
             self.argument = argument
             self.delegate = delegate
@@ -1069,36 +1274,34 @@ public enum JSSyntax {
 
         public var type: YieldExpressionNodeType
         public enum YieldExpressionNodeType : String, Codable { case YieldExpression }
-        public var argument: Nullable<Expression>
+        public var argument: Optional<Expression>
         public var delegate: Bool
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
     }
 }
 
 extension JSSyntax {
-    public typealias StatementListItem = OneOf<Declaration>
-        .Or<Statement>
-
-    public typealias ModuleItem = OneOf<ImportDeclaration>
-        .Or<ExportDeclaration>
-        .Or<StatementListItem>
 
     public typealias ArgumentListElement = OneOf<Expression>
         .Or<SpreadElement>
+    
+    public typealias ArrayExpressionElement = Optional<OneOf<Expression>
+       .Or<SpreadElement>>
 
-    public typealias ArrayExpressionElement = OneOf<Expression>
-        .Or<SpreadElement>
-        .Or<ExplicitNull>
-
-    public typealias ArrayPatternElement = OneOf<AssignmentPattern>
+    public typealias ArrayPatternElement = Optional<OneOf<AssignmentPattern>
         .Or<BindingIdentifier>
         .Or<BindingPattern>
-        .Or<RestElement>
-        .Or<ExplicitNull>
+        .Or<RestElement>>
 
     public typealias BindingPattern = OneOf<ArrayPattern>
         .Or<ObjectPattern>
 
     public typealias BindingIdentifier = Identifier
+
+    public typealias ChainElement = OneOf<CallExpression>
+        .Or<ComputedMemberExpression>
+        .Or<StaticMemberExpression>
 
     public typealias Declaration = OneOf<AsyncFunctionDeclaration>
         .Or<ClassDeclaration>
@@ -1122,30 +1325,45 @@ extension JSSyntax {
         .Or<ExportDefaultDeclaration>
         .Or<ExportNamedDeclaration>
 
-    public typealias Expression = OneOf<OneOf<ArrayExpression>
-            .Or<ArrowFunctionExpression>
-            .Or<AssignmentExpression>
-            .Or<AsyncArrowFunctionExpression>
-            .Or<AsyncFunctionExpression>
-            .Or<AwaitExpression>
-            .Or<BinaryExpression>
-            .Or<CallExpression>
-            .Or<ClassExpression>
-            .Or<ComputedMemberExpression>>
-        .Or<OneOf<ConditionalExpression>
-            .Or<Identifier>
-            .Or<FunctionExpression>
-            .Or<Literal>
-            .Or<NewExpression>
-            .Or<ObjectExpression>
-            .Or<RegexLiteral>
-            .Or<SequenceExpression>
-            .Or<StaticMemberExpression>
-            .Or<TaggedTemplateExpression>>
-        .Or<OneOf<ThisExpression>
-            .Or<UnaryExpression>
-            .Or<UpdateExpression>
-            .Or<YieldExpression>>
+    /// An expression can be one of the following:
+    ///
+    /// ```js
+    /// type Expression = ThisExpression | Identifier | Literal |
+    ///     ArrayExpression | ObjectExpression | FunctionExpression | ArrowFunctionExpression | ClassExpression |
+    ///     TaggedTemplateExpression | MemberExpression | Super | MetaProperty |
+    ///     NewExpression | CallExpression | UpdateExpression | AwaitExpression | UnaryExpression |
+    ///     BinaryExpression | LogicalExpression | ConditionalExpression |
+    ///     YieldExpression | AssignmentExpression | SequenceExpression;
+    ///    ```
+    public typealias Expression = OneOf<ThisExpression>
+        .Or<Identifier>
+        .Or<Literal>
+        .Or<ArrayExpression>
+        .Or<ObjectExpression>
+        .Or<FunctionExpression>
+        .Or<ArrowFunctionExpression>
+        .Or<ClassExpression>
+        .Or<TaggedTemplateExpression>
+        .Or<MemberExpression>
+//        .Or<ComputedMemberExpression>
+//        .Or<StaticMemberExpression>
+        .Or<Super>
+        .Or<MetaProperty>
+        .Or<NewExpression>
+        .Or<CallExpression>
+        .Or<UpdateExpression>
+        .Or<AwaitExpression>
+        .Or<UnaryExpression>
+        .Or<BinaryExpression>
+        .Or<LogicalExpression>
+        .Or<ConditionalExpression>
+        .Or<YieldExpression>
+        .Or<AssignmentExpression>
+        .Or<SequenceExpression>
+        .Or<AsyncArrowFunctionExpression>
+        .Or<AsyncFunctionExpression>
+        .Or<ChainExpression>
+        .Or<RegexLiteral>
 
     public typealias FunctionParameter = OneOf<AssignmentPattern>
         .Or<BindingIdentifier>
@@ -1161,35 +1379,38 @@ extension JSSyntax {
     public typealias ObjectPatternProperty = OneOf<Property>
         .Or<RestElement>
 
-    public typealias Statement = OneOf<OneOf<BlockStatement>
-            .Or<BreakStatement>
-            .Or<ContinueStatement>
-            .Or<DebuggerStatement>
-            .Or<DoWhileStatement>
-            .Or<EmptyStatement>
-            .Or<ForStatement>
-            .Or<ExpressionStatement>
-            .Or<Directive>
-            .Or<ForInStatement>>
-        .Or<OneOf<ForOfStatement>
-            .Or<FunctionDeclaration>
-            .Or<IfStatement>
-            .Or<ReturnStatement>
-            .Or<SwitchStatement>
-            .Or<ThrowStatement>
-            .Or<TryStatement>
-            .Or<VariableDeclaration>
-            .Or<WhileStatement>
-            .Or<WithStatement>>
+    public typealias Statement = OneOf<BlockStatement>
+        .Or<AsyncFunctionDeclaration>
+        .Or<BreakStatement>
+        .Or<ContinueStatement>
+        .Or<DebuggerStatement>
+        .Or<DoWhileStatement>
+        .Or<EmptyStatement>
+        .Or<ExpressionStatement>
+        .Or<Directive>
+        .Or<ForStatement>
+        .Or<ForInStatement>
+        .Or<ForOfStatement>
+        .Or<FunctionDeclaration>
+        .Or<IfStatement>
+        .Or<LabeledStatement>
+        .Or<ReturnStatement>
+        .Or<SwitchStatement>
+        .Or<ThrowStatement>
+        .Or<TryStatement>
+        .Or<VariableDeclaration>
+        .Or<WhileStatement>
+        .Or<WithStatement>
 
     public typealias PropertyKey = OneOf<Identifier>
         .Or<Literal>
 
-    public typealias PropertyValue = OneOf<AssignmentPattern>
-        .Or<AsyncFunctionExpression>
-        .Or<BindingIdentifier>
-        .Or<BindingPattern>
-        .Or<FunctionExpression>
+    public typealias StatementListItem = OneOf<Declaration>
+        .Or<Statement>
+
+    public typealias ModuleItem = OneOf<ImportDeclaration>
+        .Or<ExportDeclaration>
+        .Or<StatementListItem>
 }
 
 
@@ -1458,6 +1679,12 @@ public protocol JSSyntaxASTType : Codable {
 public protocol JSSyntaxAST : Hashable, JSSyntaxASTType {
     associatedtype NodeType : RawRepresentable where NodeType.RawValue == String
     var type: NodeType { get }
+
+    /// The optional source location for this token
+    var loc: SourceLocation? { get }
+
+    /// The optional range location for this token
+    var range: [Int]? { get }
 }
 
 public extension JSSyntaxAST {

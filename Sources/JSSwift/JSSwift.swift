@@ -8,6 +8,7 @@ import Foundation
 /// See also: `JXContext.installJavaScriptParser`
 open class JavaScriptParser {
     open var ctx: JXContext
+    public let esprimaVersion: String?
 
     let esprima: JXValue
 
@@ -33,6 +34,7 @@ open class JavaScriptParser {
 
 
         self.esprima = try check(ctx["exports"]["esprima"], isFunction: false)
+        self.esprimaVersion = esprima["version"].stringValue
         self.tokenizeFunction = try check(esprima["tokenize"], isFunction: true)
         self.parseScriptFunction = try check(esprima["parseScript"], isFunction: true)
         self.parseModuleFunction = try check(esprima["parseModule"], isFunction: true)
