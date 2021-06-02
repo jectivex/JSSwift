@@ -1,5 +1,5 @@
 import XCTest
-import JSSwift
+@testable import JSSwift
 
 final class ScriptParsingTests : XCTestCase {
     /// Cached script parser result
@@ -37,8 +37,8 @@ final class ScriptParsingTests : XCTestCase {
                 XCTFail("tokens mismatch in \(path)")
             }
         } else if bric == nil { // parse as raw JSON
-            let json = try sharedParser.get().parseJSON(script: String(contentsOf: scriptURL), options: .init(range: true, loc: true))
-            XCTAssertFalse(json.isEmpty)
+            let script: JSSyntax.Script = try sharedParser.get().parseJSON(script: String(contentsOf: scriptURL), options: .init(range: true, loc: true))
+            XCTAssertFalse(script.body.isEmpty)
         } else if bric == true {
             let bric = try sharedParser.get().parseBric(script: String(contentsOf: scriptURL), options: .init(range: true, loc: true))
 
@@ -178,5 +178,23 @@ final class ScriptParsingTests : XCTestCase {
 
     func testTokenizeYUI() throws {
         try parseLibrary(path: "yui-3.12.0", tokenizeOnly: true, bric: false)
+    }
+}
+
+
+private extension JavaScriptParser {
+    /// Parses a source into a JS tree
+    func parseJSON<T: Decodable>(script javaScript: String, indent: UInt32 = 0, options: ParseOptions = .init()) throws -> T {
+        return try ctx.trying { // invoke the cached function with the encoded arguments
+            parseScriptFunction.call(withArguments: [ctx.string(javaScript), try ctx.encode(options)])
+        }.toDecodable(ofType: T.self)
+    }
+}
+
+private extension JXValue {
+    /// Decodes the value by first serializing it to a String
+    func toJSONDecodable<T: Decodable>(ofType: T.Type) throws -> T {
+        // try JXValueDecoder(context: env).decode(ofType, from: self)
+        try T.loadFromJSON(data: toJSON(indent: 0).data(using: .utf8) ?? Data())
     }
 }
