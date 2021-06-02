@@ -2409,6 +2409,7 @@ public enum JSTokenType : String, Hashable, Codable {
     case StringLiteral = "String"
     case RegularExpression = "RegularExpression"
     case Template = "Template"
+    case LineComment = "LineComment"
 }
 
 

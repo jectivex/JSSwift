@@ -49,6 +49,13 @@ open class JavaScriptParser {
 
     }
 
+    /// Parses a JavaScript script to a generic `Bric` tree.
+    public func parseBric(script javaScript: String, options: ParseOptions = .init()) throws -> Bric {
+        return try ctx.trying { // invoke the cached function with the encoded arguments
+            parseScriptFunction.call(withArguments: [ctx.string(javaScript), try ctx.encode(options)])
+        }.toDecodable(ofType: Bric.self)
+    }
+
     /// Tokenizes the given JavaScript with options. This takes a string as an input and produces an array of tokens, a list of object representing categorized input characters.
     ///
     /// More info: [Lexical Analysis](https://esprima.readthedocs.io/en/4.0/lexical-analysis.html)

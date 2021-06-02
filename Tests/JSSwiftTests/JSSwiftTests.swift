@@ -34,86 +34,8 @@ private final class JXDebugValue : JXValue {
     }
 }
 
+
 final class JSSwiftTests: XCTestCase {
-
-    let sharedParser = try! JavaScriptParser()
-
-    func parseLibrary(path: String, tokenizeOnly: Bool) throws {
-        guard let syntaxURL = Bundle.module.url(forResource: path, withExtension: "json", subdirectory: "TestResources/parser/syntax") else {
-            return XCTFail("no JSON resource for \(path)")
-        }
-
-        // attempt to parse the syntax
-        let expectedSyntax = try JSSyntax.Script.loadJSON(url: syntaxURL)
-
-        guard let scriptURL = Bundle.module.url(forResource: path, withExtension: "js", subdirectory: "TestResources/parser") else {
-            return XCTFail("no JS resource for \(path)")
-        }
-
-        if tokenizeOnly {
-            let tokens = try sharedParser.tokenize(javaScript: String(contentsOf: scriptURL))
-            XCTAssertFalse(tokens.isEmpty)
-        } else {
-//            let actualSyntax = try JavaScriptParser().parseJSSyntax(script: String(contentsOf: scriptURL))
-//            XCTAssertEqual(expectedSyntax, actualSyntax)
-        }
-    }
-
-    func testParseAngular() throws {
-        try parseLibrary(path: "angular-1.2.5", tokenizeOnly: false)
-    }
-
-    func testTokenizeAngular() throws {
-        try parseLibrary(path: "angular-1.2.5", tokenizeOnly: true)
-    }
-
-    func testParseJQuery() throws {
-        try parseLibrary(path: "jquery-1.9.1", tokenizeOnly: false)
-    }
-
-    func testTokenizeJQuery() throws {
-        try parseLibrary(path: "jquery-1.9.1", tokenizeOnly: true)
-    }
-
-    func testParseBackbone() throws {
-        try parseLibrary(path: "backbone-1.1.0", tokenizeOnly: false)
-    }
-
-    func testTokenizeBackbone() throws {
-        try parseLibrary(path: "backbone-1.1.0", tokenizeOnly: true)
-    }
-
-    func testParseJQueryMobile() throws {
-        try parseLibrary(path: "jquery.mobile-1.4.2", tokenizeOnly: false)
-    }
-
-    func testTokenizeJQueryMobile() throws {
-        try parseLibrary(path: "jquery.mobile-1.4.2", tokenizeOnly: true)
-    }
-
-    func testParseUnderscore() throws {
-        try parseLibrary(path: "underscore-1.5.2", tokenizeOnly: false)
-    }
-
-    func testTokenizeUnderscore() throws {
-        try parseLibrary(path: "underscore-1.5.2", tokenizeOnly: true)
-    }
-
-    func testParseMooTools() throws {
-        try parseLibrary(path: "mootools-1.4.5", tokenizeOnly: false)
-    }
-
-    func testTokenizeMooTools() throws {
-        try parseLibrary(path: "mootools-1.4.5", tokenizeOnly: true)
-    }
-
-    func testParseYUI() throws {
-        try parseLibrary(path: "yui-3.12.0", tokenizeOnly: false)
-    }
-
-    func testTokenizeYUI() throws {
-        try parseLibrary(path: "yui-3.12.0", tokenizeOnly: true)
-    }
 
     /// Ensure that contexts are destroued as expected
     func testJSSwiftContext() throws {
