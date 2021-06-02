@@ -49,6 +49,14 @@ open class JavaScriptParser {
 
     }
 
+    /// Parses a JavaScript script to a `JSON` tree.
+    public func parseJSON(script javaScript: String, indent: UInt32 = 0, options: ParseOptions = .init()) throws -> String {
+        return try ctx.trying { // invoke the cached function with the encoded arguments
+            parseScriptFunction.call(withArguments: [ctx.string(javaScript), try ctx.encode(options)])
+        }.toJSON(indent: indent)
+    }
+
+
     /// Parses a JavaScript script to a generic `Bric` tree.
     public func parseBric(script javaScript: String, options: ParseOptions = .init()) throws -> Bric {
         return try ctx.trying { // invoke the cached function with the encoded arguments

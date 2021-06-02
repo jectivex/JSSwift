@@ -5,7 +5,7 @@ final class ScriptParsingTests : XCTestCase {
     /// Cached script parser result
     let sharedParser = Result { try JavaScriptParser() }
 
-    func parseLibrary(path: String, tokenizeOnly: Bool?, bric: Bool = true, debug: Bool = false) throws {
+    func parseLibrary(path: String, tokenizeOnly: Bool?, bric: Bool?, debug: Bool = false) throws {
         guard let syntaxURL = Bundle.module.url(forResource: path, withExtension: "json", subdirectory: "TestResources/parser/syntax") else {
             return XCTFail("no JSON resource for \(path)")
         }
@@ -36,6 +36,9 @@ final class ScriptParsingTests : XCTestCase {
 
                 XCTFail("tokens mismatch in \(path)")
             }
+        } else if bric == nil { // parse as raw JSON
+            let json = try sharedParser.get().parseJSON(script: String(contentsOf: scriptURL), options: .init(range: true, loc: true))
+            XCTAssertFalse(json.isEmpty)
         } else if bric == true {
             let bric = try sharedParser.get().parseBric(script: String(contentsOf: scriptURL), options: .init(range: true, loc: true))
 
@@ -64,7 +67,11 @@ final class ScriptParsingTests : XCTestCase {
     }
 
     func testParseAngular() throws {
-        try parseLibrary(path: "angular-1.2.5", tokenizeOnly: false)
+        try parseLibrary(path: "angular-1.2.5", tokenizeOnly: false, bric: false)
+    }
+
+    func testParseAngularJSON() throws {
+        try parseLibrary(path: "angular-1.2.5", tokenizeOnly: false, bric: nil)
     }
 
     func testParseAngularBric() throws {
@@ -72,12 +79,16 @@ final class ScriptParsingTests : XCTestCase {
     }
 
     func testTokenizeAngular() throws {
-        try parseLibrary(path: "angular-1.2.5", tokenizeOnly: true)
+        try parseLibrary(path: "angular-1.2.5", tokenizeOnly: true, bric: false)
     }
 
     func testParseJQuery() throws {
         throw XCTSkip("jquery-1.9.1 is known to mismatch")
-        try parseLibrary(path: "jquery-1.9.1", tokenizeOnly: false)
+        try parseLibrary(path: "jquery-1.9.1", tokenizeOnly: false, bric: false)
+    }
+
+    func testParseJQueryJSON() throws {
+        try parseLibrary(path: "jquery-1.9.1", tokenizeOnly: false, bric: nil)
     }
 
     func testParseJQueryBric() throws {
@@ -86,11 +97,15 @@ final class ScriptParsingTests : XCTestCase {
     }
 
     func testTokenizeJQuery() throws {
-        try parseLibrary(path: "jquery-1.9.1", tokenizeOnly: true)
+        try parseLibrary(path: "jquery-1.9.1", tokenizeOnly: true, bric: false)
     }
 
     func testParseBackbone() throws {
-        try parseLibrary(path: "backbone-1.1.0", tokenizeOnly: false)
+        try parseLibrary(path: "backbone-1.1.0", tokenizeOnly: false, bric: false)
+    }
+
+    func testParseBackboneJSON() throws {
+        try parseLibrary(path: "backbone-1.1.0", tokenizeOnly: false, bric: nil)
     }
 
     func testParseBackboneBric() throws {
@@ -98,11 +113,15 @@ final class ScriptParsingTests : XCTestCase {
     }
 
     func testTokenizeBackbone() throws {
-        try parseLibrary(path: "backbone-1.1.0", tokenizeOnly: true)
+        try parseLibrary(path: "backbone-1.1.0", tokenizeOnly: true, bric: false)
     }
 
     func testParseJQueryMobile() throws {
-        try parseLibrary(path: "jquery.mobile-1.4.2", tokenizeOnly: false)
+        try parseLibrary(path: "jquery.mobile-1.4.2", tokenizeOnly: false, bric: false)
+    }
+
+    func testParseJQueryMobileJSON() throws {
+        try parseLibrary(path: "jquery.mobile-1.4.2", tokenizeOnly: false, bric: nil)
     }
 
     func testParseJQueryMobileBric() throws {
@@ -110,11 +129,15 @@ final class ScriptParsingTests : XCTestCase {
     }
 
     func testTokenizeJQueryMobile() throws {
-        try parseLibrary(path: "jquery.mobile-1.4.2", tokenizeOnly: true)
+        try parseLibrary(path: "jquery.mobile-1.4.2", tokenizeOnly: true, bric: false)
     }
 
     func testParseUnderscore() throws {
-        try parseLibrary(path: "underscore-1.5.2", tokenizeOnly: false)
+        try parseLibrary(path: "underscore-1.5.2", tokenizeOnly: false, bric: false)
+    }
+
+    func testParseUnderscoreJSON() throws {
+        try parseLibrary(path: "underscore-1.5.2", tokenizeOnly: false, bric: nil)
     }
 
     func testParseUnderscoreBric() throws {
@@ -122,11 +145,15 @@ final class ScriptParsingTests : XCTestCase {
     }
 
     func testTokenizeUnderscore() throws {
-        try parseLibrary(path: "underscore-1.5.2", tokenizeOnly: true)
+        try parseLibrary(path: "underscore-1.5.2", tokenizeOnly: true, bric: false)
     }
 
     func testParseMooTools() throws {
-        try parseLibrary(path: "mootools-1.4.5", tokenizeOnly: false)
+        try parseLibrary(path: "mootools-1.4.5", tokenizeOnly: false, bric: false)
+    }
+
+    func testParseMooToolsJSON() throws {
+        try parseLibrary(path: "mootools-1.4.5", tokenizeOnly: false, bric: nil)
     }
 
     func testParseMooToolsBric() throws {
@@ -134,11 +161,15 @@ final class ScriptParsingTests : XCTestCase {
     }
 
     func testTokenizeMooTools() throws {
-        try parseLibrary(path: "mootools-1.4.5", tokenizeOnly: true)
+        try parseLibrary(path: "mootools-1.4.5", tokenizeOnly: true, bric: false)
     }
 
     func testParseYUI() throws {
-        try parseLibrary(path: "yui-3.12.0", tokenizeOnly: false)
+        try parseLibrary(path: "yui-3.12.0", tokenizeOnly: false, bric: false)
+    }
+
+    func testParseYUIJSON() throws {
+        try parseLibrary(path: "yui-3.12.0", tokenizeOnly: false, bric: nil)
     }
 
     func testParseYUIBric() throws {
@@ -146,6 +177,6 @@ final class ScriptParsingTests : XCTestCase {
     }
 
     func testTokenizeYUI() throws {
-        try parseLibrary(path: "yui-3.12.0", tokenizeOnly: true)
+        try parseLibrary(path: "yui-3.12.0", tokenizeOnly: true, bric: false)
     }
 }
