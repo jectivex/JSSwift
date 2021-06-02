@@ -94,21 +94,21 @@ open class JavaScriptParser {
     /// Parses a JavaScript script.
     ///
     /// More info: [Syntactic Analysis](https://esprima.readthedocs.io/en/4.0/syntactic-analysis.html)
-    open func parse(script javaScript: String, options: ParseOptions = .init()) throws -> JSSyntax.Script {
+    open func parse(script javaScript: String, options: ParseOptions = .init()) throws -> ESTree.Program {
         return try ctx.trying { // invoke the cached function with the encoded arguments
             parseScriptFunction.call(withArguments: [ctx.string(javaScript), try ctx.encode(options)])
-        }.toDecodable(ofType: JSSyntax.Script.self)
+        }.toDecodable(ofType: ESTree.Program.self)
     }
 
     /// Parses a JavaScript module.
-    /// 
+    ///
     /// This differs from `parse(script:)` in that it permits module syntax like imports.
     ///
     /// More info: [Syntactic Analysis](https://esprima.readthedocs.io/en/4.0/syntactic-analysis.html)
-    open func parse(module javaScript: String, options: ParseOptions = .init()) throws -> JSSyntax.Module {
+    open func parse(module javaScript: String, options: ParseOptions = .init()) throws -> ESTree.Program {
         return try ctx.trying { // invoke the cached function with the encoded arguments
             parseModuleFunction.call(withArguments: [ctx.string(javaScript), try ctx.encode(options)])
-        }.toDecodable(ofType: JSSyntax.Module.self)
+        }.toDecodable(ofType: ESTree.Program.self)
     }
 
     /// Options for `JavaScriptParser.parse`
@@ -153,7 +153,7 @@ open class JavaScriptParser {
 }
 
 extension JXContext {
-    @available(*, deprecated, message: "use installJavaScriptParser instead")
+    /// - TODO: @available(*, deprecated, message: "use installJavaScriptParser instead")
     public static let SwiftJSResourceURL = Bundle.module.url(forResource: "esprima", withExtension: "js", subdirectory: "Resources/JavaScript")
 
     /// Installs the `esprima.js` JavaScript parser into `exports.esprima`

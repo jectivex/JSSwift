@@ -1,20 +1,858 @@
 
-// A JavaScript AST hand-ported from esprima's `syntax.ts`
+public protocol JSSyntaxNodeType : Codable {
+    /// The name of the AST Type
+    var typeName: String { get }
+}
 
+/// See: [Estree Node Objects](https://github.com/estree/estree/blob/master/es5.md#node-objects)
+public protocol JSSyntaxNode : Hashable, JSSyntaxNodeType {
+    associatedtype NodeType : RawRepresentable where NodeType.RawValue == String
+
+    /// The type field is a string representing the AST variant type. Each subtype of Node is documented below with the specific string of its type field. You can use this field to determine which interface a node implements.
+    var type: NodeType { get }
+
+    /// The loc field represents the source location information of the node. If the node contains no information about the source location, the field is null; otherwise it is an object consisting of a start position (the position of the first character of the parsed source region) and an end position (the position of the first character after the parsed source region):
+    var loc: SourceLocation? { get }
+
+    /// The optional range location for this token
+    var range: [Int]? { get }
+}
+
+public extension JSSyntaxNode {
+    var typeName: String { type.rawValue }
+}
+
+/// A JavaScript AST as standardized by [ESTree](https://github.com/estree/estree/blob/master/es5.md)
+///
 /// Namespace for nodes corresponding to `Syntax` cases.
 ///
 /// The syntax tree format is derived from the original version of [Mozilla Parser API](https://developer.mozilla.org/en-US/docs/Mozilla/Projects/SpiderMonkey/Parser_API), which is then formalized and expanded as the [ESTree specification](https://github.com/estree/estree).
+public enum ESTree {
+
+    /// Identifier
+    ///
+    /// ```
+    /// interface Identifier <: Expression, Pattern {
+    ///     type: "Identifier";
+    ///     name: string;
+    /// }
+    /// ```
+    ///
+    /// An identifier. Note that an identifier may be an expression or a destructuring pattern.
+    public struct Identifier : JSSyntaxNode {
+        public let type: IdentifierNodeType
+        public enum IdentifierNodeType : String, Codable { case Identifier }
+
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
+    }
+
+    /// Literal
+    ///
+    ///    interface Literal <: Expression {
+    ///        type: "Literal";
+    ///        value: string | boolean | null | number | RegExp;
+    ///    }
+    ///    A literal token. Note that a literal can be an expression.
+    public struct Literal : JSSyntaxNode {
+        public let type: LiteralNodeType
+        public enum LiteralNodeType : String, Codable { case Literal }
+
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
+    }
+
+    ///    RegExpLiteral
+    ///
+    ///    interface RegExpLiteral <: Literal {
+    ///      regex: {
+    ///        pattern: string;
+    ///        flags: string;
+    ///      };
+    ///    }
+    ///    The regex property allows regexes to be represented in environments that don’t support certain flags such as y or u. In environments that don't support these flags value will be null as the regex can't be represented natively.
+    public struct RegExpLiteral : JSSyntaxNode {
+        public let type: RegExpLiteralNodeType
+        public enum RegExpLiteralNodeType : String, Codable { case RegExpLiteral }
+
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
+    }
+
+    ///    Programs
+    ///
+    ///    interface Program <: Node {
+    ///        type: "Program";
+    ///        body: [ Directive | Statement ];
+    ///    }
+    ///    A complete program source tree.
+    public struct Program : JSSyntaxNode {
+        public let type: ProgramNodeType
+        public enum ProgramNodeType : String, Codable { case Program }
+
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
+    }
+
+    /// MARK: Functions
+
+
+    ///    interface Function <: Node {
+    ///        id: Identifier | null;
+    ///        params: [ Pattern ];
+    ///        body: FunctionBody;
+    ///    }
+    ///    A function declaration or expression.
+    public typealias Function = OneOf<FunctionDeclaration>.Or<FunctionExpression>
+
+
+    // MARK: Statements
+
+    /// Statements
+    ///
+    ///    interface Statement <: Node { }
+    ///    Any statement.
+    public typealias Statement = OneOf<ExpressionStatement>
+
+    ///    ExpressionStatement
+    ///
+    ///    interface ExpressionStatement <: Statement {
+    ///        type: "ExpressionStatement";
+    ///        expression: Expression;
+    ///    }
+    ///    An expression statement, i.e., a statement consisting of a single expression.
+    public struct ExpressionStatement : JSSyntaxNode {
+        public let type: ExpressionStatementNodeType
+        public enum ExpressionStatementNodeType : String, Codable { case ExpressionStatement }
+
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
+    }
+
+    ///    Directive
+    ///
+    ///    interface Directive <: Node {
+    ///        type: "ExpressionStatement";
+    ///        expression: Literal;
+    ///        directive: string;
+    ///    }
+    ///    A directive from the directive prologue of a script or function. The directive property is the raw string source of the directive without quotes.
+    public struct Directive : JSSyntaxNode {
+        public let type: DirectiveNodeType
+        public enum DirectiveNodeType : String, Codable { case Directive }
+
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
+    }
+
+
+    ///    BlockStatement
+    ///
+    ///    interface BlockStatement <: Statement {
+    ///        type: "BlockStatement";
+    ///        body: [ Statement ];
+    ///    }
+    ///    A block statement, i.e., a sequence of statements surrounded by braces.
+    public struct BlockStatement : JSSyntaxNode {
+        public let type: BlockStatementNodeType
+        public enum BlockStatementNodeType : String, Codable { case BlockStatement }
+
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
+    }
+
+    ///    FunctionBody
+    ///
+    ///    interface FunctionBody <: BlockStatement {
+    ///        body: [ Directive | Statement ];
+    ///    }
+    ///    The body of a function, which is a block statement that may begin with directives.
+    //public typealias FunctionBody = OneOf<Never>
+
+    ///    EmptyStatement
+    ///
+    ///    interface EmptyStatement <: Statement {
+    ///        type: "EmptyStatement";
+    ///    }
+    ///    An empty statement, i.e., a solitary semicolon.
+    public struct EmptyStatement : JSSyntaxNode {
+        public let type: EmptyStatementNodeType
+        public enum EmptyStatementNodeType : String, Codable { case EmptyStatement }
+
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
+    }
+
+    ///    DebuggerStatement
+    ///
+    ///    interface DebuggerStatement <: Statement {
+    ///        type: "DebuggerStatement";
+    ///    }
+    ///    A debugger statement.
+    public struct DebuggerStatement : JSSyntaxNode {
+        public let type: DebuggerStatementNodeType
+        public enum DebuggerStatementNodeType : String, Codable { case DebuggerStatement }
+
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
+    }
+
+    ///    WithStatement
+    ///
+    ///    interface WithStatement <: Statement {
+    ///        type: "WithStatement";
+    ///        object: Expression;
+    ///        body: Statement;
+    ///    }
+    ///    A with statement.
+    public struct WithStatement : JSSyntaxNode {
+        public let type: WithStatementNodeType
+        public enum WithStatementNodeType : String, Codable { case WithStatement }
+
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
+    }
+
+    // MARK: Control flow
+
+
+    ///    ReturnStatement
+    ///
+    ///    interface ReturnStatement <: Statement {
+    ///        type: "ReturnStatement";
+    ///        argument: Expression | null;
+    ///    }
+    ///    A return statement.
+    public struct ReturnStatement : JSSyntaxNode {
+        public let type: ReturnStatementNodeType
+        public enum ReturnStatementNodeType : String, Codable { case ReturnStatement }
+
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
+    }
+
+    ///    LabeledStatement
+    ///
+    ///    interface LabeledStatement <: Statement {
+    ///        type: "LabeledStatement";
+    ///        label: Identifier;
+    ///        body: Statement;
+    ///    }
+    ///    A labeled statement, i.e., a statement prefixed by a break/continue label.
+    public struct LabeledStatement : JSSyntaxNode {
+        public let type: LabeledStatementNodeType
+        public enum LabeledStatementNodeType : String, Codable { case LabeledStatement }
+
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
+    }
+
+    ///    BreakStatement
+    ///
+    ///    interface BreakStatement <: Statement {
+    ///        type: "BreakStatement";
+    ///        label: Identifier | null;
+    ///    }
+    ///    A break statement.
+    public struct BreakStatement : JSSyntaxNode {
+        public let type: BreakStatementNodeType
+        public enum BreakStatementNodeType : String, Codable { case BreakStatement }
+
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
+    }
+
+    ///    ContinueStatement
+    ///
+    ///    interface ContinueStatement <: Statement {
+    ///        type: "ContinueStatement";
+    ///        label: Identifier | null;
+    ///    }
+    ///    A continue statement.
+    public struct ContinueStatement : JSSyntaxNode {
+        public let type: ContinueStatementNodeType
+        public enum ContinueStatementNodeType : String, Codable { case ContinueStatement }
+
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
+    }
+
+    /// MARK: Choice
+
+
+    ///    IfStatement
+    ///
+    ///    interface IfStatement <: Statement {
+    ///        type: "IfStatement";
+    ///        test: Expression;
+    ///        consequent: Statement;
+    ///        alternate: Statement | null;
+    ///    }
+    ///    An if statement.
+    public struct IfStatement : JSSyntaxNode {
+        public let type: IfStatementNodeType
+        public enum IfStatementNodeType : String, Codable { case IfStatement }
+
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
+    }
+
+    ///    SwitchStatement
+    ///
+    ///    interface SwitchStatement <: Statement {
+    ///        type: "SwitchStatement";
+    ///        discriminant: Expression;
+    ///        cases: [ SwitchCase ];
+    ///    }
+    ///    A switch statement.
+    public struct SwitchStatement : JSSyntaxNode {
+        public let type: SwitchStatementNodeType
+        public enum SwitchStatementNodeType : String, Codable { case SwitchStatement }
+
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
+    }
+
+    ///    SwitchCase
+    ///
+    ///    interface SwitchCase <: Node {
+    ///        type: "SwitchCase";
+    ///        test: Expression | null;
+    ///        consequent: [ Statement ];
+    ///    }
+    ///    A case (if test is an Expression) or default (if test === null) clause in the body of a switch statement.
+    public struct SwitchCase : JSSyntaxNode {
+        public let type: SwitchCaseNodeType
+        public enum SwitchCaseNodeType : String, Codable { case SwitchCase }
+
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
+    }
+
+    /// MARK: Exceptions
+
+
+    ///    ThrowStatement
+    ///
+    ///    interface ThrowStatement <: Statement {
+    ///        type: "ThrowStatement";
+    ///        argument: Expression;
+    ///    }
+    ///    A throw statement.
+    public struct ThrowStatement : JSSyntaxNode {
+        public let type: ThrowStatementNodeType
+        public enum ThrowStatementNodeType : String, Codable { case ThrowStatement }
+
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
+    }
+
+    ///    TryStatement
+    ///
+    ///    interface TryStatement <: Statement {
+    ///        type: "TryStatement";
+    ///        block: BlockStatement;
+    ///        handler: CatchClause | null;
+    ///        finalizer: BlockStatement | null;
+    ///    }
+    ///    A try statement. If handler is null then finalizer must be a BlockStatement.
+    public struct TryStatement : JSSyntaxNode {
+        public let type: TryStatementNodeType
+        public enum TryStatementNodeType : String, Codable { case TryStatement }
+
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
+    }
+
+    ///    CatchClause
+    ///
+    ///    interface CatchClause <: Node {
+    ///        type: "CatchClause";
+    ///        param: Pattern;
+    ///        body: BlockStatement;
+    ///    }
+    ///    A catch clause following a try block.
+    public struct CatchClause : JSSyntaxNode {
+        public let type: CatchClauseNodeType
+        public enum CatchClauseNodeType : String, Codable { case CatchClause }
+
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
+    }
+
+    /// MARK: Loops
+
+
+    ///    WhileStatement
+    ///
+    ///    interface WhileStatement <: Statement {
+    ///        type: "WhileStatement";
+    ///        test: Expression;
+    ///        body: Statement;
+    ///    }
+    ///    A while statement.
+    public struct WhileStatement : JSSyntaxNode {
+        public let type: WhileStatementNodeType
+        public enum WhileStatementNodeType : String, Codable { case WhileStatement }
+
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
+    }
+
+    ///    DoWhileStatement
+    ///
+    ///    interface DoWhileStatement <: Statement {
+    ///        type: "DoWhileStatement";
+    ///        body: Statement;
+    ///        test: Expression;
+    ///    }
+    ///    A do/while statement.
+    public struct DoWhileStatement : JSSyntaxNode {
+        public let type: DoWhileStatementNodeType
+        public enum DoWhileStatementNodeType : String, Codable { case DoWhileStatement }
+
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
+    }
+
+    ///    ForStatement
+    ///
+    ///    interface ForStatement <: Statement {
+    ///        type: "ForStatement";
+    ///        init: VariableDeclaration | Expression | null;
+    ///        test: Expression | null;
+    ///        update: Expression | null;
+    ///        body: Statement;
+    ///    }
+    ///    A for statement.
+    public struct ForStatement : JSSyntaxNode {
+        public let type: ForStatementNodeType
+        public enum ForStatementNodeType : String, Codable { case ForStatement }
+
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
+    }
+
+    ///    ForInStatement
+    ///
+    ///    interface ForInStatement <: Statement {
+    ///        type: "ForInStatement";
+    ///        left: VariableDeclaration |  Pattern;
+    ///        right: Expression;
+    ///        body: Statement;
+    ///    }
+    ///    A for/in statement.
+    public struct ForInStatement : JSSyntaxNode {
+        public let type: ForInStatementNodeType
+        public enum ForInStatementNodeType : String, Codable { case ForInStatement }
+
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
+    }
+
+    /// MARK: Declarations
+
+    ///    interface Declaration <: Statement { }
+    ///    Any declaration node. Note that declarations are considered statements; this is because declarations can appear in any statement context.
+    public typealias Declaration = OneOf<Never>
+
+    ///    FunctionDeclaration
+    ///
+    ///    interface FunctionDeclaration <: Function, Declaration {
+    ///        type: "FunctionDeclaration";
+    ///        id: Identifier;
+    ///    }
+    ///    A function declaration. Note that unlike in the parent interface Function, the id cannot be null.
+    public struct FunctionDeclaration : JSSyntaxNode {
+        public let type: FunctionDeclarationNodeType
+        public enum FunctionDeclarationNodeType : String, Codable { case FunctionDeclaration }
+
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
+    }
+
+    ///    VariableDeclaration
+    ///
+    ///    interface VariableDeclaration <: Declaration {
+    ///        type: "VariableDeclaration";
+    ///        declarations: [ VariableDeclarator ];
+    ///        kind: "var";
+    ///    }
+    ///    A variable declaration.
+    public struct VariableDeclaration : JSSyntaxNode {
+        public let type: VariableDeclarationNodeType
+        public enum VariableDeclarationNodeType : String, Codable { case VariableDeclaration }
+
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
+    }
+
+    ///    VariableDeclarator
+    ///
+    ///    interface VariableDeclarator <: Node {
+    ///        type: "VariableDeclarator";
+    ///        id: Pattern;
+    ///        init: Expression | null;
+    ///    }
+    ///    A variable declarator.
+    public struct VariableDeclarator : JSSyntaxNode {
+        public let type: VariableDeclaratorNodeType
+        public enum VariableDeclaratorNodeType : String, Codable { case VariableDeclarator }
+
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
+    }
+
+    // MARK: Expressions
+
+    ///    interface Expression <: Node { }
+    ///    Any expression node. Since the left-hand side of an assignment may be any expression in general, an expression can also be a pattern.
+    public typealias Expression = OneOf<Never>
+
+    ///    ThisExpression
+    ///
+    ///    interface ThisExpression <: Expression {
+    ///        type: "ThisExpression";
+    ///    }
+    ///    A this expression.
+    public struct ThisExpression : JSSyntaxNode {
+        public let type: ThisExpressionNodeType
+        public enum ThisExpressionNodeType : String, Codable { case ThisExpression }
+
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
+    }
+
+    ///    ArrayExpression
+    ///
+    ///    interface ArrayExpression <: Expression {
+    ///        type: "ArrayExpression";
+    ///        elements: [ Expression | null ];
+    ///    }
+    ///    An array expression. An element might be null if it represents a hole in a sparse array. E.g. [1,,2].
+    public struct ArrayExpression : JSSyntaxNode {
+        public let type: ArrayExpressionNodeType
+        public enum ArrayExpressionNodeType : String, Codable { case ArrayExpression }
+
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
+    }
+
+    ///    ObjectExpression
+    ///
+    ///    interface ObjectExpression <: Expression {
+    ///        type: "ObjectExpression";
+    ///        properties: [ Property ];
+    ///    }
+    ///    An object expression.
+    public struct ObjectExpression : JSSyntaxNode {
+        public let type: ObjectExpressionNodeType
+        public enum ObjectExpressionNodeType : String, Codable { case ObjectExpression }
+
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
+    }
+
+    ///    Property
+    ///
+    ///    interface Property <: Node {
+    ///        type: "Property";
+    ///        key: Literal | Identifier;
+    ///        value: Expression;
+    ///        kind: "init" | "get" | "set";
+    ///    }
+    ///    A literal property in an object expression can have either a string or number as its value. Ordinary property initializers have a kind value "init"; getters and setters have the kind values "get" and "set", respectively.
+    public struct Property : JSSyntaxNode {
+        public let type: PropertyNodeType
+        public enum PropertyNodeType : String, Codable { case Property }
+
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
+    }
+
+    ///    FunctionExpression
+    ///
+    ///    interface FunctionExpression <: Function, Expression {
+    ///        type: "FunctionExpression";
+    ///    }
+    ///    A function expression.
+    public struct FunctionExpression : JSSyntaxNode {
+        public let type: FunctionExpressionNodeType
+        public enum FunctionExpressionNodeType : String, Codable { case FunctionExpression }
+
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
+    }
+
+    // MARK: Unary operations
+
+    ///    UnaryExpression
+    ///
+    ///    interface UnaryExpression <: Expression {
+    ///        type: "UnaryExpression";
+    ///        operator: UnaryOperator;
+    ///        prefix: boolean;
+    ///        argument: Expression;
+    ///    }
+    ///    A unary operator expression.
+    public struct UnaryExpression : JSSyntaxNode {
+        ///    UnaryOperator
+        ///
+        ///    enum UnaryOperator {
+        ///        "-" | "+" | "!" | "~" | "typeof" | "void" | "delete"
+        ///    }
+        ///    A unary operator token.
+        public let type: UnaryExpressionNodeType
+        public enum UnaryExpressionNodeType : String, Codable { case UnaryExpression }
+
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
+    }
+
+    ///    UpdateExpression
+    ///
+    ///    interface UpdateExpression <: Expression {
+    ///        type: "UpdateExpression";
+    ///        operator: UpdateOperator;
+    ///        argument: Expression;
+    ///        prefix: boolean;
+    ///    }
+    ///    An update (increment or decrement) operator expression.
+    public struct UpdateExpression : JSSyntaxNode {
+        ///    UpdateOperator
+        ///
+        ///    enum UpdateOperator {
+        ///        "++" | "--"
+        ///    }
+        ///    An update (increment or decrement) operator token.
+        public let type: UpdateExpressionNodeType
+        public enum UpdateExpressionNodeType : String, Codable { case UpdateExpression }
+
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
+    }
+
+
+    // MARK: Binary operations
+
+    ///    BinaryExpression
+    ///
+    ///    interface BinaryExpression <: Expression {
+    ///        type: "BinaryExpression";
+    ///        operator: BinaryOperator;
+    ///        left: Expression;
+    ///        right: Expression;
+    ///    }
+    ///    A binary operator expression.
+    public struct BinaryExpression : JSSyntaxNode {
+        ///    BinaryOperator
+        ///
+        ///    enum BinaryOperator {
+        ///        "==" | "!=" | "===" | "!=="
+        ///             | "<" | "<=" | ">" | ">="
+        ///             | "<<" | ">>" | ">>>"
+        ///             | "+" | "-" | "*" | "/" | "%"
+        ///             | "|" | "^" | "&" | "in"
+        ///             | "instanceof"
+        ///    }
+        ///    A binary operator token.
+        public let type: BinaryExpressionNodeType
+        public enum BinaryExpressionNodeType : String, Codable { case BinaryExpression }
+
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
+    }
+
+
+    ///    AssignmentExpression
+    ///
+    ///    interface AssignmentExpression <: Expression {
+    ///        type: "AssignmentExpression";
+    ///        operator: AssignmentOperator;
+    ///        left: Pattern | Expression;
+    ///        right: Expression;
+    ///    }
+    ///    An assignment operator expression.
+    public struct AssignmentExpression : JSSyntaxNode {
+        ///    AssignmentOperator
+        ///
+        ///    enum AssignmentOperator {
+        ///        "=" | "+=" | "-=" | "*=" | "/=" | "%="
+        ///            | "<<=" | ">>=" | ">>>="
+        ///            | "|=" | "^=" | "&="
+        ///    }
+        ///    An assignment operator token.
+        public let type: AssignmentExpressionNodeType
+        public enum AssignmentExpressionNodeType : String, Codable { case AssignmentExpression }
+
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
+    }
+
+
+    ///    LogicalExpression
+    ///
+    ///    interface LogicalExpression <: Expression {
+    ///        type: "LogicalExpression";
+    ///        operator: LogicalOperator;
+    ///        left: Expression;
+    ///        right: Expression;
+    ///    }
+    ///    A logical operator expression.
+    public struct LogicalExpression : JSSyntaxNode {
+        ///    LogicalOperator
+        ///
+        ///    enum LogicalOperator {
+        ///        "||" | "&&"
+        ///    }
+        ///    A logical operator token.
+        public let type: LogicalExpressionNodeType
+        public enum LogicalExpressionNodeType : String, Codable { case LogicalExpression }
+
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
+    }
+
+
+    ///    MemberExpression
+    ///
+    ///    interface MemberExpression <: Expression, Pattern {
+    ///        type: "MemberExpression";
+    ///        object: Expression;
+    ///        property: Expression;
+    ///        computed: boolean;
+    ///    }
+    ///    A member expression. If computed is true, the node corresponds to a computed (a[b]) member expression and property is an Expression. If computed is false, the node corresponds to a static (a.b) member expression and property is an Identifier.
+    public struct MemberExpression : JSSyntaxNode {
+        public let type: MemberExpressionNodeType
+        public enum MemberExpressionNodeType : String, Codable { case MemberExpression }
+
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
+    }
+
+    ///    ConditionalExpression
+    ///
+    ///    interface ConditionalExpression <: Expression {
+    ///        type: "ConditionalExpression";
+    ///        test: Expression;
+    ///        alternate: Expression;
+    ///        consequent: Expression;
+    ///    }
+    ///    A conditional expression, i.e., a ternary ?/: expression.
+    public struct ConditionalExpression : JSSyntaxNode {
+        public let type: ConditionalExpressionNodeType
+        public enum ConditionalExpressionNodeType : String, Codable { case ConditionalExpression }
+
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
+    }
+
+
+    ///    CallExpression
+    ///
+    ///    interface CallExpression <: Expression {
+    ///        type: "CallExpression";
+    ///        callee: Expression;
+    ///        arguments: [ Expression ];
+    ///    }
+    ///    A function or method call expression.
+    public struct CallExpression : JSSyntaxNode {
+        public let type: CallExpressionNodeType
+        public enum CallExpressionNodeType : String, Codable { case CallExpression }
+
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
+    }
+
+
+    ///    NewExpression
+    ///
+    ///    interface NewExpression <: Expression {
+    ///        type: "NewExpression";
+    ///        callee: Expression;
+    ///        arguments: [ Expression ];
+    ///    }
+    ///    A new expression.
+    public struct NewExpression : JSSyntaxNode {
+        public let type: NewExpressionNodeType
+        public enum NewExpressionNodeType : String, Codable { case NewExpression }
+
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
+    }
+
+
+    ///    SequenceExpression
+    ///
+    ///    interface SequenceExpression <: Expression {
+    ///        type: "SequenceExpression";
+    ///        expressions: [ Expression ];
+    ///    }
+    ///    A sequence expression, i.e., a comma-separated sequence of expressions.
+    public struct SequenceExpression : JSSyntaxNode {
+        public let type: SequenceExpressionNodeType
+        public enum SequenceExpressionNodeType : String, Codable { case SequenceExpression }
+
+        public var loc: SourceLocation? = nil
+        public var range: [Int]? = nil
+    }
+
+
+    ///    Patterns
+    ///
+    ///    Destructuring binding and assignment are not part of ES5, but all binding positions accept Pattern to allow for destructuring in ES6. Nevertheless, for ES5, the only Pattern subtype is Identifier.
+    ///    interface Pattern <: Node { }
+    public typealias Pattern = OneOf<Never>
+
+}
+
+
+
+// ------------------------------------------------------
+// MARK: Deprecated Syntax
+// ------------------------------------------------------
+
+
+
+
+public extension JavaScriptParser {
+    /// Parses a JavaScript script.
+    ///
+    /// More info: [Syntactic Analysis](https://esprima.readthedocs.io/en/4.0/syntactic-analysis.html)
+    @available(*, deprecated, renamed: "parse(script:options:)")
+    func parseJSSyntax(script javaScript: String, options: ParseOptions = .init()) throws -> JSSyntax.Script {
+        return try ctx.trying { // invoke the cached function with the encoded arguments
+            parseScriptFunction.call(withArguments: [ctx.string(javaScript), try ctx.encode(options)])
+        }.toDecodable(ofType: JSSyntax.Script.self)
+    }
+
+
+    /// Parses a JavaScript module.
+    ///
+    /// This differs from `parse(script:)` in that it permits module syntax like imports.
+    ///
+    /// More info: [Syntactic Analysis](https://esprima.readthedocs.io/en/4.0/syntactic-analysis.html)
+    @available(*, deprecated, renamed: "parse(script:module:)")
+    func parseJSSyntax(module javaScript: String, options: ParseOptions = .init()) throws -> JSSyntax.Module {
+        return try ctx.trying { // invoke the cached function with the encoded arguments
+            parseModuleFunction.call(withArguments: [ctx.string(javaScript), try ctx.encode(options)])
+        }.toDecodable(ofType: JSSyntax.Module.self)
+    }
+}
+
+@available(*, deprecated, renamed: "ESTree")
 public enum JSSyntax {
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
-    public struct Script : JSSyntaxAST {
+    public struct Script : JSSyntaxNode {
         public init(type: ProgramNodeType = .Program, body: [StatementListItem], sourceType: String) {
             self.type = type
             self.body = body
             self.sourceType = sourceType
         }
 
-        public var type: ProgramNodeType
+        public let type: ProgramNodeType
         public enum ProgramNodeType : String, Codable { case Program }
         public var body: [StatementListItem]
         public var sourceType: String
@@ -23,14 +861,14 @@ public enum JSSyntax {
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
-    public struct Module : JSSyntaxAST {
+    public struct Module : JSSyntaxNode {
         public init(type: ProgramNodeType = .Program, body: [ModuleItem], sourceType: String) {
             self.type = type
             self.body = body
             self.sourceType = sourceType
         }
 
-        public var type: ProgramNodeType
+        public let type: ProgramNodeType
         public enum ProgramNodeType : String, Codable { case Program }
         public var body: [ModuleItem]
         public var sourceType: String
@@ -40,35 +878,35 @@ public enum JSSyntax {
 
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
-    public struct ArrayExpression : JSSyntaxAST {
-        public init(type: ArrayExpressionNodeType = .ArrayExpression, elements: Array<ArrayExpressionElement>) {
+    public struct ArrayExpression : JSSyntaxNode {
+        public init(type: ArrayExpressionNodeType = .ArrayExpression, elements: Array<Nullable<ArrayExpressionElement>>) {
             self.type = type
             self.elements = elements
         }
 
-        public var type: ArrayExpressionNodeType
+        public let type: ArrayExpressionNodeType
         public enum ArrayExpressionNodeType : String, Codable { case ArrayExpression }
-        public var elements: Array<ArrayExpressionElement>
+        public var elements: Array<Nullable<ArrayExpressionElement>>
         public var loc: SourceLocation? = nil
         public var range: [Int]? = nil
     }
 
     /// https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html#array-pattern
-    public struct ArrayPattern : JSSyntaxAST {
-        public init(type: ArrayPatternNodeType = .ArrayPattern, elements: [ArrayPatternElement]) {
+    public struct ArrayPattern : JSSyntaxNode {
+        public init(type: ArrayPatternNodeType = .ArrayPattern, elements: [Nullable<ArrayPatternElement>]) {
             self.type = type
             self.elements = elements
         }
         
-        public var type: ArrayPatternNodeType
+        public let type: ArrayPatternNodeType
         public enum ArrayPatternNodeType : String, Codable { case ArrayPattern }
-        public var elements: [ArrayPatternElement]
+        public var elements: [Nullable<ArrayPatternElement>]
         public var loc: SourceLocation? = nil
         public var range: [Int]? = nil
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
-    public struct ArrowFunctionExpression : JSSyntaxAST {
+    public struct ArrowFunctionExpression : JSSyntaxNode {
         public init(type: ArrowFunctionExpressionNodeType = .ArrowFunctionExpression, id: Optional<Identifier>, params: [FunctionParameter], body: OneOf<BlockStatement>.Or<Expression>, generator: Bool, expression: Bool, async: Bool) {
             self.type = type
             self.id = id
@@ -79,7 +917,7 @@ public enum JSSyntax {
             self.async = async
         }
 
-        public var type: ArrowFunctionExpressionNodeType
+        public let type: ArrowFunctionExpressionNodeType
         public enum ArrowFunctionExpressionNodeType : String, Codable { case ArrowFunctionExpression }
         public var id: Optional<Identifier>
         public var params: [FunctionParameter]
@@ -92,7 +930,7 @@ public enum JSSyntax {
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
-    public struct AssignmentExpression : JSSyntaxAST {
+    public struct AssignmentExpression : JSSyntaxNode {
         public init(type: AssignmentExpressionNodeType = .AssignmentExpression, operator: String, left: Expression, right: Expression) {
             self.type = type
             self.`operator` = `operator`
@@ -100,7 +938,7 @@ public enum JSSyntax {
             self.right = right
         }
 
-        public var type: AssignmentExpressionNodeType
+        public let type: AssignmentExpressionNodeType
         public enum AssignmentExpressionNodeType : String, Codable { case AssignmentExpression}
         public var `operator`: String
         public var left: Expression
@@ -110,14 +948,14 @@ public enum JSSyntax {
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
-    public struct AssignmentPattern : JSSyntaxAST {
+    public struct AssignmentPattern : JSSyntaxNode {
         public init(type: AssignmentPatternNodeType = .AssignmentPattern, left: OneOf<BindingIdentifier>.Or<BindingPattern>, right: Expression) {
             self.type = type
             self.left = left
             self.right = right
         }
 
-        public var type: AssignmentPatternNodeType
+        public let type: AssignmentPatternNodeType
         public enum AssignmentPatternNodeType : String, Codable { case AssignmentPattern }
         public var left: OneOf<BindingIdentifier>.Or<BindingPattern>
         public var right: Expression
@@ -126,7 +964,7 @@ public enum JSSyntax {
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
-    public struct AsyncArrowFunctionExpression : JSSyntaxAST {
+    public struct AsyncArrowFunctionExpression : JSSyntaxNode {
         public init(type: AsyncArrowFunctionExpressionNodeType = .AsyncArrowFunctionExpression, id: Optional<Identifier>, params: [FunctionParameter], body: OneOf<BlockStatement>.Or<Expression>, generator: Bool, expression: Bool, async: Bool) {
             self.type = type
             self.id = id
@@ -137,7 +975,7 @@ public enum JSSyntax {
             self.async = async
         }
 
-        public var type: AsyncArrowFunctionExpressionNodeType
+        public let type: AsyncArrowFunctionExpressionNodeType
         public enum AsyncArrowFunctionExpressionNodeType : String, Codable { case AsyncArrowFunctionExpression }
         public var id: Optional<Identifier>
         public var params: [FunctionParameter]
@@ -150,7 +988,7 @@ public enum JSSyntax {
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
-    public struct AsyncFunctionDeclaration : JSSyntaxAST {
+    public struct AsyncFunctionDeclaration : JSSyntaxNode {
         public init(type: AsyncFunctionDeclarationNodeType = .AsyncFunctionDeclaration, id: Optional<Identifier>, params: [FunctionParameter], body: BlockStatement, generator: Bool, expression: Bool, async: Bool) {
             self.type = type
             self.id = id
@@ -161,7 +999,7 @@ public enum JSSyntax {
             self.async = async
         }
 
-        public var type: AsyncFunctionDeclarationNodeType
+        public let type: AsyncFunctionDeclarationNodeType
         public enum AsyncFunctionDeclarationNodeType : String, Codable { case AsyncFunctionDeclaration }
         public var id: Optional<Identifier>
         public var params: [FunctionParameter]
@@ -174,7 +1012,7 @@ public enum JSSyntax {
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
-    public struct AsyncFunctionExpression : JSSyntaxAST {
+    public struct AsyncFunctionExpression : JSSyntaxNode {
         public init(type: AsyncFunctionExpressionNodeType = .AsyncFunctionExpression, id: Optional<Identifier>, params: [FunctionParameter], body: BlockStatement, generator: Bool, expression: Bool, async: Bool) {
             self.type = type
             self.id = id
@@ -185,7 +1023,7 @@ public enum JSSyntax {
             self.async = async
         }
 
-        public var type: AsyncFunctionExpressionNodeType
+        public let type: AsyncFunctionExpressionNodeType
         public enum AsyncFunctionExpressionNodeType : String, Codable { case AsyncFunctionExpression }
         public var id: Optional<Identifier>
         public var params: [FunctionParameter]
@@ -198,13 +1036,13 @@ public enum JSSyntax {
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
-    public struct AwaitExpression : JSSyntaxAST {
+    public struct AwaitExpression : JSSyntaxNode {
         public init(type: AwaitExpressionNodeType = .AwaitExpression, argument: Expression) {
             self.type = type
             self.argument = argument
         }
 
-        public var type: AwaitExpressionNodeType
+        public let type: AwaitExpressionNodeType
         public enum AwaitExpressionNodeType : String, Codable { case AwaitExpression }
         public var argument: Expression
         public var loc: SourceLocation? = nil
@@ -212,7 +1050,7 @@ public enum JSSyntax {
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
-    public struct BinaryExpression : JSSyntaxAST {
+    public struct BinaryExpression : JSSyntaxNode {
         public init(type: BinaryExpressionNodeType = .BinaryExpression, `operator`: String, left: Expression, right: Expression) {
             self.type = type
             self.`operator` = `operator`
@@ -220,7 +1058,7 @@ public enum JSSyntax {
             self.right = right
         }
 
-        public var type: BinaryExpressionNodeType
+        public let type: BinaryExpressionNodeType
         public enum BinaryExpressionNodeType : String, Codable { case BinaryExpression }
         public var `operator`: String
         public var left: Expression
@@ -230,7 +1068,7 @@ public enum JSSyntax {
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
-    public struct LogicalExpression : JSSyntaxAST {
+    public struct LogicalExpression : JSSyntaxNode {
         public init(type: LogicalExpressionNodeType = .LogicalExpression, `operator`: String, left: Expression, right: Expression) {
             self.type = type
             self.`operator` = `operator`
@@ -238,7 +1076,7 @@ public enum JSSyntax {
             self.right = right
         }
 
-        public var type: LogicalExpressionNodeType
+        public let type: LogicalExpressionNodeType
         public enum LogicalExpressionNodeType : String, Codable { case LogicalExpression }
         public var `operator`: String
         public var left: Expression
@@ -248,13 +1086,13 @@ public enum JSSyntax {
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
-    public struct BlockStatement : JSSyntaxAST {
+    public struct BlockStatement : JSSyntaxNode {
         public init(type: BlockStatementNodeType = .BlockStatement, body: [StatementListItem]) {
             self.type = type
             self.body = body
         }
 
-        public var type: BlockStatementNodeType
+        public let type: BlockStatementNodeType
         public enum BlockStatementNodeType : String, Codable { case BlockStatement }
         public var body: [StatementListItem]
         public var loc: SourceLocation? = nil
@@ -262,13 +1100,13 @@ public enum JSSyntax {
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
-    public struct BreakStatement : JSSyntaxAST {
+    public struct BreakStatement : JSSyntaxNode {
         public init(type: BreakStatementNodeType = .BreakStatement, label: Optional<Identifier>) {
             self.type = type
             self.label = label
         }
 
-        public var type: BreakStatementNodeType
+        public let type: BreakStatementNodeType
         public enum BreakStatementNodeType : String, Codable { case BreakStatement }
         public var label: Optional<Identifier>
         public var loc: SourceLocation? = nil
@@ -276,14 +1114,14 @@ public enum JSSyntax {
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
-    public struct CallExpression : JSSyntaxAST {
+    public struct CallExpression : JSSyntaxNode {
         public init(type: CallExpressionNodeType = .CallExpression, callee: OneOf<Expression>.Or<Import>, arguments: [ArgumentListElement]) {
             self.type = type
             self.callee = callee
             self.arguments = arguments
         }
 
-        public var type: CallExpressionNodeType
+        public let type: CallExpressionNodeType
         public enum CallExpressionNodeType : String, Codable { case CallExpression }
         public var callee: OneOf<Expression>.Or<Import>
         public var arguments: [ArgumentListElement]
@@ -292,14 +1130,14 @@ public enum JSSyntax {
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
-    public struct CatchClause : JSSyntaxAST {
+    public struct CatchClause : JSSyntaxNode {
         public init(type: CatchClauseNodeType = .CatchClause, param: OneOf<BindingIdentifier>.Or<BindingPattern>, body: BlockStatement) {
             self.type = type
             self.param = param
             self.body = body
         }
 
-        public var type: CatchClauseNodeType
+        public let type: CatchClauseNodeType
         public enum CatchClauseNodeType : String, Codable { case CatchClause }
         public var param: OneOf<BindingIdentifier>.Or<BindingPattern>
         public var body: BlockStatement
@@ -308,13 +1146,13 @@ public enum JSSyntax {
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
-    public struct ChainExpression : JSSyntaxAST {
+    public struct ChainExpression : JSSyntaxNode {
         public init(type: ChainExpressionNodeType = .ChainExpression, expression: ChainElement) {
             self.type = type
             self.expression = expression
         }
 
-        public var type: ChainExpressionNodeType
+        public let type: ChainExpressionNodeType
         public enum ChainExpressionNodeType : String, Codable { case ChainExpression }
         public var expression: ChainElement
         public var loc: SourceLocation? = nil
@@ -322,13 +1160,13 @@ public enum JSSyntax {
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
-    public struct ClassBody : JSSyntaxAST {
+    public struct ClassBody : JSSyntaxNode {
         public init(type: ClassBodyNodeType = .ClassBody, body: [MethodDefinition]) {
             self.type = type
             self.body = body
         }
 
-        public var type: ClassBodyNodeType
+        public let type: ClassBodyNodeType
         public enum ClassBodyNodeType : String, Codable { case ClassBody }
         public var body: [MethodDefinition]
         public var loc: SourceLocation? = nil
@@ -336,7 +1174,7 @@ public enum JSSyntax {
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
-    public struct ClassDeclaration : JSSyntaxAST {
+    public struct ClassDeclaration : JSSyntaxNode {
         public init(type: ClassDeclarationNodeType = .ClassDeclaration, id: Optional<Identifier>, superClass: Optional<Identifier>, body: ClassBody) {
             self.type = type
             self.id = id
@@ -344,7 +1182,7 @@ public enum JSSyntax {
             self.body = body
         }
 
-        public var type: ClassDeclarationNodeType
+        public let type: ClassDeclarationNodeType
         public enum ClassDeclarationNodeType : String, Codable { case ClassDeclaration }
         public var id: Optional<Identifier>
         public var superClass: Optional<Identifier>
@@ -354,7 +1192,7 @@ public enum JSSyntax {
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
-    public struct ClassExpression : JSSyntaxAST {
+    public struct ClassExpression : JSSyntaxNode {
         public init(type: ClassExpressionNodeType = .ClassExpression, id: Optional<Identifier>, superClass: Optional<Identifier>, body: ClassBody) {
             self.type = type
             self.id = id
@@ -362,7 +1200,7 @@ public enum JSSyntax {
             self.body = body
         }
 
-        public var type: ClassExpressionNodeType
+        public let type: ClassExpressionNodeType
         public enum ClassExpressionNodeType : String, Codable { case ClassExpression }
         public var id: Optional<Identifier>
         public var superClass: Optional<Identifier>
@@ -372,7 +1210,7 @@ public enum JSSyntax {
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
-    public struct ComputedMemberExpression : JSSyntaxAST {
+    public struct ComputedMemberExpression : JSSyntaxNode {
         public init(type: ComputedMemberExpressionNodeType = .ComputedMemberExpression, computed: Bool, object: Expression, property: Expression) {
             self.type = type
             self.computed = computed
@@ -380,7 +1218,7 @@ public enum JSSyntax {
             self.property = property
         }
 
-        public var type: ComputedMemberExpressionNodeType
+        public let type: ComputedMemberExpressionNodeType
         public enum ComputedMemberExpressionNodeType : String, Codable { case ComputedMemberExpression }
         public var computed: Bool
         public var object: Expression
@@ -390,7 +1228,7 @@ public enum JSSyntax {
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
-    public struct ConditionalExpression : JSSyntaxAST {
+    public struct ConditionalExpression : JSSyntaxNode {
         public init(type: ConditionalExpressionNodeType = .ConditionalExpression, test: Expression, consequent: Expression, alternate: Expression) {
             self.type = type
             self.test = test
@@ -398,7 +1236,7 @@ public enum JSSyntax {
             self.alternate = alternate
         }
 
-        public var type: ConditionalExpressionNodeType
+        public let type: ConditionalExpressionNodeType
         public enum ConditionalExpressionNodeType : String, Codable { case ConditionalExpression }
         public var test: Expression
         public var consequent: Expression
@@ -408,13 +1246,13 @@ public enum JSSyntax {
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
-    public struct ContinueStatement : JSSyntaxAST {
+    public struct ContinueStatement : JSSyntaxNode {
         public init(type: ContinueStatementNodeType = .ContinueStatement, label: Optional<Identifier>) {
             self.type = type
             self.label = label
         }
 
-        public var type: ContinueStatementNodeType
+        public let type: ContinueStatementNodeType
         public enum ContinueStatementNodeType : String, Codable { case ContinueStatement }
         public var label: Optional<Identifier>
         public var loc: SourceLocation? = nil
@@ -422,26 +1260,26 @@ public enum JSSyntax {
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
-    public struct DebuggerStatement : JSSyntaxAST {
+    public struct DebuggerStatement : JSSyntaxNode {
         public init(type: DebuggerStatementNodeType = .DebuggerStatement) {
             self.type = type
         }
 
-        public var type: DebuggerStatementNodeType
+        public let type: DebuggerStatementNodeType
         public enum DebuggerStatementNodeType : String, Codable { case DebuggerStatement }
         public var loc: SourceLocation? = nil
         public var range: [Int]? = nil
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
-    public struct Directive : JSSyntaxAST {
+    public struct Directive : JSSyntaxNode {
         public init(type: DirectiveNodeType = .Directive, expression: Expression, directive: String) {
             self.type = type
             self.expression = expression
             self.directive = directive
         }
 
-        public var type: DirectiveNodeType
+        public let type: DirectiveNodeType
         public enum DirectiveNodeType : String, Codable { case Directive }
         public var expression: Expression
         public var directive: String
@@ -450,14 +1288,14 @@ public enum JSSyntax {
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
-    public struct DoWhileStatement : JSSyntaxAST {
+    public struct DoWhileStatement : JSSyntaxNode {
         public init(type: DoWhileStatementNodeType = .DoWhileStatement, body: Statement, test: Expression) {
             self.type = type
             self.body = body
             self.test = test
         }
 
-        public var type: DoWhileStatementNodeType
+        public let type: DoWhileStatementNodeType
         public enum DoWhileStatementNodeType : String, Codable { case DoWhileStatement }
         public var body: Statement
         public var test: Expression
@@ -466,25 +1304,25 @@ public enum JSSyntax {
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
-    public struct EmptyStatement : JSSyntaxAST {
+    public struct EmptyStatement : JSSyntaxNode {
         public init(type: EmptyStatementNodeType = .EmptyStatement) {
             self.type = type
         }
 
-        public var type: EmptyStatementNodeType
+        public let type: EmptyStatementNodeType
         public enum EmptyStatementNodeType : String, Codable { case EmptyStatement }
         public var loc: SourceLocation? = nil
         public var range: [Int]? = nil
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
-    public struct ExportAllDeclaration : JSSyntaxAST {
+    public struct ExportAllDeclaration : JSSyntaxNode {
         public init(type: ExportAllDeclarationNodeType = .ExportAllDeclaration, source: Literal) {
             self.type = type
             self.source = source
         }
 
-        public var type: ExportAllDeclarationNodeType
+        public let type: ExportAllDeclarationNodeType
         public enum ExportAllDeclarationNodeType : String, Codable { case ExportAllDeclaration }
         public var source: Literal
         public var loc: SourceLocation? = nil
@@ -492,13 +1330,13 @@ public enum JSSyntax {
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
-    public struct ExportDefaultDeclaration : JSSyntaxAST {
+    public struct ExportDefaultDeclaration : JSSyntaxNode {
         public init(type: ExportDefaultDeclarationNodeType = .ExportDefaultDeclaration, declaration: ExportableDefaultDeclaration) {
             self.type = type
             self.declaration = declaration
         }
 
-        public var type: ExportDefaultDeclarationNodeType
+        public let type: ExportDefaultDeclarationNodeType
         public enum ExportDefaultDeclarationNodeType : String, Codable { case ExportDefaultDeclaration }
         public var declaration: ExportableDefaultDeclaration
         public var loc: SourceLocation? = nil
@@ -506,7 +1344,7 @@ public enum JSSyntax {
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
-    public struct ExportNamedDeclaration : JSSyntaxAST {
+    public struct ExportNamedDeclaration : JSSyntaxNode {
         public init(type: ExportNamedDeclarationNodeType = .ExportNamedDeclaration, declaration: Optional<ExportableNamedDeclaration>, specifiers: [ExportSpecifier], source: Optional<Literal>) {
             self.type = type
             self.declaration = declaration
@@ -514,7 +1352,7 @@ public enum JSSyntax {
             self.source = source
         }
 
-        public var type: ExportNamedDeclarationNodeType
+        public let type: ExportNamedDeclarationNodeType
         public enum ExportNamedDeclarationNodeType : String, Codable { case ExportNamedDeclaration }
         public var declaration: Optional<ExportableNamedDeclaration>
         public var specifiers: [ExportSpecifier]
@@ -524,14 +1362,14 @@ public enum JSSyntax {
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
-    public struct ExportSpecifier : JSSyntaxAST {
+    public struct ExportSpecifier : JSSyntaxNode {
         public init(type: ExportSpecifierNodeType = .ExportSpecifier, exported: Identifier, local: Identifier) {
             self.type = type
             self.exported = exported
             self.local = local
         }
 
-        public var type: ExportSpecifierNodeType
+        public let type: ExportSpecifierNodeType
         public enum ExportSpecifierNodeType : String, Codable { case ExportSpecifier }
         public var exported: Identifier
         public var local: Identifier
@@ -540,14 +1378,14 @@ public enum JSSyntax {
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
-    public struct ExpressionStatement : JSSyntaxAST {
+    public struct ExpressionStatement : JSSyntaxNode {
         public init(type: ExpressionStatementNodeType = .ExpressionStatement, expression: Expression, directive: String?) {
             self.type = type
             self.expression = expression
             self.directive = directive
         }
 
-        public var type: ExpressionStatementNodeType
+        public let type: ExpressionStatementNodeType
         public enum ExpressionStatementNodeType : String, Codable { case ExpressionStatement }
         public var expression: Expression
         public var directive: String?
@@ -556,7 +1394,7 @@ public enum JSSyntax {
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
-    public struct ForInStatement : JSSyntaxAST {
+    public struct ForInStatement : JSSyntaxNode {
         public init(type: ForInStatementNodeType = .ForInStatement, left: OneOf<VariableDeclaration>.Or<Expression>, right: Expression, body: Statement, each: Bool) {
             self.type = type
             self.left = left
@@ -565,7 +1403,7 @@ public enum JSSyntax {
             self.each = each
         }
 
-        public var type: ForInStatementNodeType
+        public let type: ForInStatementNodeType
         public enum ForInStatementNodeType : String, Codable { case ForInStatement }
         public var left: OneOf<VariableDeclaration>.Or<Expression>
         public var right: Expression
@@ -576,7 +1414,7 @@ public enum JSSyntax {
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
-    public struct ForOfStatement : JSSyntaxAST {
+    public struct ForOfStatement : JSSyntaxNode {
         public init(type: ForOfStatementNodeType = .ForOfStatement, left: OneOf<VariableDeclaration>.Or<Expression>, right: Expression, body: Statement) {
             self.type = type
             self.left = left
@@ -584,7 +1422,7 @@ public enum JSSyntax {
             self.body = body
         }
 
-        public var type: ForOfStatementNodeType
+        public let type: ForOfStatementNodeType
         public enum ForOfStatementNodeType : String, Codable { case ForOfStatement }
         public var left: OneOf<VariableDeclaration>.Or<Expression>
         public var right: Expression
@@ -594,8 +1432,8 @@ public enum JSSyntax {
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
-    public struct ForStatement : JSSyntaxAST {
-        public init(type: ForStatementNodeType = .ForStatement, `init`: Optional<OneOf<VariableDeclaration>.Or<Expression>>, test: Optional<Expression>, update: Optional<Expression>, body: Statement) {
+    public struct ForStatement : JSSyntaxNode {
+        public init(type: ForStatementNodeType = .ForStatement, `init`: Nullable<OneOf<VariableDeclaration>.Or<Expression>>, test: Nullable<Expression>, update: Nullable<Expression>, body: Statement) {
             self.type = type
             self.`init` = `init`
             self.test = test
@@ -603,18 +1441,18 @@ public enum JSSyntax {
             self.body = body
         }
 
-        public var type: ForStatementNodeType
+        public let type: ForStatementNodeType
         public enum ForStatementNodeType : String, Codable { case ForStatement }
-        public var `init`: Optional<OneOf<VariableDeclaration>.Or<Expression>>
-        public var test: Optional<Expression>
-        public var update: Optional<Expression>
+        public var `init`: Nullable<OneOf<VariableDeclaration>.Or<Expression>>
+        public var test: Nullable<Expression>
+        public var update: Nullable<Expression>
         public var body: Statement
         public var loc: SourceLocation? = nil
         public var range: [Int]? = nil
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
-    public struct FunctionDeclaration : JSSyntaxAST {
+    public struct FunctionDeclaration : JSSyntaxNode {
         public init(type: FunctionDeclarationNodeType = .FunctionDeclaration, id: Optional<Identifier>, params: [FunctionParameter], body: BlockStatement, generator: Bool, expression: Bool, async: Bool) {
             self.type = type
             self.id = id
@@ -625,7 +1463,7 @@ public enum JSSyntax {
             self.async = async
         }
 
-        public var type: FunctionDeclarationNodeType
+        public let type: FunctionDeclarationNodeType
         public enum FunctionDeclarationNodeType : String, Codable { case FunctionDeclaration }
         public var id: Optional<Identifier>
         public var params: [FunctionParameter]
@@ -638,7 +1476,7 @@ public enum JSSyntax {
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
-    public struct FunctionExpression : JSSyntaxAST {
+    public struct FunctionExpression : JSSyntaxNode {
         public init(type: FunctionExpressionNodeType = .FunctionExpression, id: Optional<Identifier>, params: [FunctionParameter], body: BlockStatement, generator: Bool, expression: Bool, async: Bool) {
             self.type = type
             self.id = id
@@ -649,7 +1487,7 @@ public enum JSSyntax {
             self.async = async
         }
 
-        public var type: FunctionExpressionNodeType
+        public let type: FunctionExpressionNodeType
         public enum FunctionExpressionNodeType : String, Codable { case FunctionExpression }
         public var id: Optional<Identifier>
         public var params: [FunctionParameter]
@@ -662,13 +1500,13 @@ public enum JSSyntax {
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
-    public struct Identifier : JSSyntaxAST {
+    public struct Identifier : JSSyntaxNode {
         public init(type: IdentifierNodeType = .Identifier, name: String) {
             self.type = type
             self.name = name
         }
 
-        public var type: IdentifierNodeType
+        public let type: IdentifierNodeType
         public enum IdentifierNodeType : String, Codable { case Identifier }
         public var name: String
         public var loc: SourceLocation? = nil
@@ -676,7 +1514,7 @@ public enum JSSyntax {
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
-    public struct IfStatement : JSSyntaxAST {
+    public struct IfStatement : JSSyntaxNode {
         public init(type: IfStatementNodeType = .IfStatement, test: Expression, consequent: Statement, alternate: Optional<Statement>) {
             self.type = type
             self.test = test
@@ -684,7 +1522,7 @@ public enum JSSyntax {
             self.alternate = alternate
         }
 
-        public var type: IfStatementNodeType
+        public let type: IfStatementNodeType
         public enum IfStatementNodeType : String, Codable { case IfStatement }
         public var test: Expression
         public var consequent: Statement
@@ -694,26 +1532,26 @@ public enum JSSyntax {
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
-    public struct Import : JSSyntaxAST {
+    public struct Import : JSSyntaxNode {
         public init(type: ImportNodeType = .Import) {
             self.type = type
         }
 
-        public var type: ImportNodeType
+        public let type: ImportNodeType
         public enum ImportNodeType : String, Codable { case Import }
         public var loc: SourceLocation? = nil
         public var range: [Int]? = nil
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
-    public struct ImportDeclaration : JSSyntaxAST {
+    public struct ImportDeclaration : JSSyntaxNode {
         public init(type: ImportDeclarationNodeType = .ImportDeclaration, specifiers: [ImportDeclarationSpecifier], source: Literal) {
             self.type = type
             self.specifiers = specifiers
             self.source = source
         }
 
-        public var type: ImportDeclarationNodeType
+        public let type: ImportDeclarationNodeType
         public enum ImportDeclarationNodeType : String, Codable { case ImportDeclaration }
         public var specifiers: [ImportDeclarationSpecifier]
         public var source: Literal
@@ -722,13 +1560,13 @@ public enum JSSyntax {
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
-    public struct ImportDefaultSpecifier : JSSyntaxAST {
+    public struct ImportDefaultSpecifier : JSSyntaxNode {
         public init(type: ImportDefaultSpecifierNodeType = .ImportDefaultSpecifier, local: Identifier) {
             self.type = type
             self.local = local
         }
 
-        public var type: ImportDefaultSpecifierNodeType
+        public let type: ImportDefaultSpecifierNodeType
         public enum ImportDefaultSpecifierNodeType : String, Codable { case ImportDefaultSpecifier }
         public var local: Identifier
         public var loc: SourceLocation? = nil
@@ -736,13 +1574,13 @@ public enum JSSyntax {
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
-    public struct ImportNamespaceSpecifier : JSSyntaxAST {
+    public struct ImportNamespaceSpecifier : JSSyntaxNode {
         public init(type: ImportNamespaceSpecifierNodeType = .ImportNamespaceSpecifier, local: Identifier) {
             self.type = type
             self.local = local
         }
 
-        public var type: ImportNamespaceSpecifierNodeType
+        public let type: ImportNamespaceSpecifierNodeType
         public enum ImportNamespaceSpecifierNodeType : String, Codable { case ImportNamespaceSpecifier }
         public var local: Identifier
         public var loc: SourceLocation? = nil
@@ -750,14 +1588,14 @@ public enum JSSyntax {
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
-    public struct ImportSpecifier : JSSyntaxAST {
+    public struct ImportSpecifier : JSSyntaxNode {
         public init(type: ImportSpecifierNodeType = .ImportSpecifier, local: Identifier, imported: Identifier) {
             self.type = type
             self.local = local
             self.imported = imported
         }
 
-        public var type: ImportSpecifierNodeType
+        public let type: ImportSpecifierNodeType
         public enum ImportSpecifierNodeType : String, Codable { case ImportSpecifier }
         public var local: Identifier
         public var imported: Identifier
@@ -766,14 +1604,14 @@ public enum JSSyntax {
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
-    public struct LabeledStatement : JSSyntaxAST {
+    public struct LabeledStatement : JSSyntaxNode {
         public init(type: LabeledStatementNodeType = .LabeledStatement, label: Identifier, body: Statement) {
             self.type = type
             self.label = label
             self.body = body
         }
 
-        public var type: LabeledStatementNodeType
+        public let type: LabeledStatementNodeType
         public enum LabeledStatementNodeType : String, Codable { case LabeledStatement }
         public var label: Identifier
         public var body: Statement
@@ -782,7 +1620,7 @@ public enum JSSyntax {
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
-    public struct Literal : JSSyntaxAST {
+    public struct Literal : JSSyntaxNode {
         public init(type: LiteralNodeType = .Literal, value: Optional<OneOf<Bool>.Or<Double>.Or<String>.Or<RegExp>>, raw: String, regex: Optional<Regex>) {
             self.type = type
             self.value = value
@@ -790,7 +1628,7 @@ public enum JSSyntax {
             self.regex = regex
         }
 
-        public var type: LiteralNodeType
+        public let type: LiteralNodeType
         public enum LiteralNodeType : String, Codable { case Literal }
         public var value: Optional<OneOf<Bool>.Or<Double>.Or<String>.Or<RegExp>>
         public var raw: String
@@ -805,7 +1643,7 @@ public enum JSSyntax {
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
-    public struct MemberExpression : JSSyntaxAST {
+    public struct MemberExpression : JSSyntaxNode {
         public init(type: MemberExpressionNodeType = .MemberExpression, computed: Bool, object: Expression, property: Expression) {
             self.type = type
             self.computed = computed
@@ -813,7 +1651,7 @@ public enum JSSyntax {
             self.property = property
         }
 
-        public var type: MemberExpressionNodeType
+        public let type: MemberExpressionNodeType
         public enum MemberExpressionNodeType : String, Codable { case MemberExpression }
         public var computed: Bool
         public var object: Expression
@@ -824,14 +1662,14 @@ public enum JSSyntax {
 
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
-    public struct MetaProperty : JSSyntaxAST {
+    public struct MetaProperty : JSSyntaxNode {
         public init(type: MetaPropertyNodeType = .MetaProperty, meta: Identifier, property: Identifier) {
             self.type = type
             self.meta = meta
             self.property = property
         }
 
-        public var type: MetaPropertyNodeType
+        public let type: MetaPropertyNodeType
         public enum MetaPropertyNodeType : String, Codable { case MetaProperty }
         public var meta: Identifier
         public var property: Identifier
@@ -840,7 +1678,7 @@ public enum JSSyntax {
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
-    public struct MethodDefinition : JSSyntaxAST {
+    public struct MethodDefinition : JSSyntaxNode {
         public init(type: MethodDefinitionNodeType = .MethodDefinition, key: Optional<Expression>, computed: Bool, value: Optional<OneOf<AsyncFunctionExpression>.Or<FunctionExpression>>, kind: MethodDefinitionKind, `static`: Bool) {
             self.type = type
             self.key = key
@@ -850,7 +1688,7 @@ public enum JSSyntax {
             self.`static` = `static`
         }
 
-        public var type: MethodDefinitionNodeType
+        public let type: MethodDefinitionNodeType
         public enum MethodDefinitionNodeType : String, Codable { case MethodDefinition }
         public var key: Optional<Expression>
         public var computed: Bool
@@ -863,14 +1701,14 @@ public enum JSSyntax {
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
-    public struct NewExpression : JSSyntaxAST {
+    public struct NewExpression : JSSyntaxNode {
         public init(type: NewExpressionNodeType = .NewExpression, callee: Expression, arguments: [ArgumentListElement]) {
             self.type = type
             self.callee = callee
             self.arguments = arguments
         }
 
-        public var type: NewExpressionNodeType
+        public let type: NewExpressionNodeType
         public enum NewExpressionNodeType : String, Codable { case NewExpression }
         public var callee: Expression
         public var arguments: [ArgumentListElement]
@@ -879,13 +1717,13 @@ public enum JSSyntax {
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
-    public struct ObjectExpression : JSSyntaxAST {
+    public struct ObjectExpression : JSSyntaxNode {
         public init(type: ObjectExpressionNodeType = .ObjectExpression, properties: [ObjectExpressionProperty]) {
             self.type = type
             self.properties = properties
         }
 
-        public var type: ObjectExpressionNodeType
+        public let type: ObjectExpressionNodeType
         public enum ObjectExpressionNodeType : String, Codable { case ObjectExpression }
         public var properties: [ObjectExpressionProperty]
         public var loc: SourceLocation? = nil
@@ -893,13 +1731,13 @@ public enum JSSyntax {
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
-    public struct ObjectPattern : JSSyntaxAST {
+    public struct ObjectPattern : JSSyntaxNode {
         public init(type: ObjectPatternNodeType = .ObjectPattern, properties: [ObjectPatternProperty]) {
             self.type = type
             self.properties = properties
         }
 
-        public var type: ObjectPatternNodeType
+        public let type: ObjectPatternNodeType
         public enum ObjectPatternNodeType : String, Codable { case ObjectPattern }
         public var properties: [ObjectPatternProperty]
         public var loc: SourceLocation? = nil
@@ -907,7 +1745,7 @@ public enum JSSyntax {
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
-    public struct Property : JSSyntaxAST {
+    public struct Property : JSSyntaxNode {
         public init(type: PropertyNodeType = .Property, key: PropertyKey, computed: Bool, value: Optional<Expression>, kind: String, method: Bool, shorthand: Bool) {
             self.type = type
             self.key = key
@@ -918,7 +1756,7 @@ public enum JSSyntax {
             self.shorthand = shorthand
         }
 
-        public var type: PropertyNodeType
+        public let type: PropertyNodeType
         public enum PropertyNodeType : String, Codable { case Property }
         public var key: PropertyKey
         public var computed: Bool
@@ -931,7 +1769,7 @@ public enum JSSyntax {
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
-    public struct RegexLiteral : JSSyntaxAST {
+    public struct RegexLiteral : JSSyntaxNode {
         public init(type: RegexLiteralNodeType = .RegexLiteral, value: Bric, raw: String, regex: Regex) {
             self.type = type
             self.value = value
@@ -939,7 +1777,7 @@ public enum JSSyntax {
             self.regex = regex
         }
 
-        public var type: RegexLiteralNodeType
+        public let type: RegexLiteralNodeType
         public enum RegexLiteralNodeType : String, Codable { case RegexLiteral }
         public var value: Bric; // RegExp
         public var raw: String
@@ -949,13 +1787,13 @@ public enum JSSyntax {
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
-    public struct RestElement : JSSyntaxAST {
+    public struct RestElement : JSSyntaxNode {
         public init(type: RestElementNodeType = .RestElement, argument: OneOf<BindingIdentifier>.Or<BindingPattern>) {
             self.type = type
             self.argument = argument
         }
 
-        public var type: RestElementNodeType
+        public let type: RestElementNodeType
         public enum RestElementNodeType : String, Codable { case RestElement }
         public var argument: OneOf<BindingIdentifier>.Or<BindingPattern>
         public var loc: SourceLocation? = nil
@@ -963,13 +1801,13 @@ public enum JSSyntax {
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
-    public struct ReturnStatement : JSSyntaxAST {
+    public struct ReturnStatement : JSSyntaxNode {
         public init(type: ReturnStatementNodeType = .ReturnStatement, argument: Optional<Expression>) {
             self.type = type
             self.argument = argument
         }
 
-        public var type: ReturnStatementNodeType
+        public let type: ReturnStatementNodeType
         public enum ReturnStatementNodeType : String, Codable { case ReturnStatement }
         public var argument: Optional<Expression>
         public var loc: SourceLocation? = nil
@@ -977,13 +1815,13 @@ public enum JSSyntax {
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
-    public struct SequenceExpression : JSSyntaxAST {
+    public struct SequenceExpression : JSSyntaxNode {
         public init(type: SequenceExpressionNodeType = .SequenceExpression, expressions: [Expression]) {
             self.type = type
             self.expressions = expressions
         }
 
-        public var type: SequenceExpressionNodeType
+        public let type: SequenceExpressionNodeType
         public enum SequenceExpressionNodeType : String, Codable { case SequenceExpression }
         public var expressions: [Expression]
         public var loc: SourceLocation? = nil
@@ -991,13 +1829,13 @@ public enum JSSyntax {
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
-    public struct SpreadElement : JSSyntaxAST {
+    public struct SpreadElement : JSSyntaxNode {
         public init(type: SpreadElementNodeType = .SpreadElement, argument: Expression) {
             self.type = type
             self.argument = argument
         }
 
-        public var type: SpreadElementNodeType
+        public let type: SpreadElementNodeType
         public enum SpreadElementNodeType : String, Codable { case SpreadElement }
         public var argument: Expression
         public var loc: SourceLocation? = nil
@@ -1005,7 +1843,7 @@ public enum JSSyntax {
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
-    public struct StaticMemberExpression : JSSyntaxAST {
+    public struct StaticMemberExpression : JSSyntaxNode {
         public init(type: StaticMemberExpressionNodeType = .StaticMemberExpression, computed: Bool, object: Expression, property: Expression) {
             self.type = type
             self.computed = computed
@@ -1013,7 +1851,7 @@ public enum JSSyntax {
             self.property = property
         }
 
-        public var type: StaticMemberExpressionNodeType
+        public let type: StaticMemberExpressionNodeType
         public enum StaticMemberExpressionNodeType : String, Codable { case StaticMemberExpression }
         public var computed: Bool
         public var object: Expression
@@ -1023,26 +1861,26 @@ public enum JSSyntax {
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
-    public struct Super : JSSyntaxAST {
+    public struct Super : JSSyntaxNode {
         public init(type: SuperNodeType = .Super) {
             self.type = type
         }
 
-        public var type: SuperNodeType
+        public let type: SuperNodeType
         public enum SuperNodeType : String, Codable { case Super }
         public var loc: SourceLocation? = nil
         public var range: [Int]? = nil
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
-    public struct SwitchCase : JSSyntaxAST {
+    public struct SwitchCase : JSSyntaxNode {
         public init(type: SwitchCaseNodeType = .SwitchCase, test: Optional<Expression>, consequent: [Statement]) {
             self.type = type
             self.test = test
             self.consequent = consequent
         }
 
-        public var type: SwitchCaseNodeType
+        public let type: SwitchCaseNodeType
         public enum SwitchCaseNodeType : String, Codable { case SwitchCase }
         public var test: Optional<Expression>
         public var consequent: [Statement]
@@ -1051,14 +1889,14 @@ public enum JSSyntax {
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
-    public struct SwitchStatement : JSSyntaxAST {
+    public struct SwitchStatement : JSSyntaxNode {
         public init(type: SwitchStatementNodeType = .SwitchStatement, discriminant: Expression, cases: [SwitchCase]) {
             self.type = type
             self.discriminant = discriminant
             self.cases = cases
         }
 
-        public var type: SwitchStatementNodeType
+        public let type: SwitchStatementNodeType
         public enum SwitchStatementNodeType : String, Codable { case SwitchStatement }
         public var discriminant: Expression
         public var cases: [SwitchCase]
@@ -1067,14 +1905,14 @@ public enum JSSyntax {
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
-    public struct TaggedTemplateExpression : JSSyntaxAST {
+    public struct TaggedTemplateExpression : JSSyntaxNode {
         public init(type: TaggedTemplateExpressionNodeType = .TaggedTemplateExpression, tag: Expression, quasi: TemplateLiteral) {
             self.type = type
             self.tag = tag
             self.quasi = quasi
         }
 
-        public var type: TaggedTemplateExpressionNodeType
+        public let type: TaggedTemplateExpressionNodeType
         public enum TaggedTemplateExpressionNodeType : String, Codable { case TaggedTemplateExpression }
         public var tag: Expression
         public var quasi: TemplateLiteral
@@ -1089,14 +1927,14 @@ public enum JSSyntax {
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
-    public struct TemplateElement : JSSyntaxAST {
+    public struct TemplateElement : JSSyntaxNode {
         public init(type: TemplateElementValueNodeType = .TemplateElement, value: TemplateElementValue, tail: Bool) {
             self.type = type
             self.value = value
             self.tail = tail
         }
 
-        public var type: TemplateElementValueNodeType
+        public let type: TemplateElementValueNodeType
         public enum TemplateElementValueNodeType : String, Codable { case TemplateElement }
         public var value: TemplateElementValue
         public var tail: Bool
@@ -1105,14 +1943,14 @@ public enum JSSyntax {
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
-    public struct TemplateLiteral : JSSyntaxAST {
+    public struct TemplateLiteral : JSSyntaxNode {
         public init(type: TemplateLiteralNodeType = .TemplateLiteral, quasis: [TemplateElement], expressions: [Expression]) {
             self.type = type
             self.quasis = quasis
             self.expressions = expressions
         }
 
-        public var type: TemplateLiteralNodeType
+        public let type: TemplateLiteralNodeType
         public enum TemplateLiteralNodeType : String, Codable { case TemplateLiteral }
         public var quasis: [TemplateElement]
         public var expressions: [Expression]
@@ -1121,25 +1959,25 @@ public enum JSSyntax {
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
-    public struct ThisExpression : JSSyntaxAST {
+    public struct ThisExpression : JSSyntaxNode {
         public init(type: ThisExpressionNodeType = .ThisExpression) {
             self.type = type
         }
 
-        public var type: ThisExpressionNodeType
+        public let type: ThisExpressionNodeType
         public enum ThisExpressionNodeType : String, Codable { case ThisExpression }
         public var loc: SourceLocation? = nil
         public var range: [Int]? = nil
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
-    public struct ThrowStatement : JSSyntaxAST {
+    public struct ThrowStatement : JSSyntaxNode {
         public init(type: ThrowStatementNodeType = .ThrowStatement, argument: Expression) {
             self.type = type
             self.argument = argument
         }
 
-        public var type: ThrowStatementNodeType
+        public let type: ThrowStatementNodeType
         public enum ThrowStatementNodeType : String, Codable { case ThrowStatement }
         public var argument: Expression
         public var loc: SourceLocation? = nil
@@ -1147,7 +1985,7 @@ public enum JSSyntax {
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
-    public struct TryStatement : JSSyntaxAST {
+    public struct TryStatement : JSSyntaxNode {
         public init(type: TryStatementNodeType = .TryStatement, block: BlockStatement, handler: Optional<CatchClause>, finalizer: Optional<BlockStatement>) {
             self.type = type
             self.block = block
@@ -1155,7 +1993,7 @@ public enum JSSyntax {
             self.finalizer = finalizer
         }
 
-        public var type: TryStatementNodeType
+        public let type: TryStatementNodeType
         public enum TryStatementNodeType : String, Codable { case TryStatement }
         public var block: BlockStatement
         public var handler: Optional<CatchClause>
@@ -1165,7 +2003,7 @@ public enum JSSyntax {
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
-    public struct UnaryExpression : JSSyntaxAST {
+    public struct UnaryExpression : JSSyntaxNode {
         public init(type: UnaryExpressionNodeType = .UnaryExpression, `operator`: String, argument: Expression, prefix: Bool) {
             self.type = type
             self.`operator` = `operator`
@@ -1173,7 +2011,7 @@ public enum JSSyntax {
             self.prefix = prefix
         }
 
-        public var type: UnaryExpressionNodeType
+        public let type: UnaryExpressionNodeType
         public enum UnaryExpressionNodeType : String, Codable { case UnaryExpression }
         public var `operator`: String
         public var argument: Expression
@@ -1183,7 +2021,7 @@ public enum JSSyntax {
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
-    public struct UpdateExpression : JSSyntaxAST {
+    public struct UpdateExpression : JSSyntaxNode {
         public init(type: UpdateExpressionNodeType = .UpdateExpression, `operator`: String, argument: Expression, prefix: Bool) {
             self.type = type
             self.`operator` = `operator`
@@ -1191,7 +2029,7 @@ public enum JSSyntax {
             self.prefix = prefix
         }
 
-        public var type: UpdateExpressionNodeType
+        public let type: UpdateExpressionNodeType
         public enum UpdateExpressionNodeType : String, Codable { case UpdateExpression }
         public var `operator`: String
         public var argument: Expression
@@ -1201,14 +2039,14 @@ public enum JSSyntax {
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
-    public struct VariableDeclaration : JSSyntaxAST {
+    public struct VariableDeclaration : JSSyntaxNode {
         public init(type: VariableDeclarationNodeType = .VariableDeclaration, declarations: [VariableDeclarator], kind: String) {
             self.type = type
             self.declarations = declarations
             self.kind = kind
         }
 
-        public var type: VariableDeclarationNodeType
+        public let type: VariableDeclarationNodeType
         public enum VariableDeclarationNodeType : String, Codable { case VariableDeclaration }
         public var declarations: [VariableDeclarator]
         public var kind: String
@@ -1217,14 +2055,14 @@ public enum JSSyntax {
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
-    public struct VariableDeclarator : JSSyntaxAST {
+    public struct VariableDeclarator : JSSyntaxNode {
         public init(type: VariableDeclaratorNodeType = .VariableDeclarator, id: OneOf<BindingIdentifier>.Or<BindingPattern>, `init`: Optional<Expression>) {
             self.type = type
             self.id = id
             self.`init` = `init`
         }
 
-        public var type: VariableDeclaratorNodeType
+        public let type: VariableDeclaratorNodeType
         public enum VariableDeclaratorNodeType : String, Codable { case VariableDeclarator }
         public var id: OneOf<BindingIdentifier>.Or<BindingPattern>
         public var `init`: Optional<Expression>
@@ -1233,14 +2071,14 @@ public enum JSSyntax {
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
-    public struct WhileStatement : JSSyntaxAST {
+    public struct WhileStatement : JSSyntaxNode {
         public init(type: WhileStatementNodeType = .WhileStatement, test: Expression, body: Statement) {
             self.type = type
             self.test = test
             self.body = body
         }
 
-        public var type: WhileStatementNodeType
+        public let type: WhileStatementNodeType
         public enum WhileStatementNodeType : String, Codable { case WhileStatement }
         public var test: Expression
         public var body: Statement
@@ -1249,14 +2087,14 @@ public enum JSSyntax {
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
-    public struct WithStatement : JSSyntaxAST {
+    public struct WithStatement : JSSyntaxNode {
         public init(type: WithStatementNodeType = .WithStatement, object: Expression, body: Statement) {
             self.type = type
             self.object = object
             self.body = body
         }
 
-        public var type: WithStatementNodeType
+        public let type: WithStatementNodeType
         public enum WithStatementNodeType : String, Codable { case WithStatement }
         public var object: Expression
         public var body: Statement
@@ -1265,14 +2103,14 @@ public enum JSSyntax {
     }
 
     /// See: [Syntax Tree Format](https://esprima.readthedocs.io/en/4.0/syntax-tree-format.html)
-    public struct YieldExpression : JSSyntaxAST {
+    public struct YieldExpression : JSSyntaxNode {
         public init(type: YieldExpressionNodeType = .YieldExpression, argument: Optional<Expression>, delegate: Bool) {
             self.type = type
             self.argument = argument
             self.delegate = delegate
         }
 
-        public var type: YieldExpressionNodeType
+        public let type: YieldExpressionNodeType
         public enum YieldExpressionNodeType : String, Codable { case YieldExpression }
         public var argument: Optional<Expression>
         public var delegate: Bool
@@ -1281,34 +2119,490 @@ public enum JSSyntax {
     }
 }
 
-extension JSSyntax {
 
-    public typealias ArgumentListElement = OneOf<Expression>
+@available(*, deprecated, renamed: "ESTree")
+extension JSSyntax {
+    public indirect enum Expression : Hashable, Codable {
+        case ThisExpression(ThisExpression)
+        case Identifier(Identifier)
+        case Literal(Literal)
+        case SequenceExpression(SequenceExpression)
+        case ArrayExpression(ArrayExpression)
+        case MemberExpression(MemberExpression)
+        case MetaProperty(MetaProperty)
+        case CallExpression(CallExpression)
+        case ObjectExpression(ObjectExpression)
+        case FunctionExpression(FunctionExpression)
+        case ArrowFunctionExpression(ArrowFunctionExpression)
+        case ClassExpression(ClassExpression)
+        case TaggedTemplateExpression(TaggedTemplateExpression)
+        case Super(Super)
+        case NewExpression(NewExpression)
+        case UpdateExpression(UpdateExpression)
+        case AwaitExpression(AwaitExpression)
+        case UnaryExpression(UnaryExpression)
+        case BinaryExpression(BinaryExpression)
+        case LogicalExpression(LogicalExpression)
+        case ConditionalExpression(ConditionalExpression)
+        case YieldExpression(YieldExpression)
+        case AssignmentExpression(AssignmentExpression)
+        case AsyncArrowFunctionExpression(AsyncArrowFunctionExpression)
+        case AsyncFunctionExpression(AsyncFunctionExpression)
+        case ChainExpression(ChainExpression)
+        case RegexLiteral(RegexLiteral)
+
+        public init(from decoder: Decoder) throws {
+            let typeName = try decoder
+                .container(keyedBy: CodingKeys.self)
+                .decode(String.self, forKey: .type)
+
+            switch typeName {
+            case JSSyntax.ThisExpression.NodeType.ThisExpression.rawValue:
+                self = .ThisExpression(try .init(from: decoder))
+            case JSSyntax.Identifier.NodeType.Identifier.rawValue:
+                self = .Identifier(try .init(from: decoder))
+            case JSSyntax.Literal.NodeType.Literal.rawValue:
+                self = .Literal(try .init(from: decoder))
+            case JSSyntax.SequenceExpression.NodeType.SequenceExpression.rawValue:
+                self = .SequenceExpression(try .init(from: decoder))
+            case JSSyntax.ArrayExpression.NodeType.ArrayExpression.rawValue:
+                self = .ArrayExpression(try .init(from: decoder))
+            case JSSyntax.MemberExpression.NodeType.MemberExpression.rawValue:
+                self = .MemberExpression(try .init(from: decoder))
+            case JSSyntax.MetaProperty.NodeType.MetaProperty.rawValue:
+                self = .MetaProperty(try .init(from: decoder))
+            case JSSyntax.CallExpression.NodeType.CallExpression.rawValue:
+                self = .CallExpression(try .init(from: decoder))
+            case JSSyntax.ObjectExpression.NodeType.ObjectExpression.rawValue:
+                self = .ObjectExpression(try .init(from: decoder))
+            case JSSyntax.FunctionExpression.NodeType.FunctionExpression.rawValue:
+                self = .FunctionExpression(try .init(from: decoder))
+            case JSSyntax.ArrowFunctionExpression.NodeType.ArrowFunctionExpression.rawValue:
+                self = .ArrowFunctionExpression(try .init(from: decoder))
+            case JSSyntax.ClassExpression.NodeType.ClassExpression.rawValue:
+                self = .ClassExpression(try .init(from: decoder))
+            case JSSyntax.TaggedTemplateExpression.NodeType.TaggedTemplateExpression.rawValue:
+                self = .TaggedTemplateExpression(try .init(from: decoder))
+            case JSSyntax.Super.NodeType.Super.rawValue:
+                self = .Super(try .init(from: decoder))
+            case JSSyntax.NewExpression.NodeType.NewExpression.rawValue:
+                self = .NewExpression(try .init(from: decoder))
+            case JSSyntax.UpdateExpression.NodeType.UpdateExpression.rawValue:
+                self = .UpdateExpression(try .init(from: decoder))
+            case JSSyntax.AwaitExpression.NodeType.AwaitExpression.rawValue:
+                self = .AwaitExpression(try .init(from: decoder))
+            case JSSyntax.UnaryExpression.NodeType.UnaryExpression.rawValue:
+                self = .UnaryExpression(try .init(from: decoder))
+            case JSSyntax.BinaryExpression.NodeType.BinaryExpression.rawValue:
+                self = .BinaryExpression(try .init(from: decoder))
+            case JSSyntax.LogicalExpression.NodeType.LogicalExpression.rawValue:
+                self = .LogicalExpression(try .init(from: decoder))
+            case JSSyntax.ConditionalExpression.NodeType.ConditionalExpression.rawValue:
+                self = .ConditionalExpression(try .init(from: decoder))
+            case JSSyntax.YieldExpression.NodeType.YieldExpression.rawValue:
+                self = .YieldExpression(try .init(from: decoder))
+            case JSSyntax.AssignmentExpression.NodeType.AssignmentExpression.rawValue:
+                self = .AssignmentExpression(try .init(from: decoder))
+            case JSSyntax.AsyncArrowFunctionExpression.NodeType.AsyncArrowFunctionExpression.rawValue:
+                self = .AsyncArrowFunctionExpression(try .init(from: decoder))
+            case JSSyntax.AsyncFunctionExpression.NodeType.AsyncFunctionExpression.rawValue:
+                self = .AsyncFunctionExpression(try .init(from: decoder))
+            case JSSyntax.ChainExpression.NodeType.ChainExpression.rawValue:
+                self = .ChainExpression(try .init(from: decoder))
+            case JSSyntax.RegexLiteral.NodeType.RegexLiteral.rawValue:
+                self = .RegexLiteral(try .init(from: decoder))
+            default:
+                throw DecodingError.keyNotFound(CodingKeys.type, DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Bad value for type: \(typeName)"))
+            }
+        }
+
+        public func encode(to encoder: Encoder) throws {
+            switch self {
+            case .ThisExpression(let x): return try x.encode(to: encoder)
+            case .Identifier(let x): return try x.encode(to: encoder)
+            case .Literal(let x): return try x.encode(to: encoder)
+            case .SequenceExpression(let x): return try x.encode(to: encoder)
+            case .ArrayExpression(let x): return try x.encode(to: encoder)
+            case .MemberExpression(let x): return try x.encode(to: encoder)
+            case .MetaProperty(let x): return try x.encode(to: encoder)
+            case .CallExpression(let x): return try x.encode(to: encoder)
+            case .ObjectExpression(let x): return try x.encode(to: encoder)
+            case .FunctionExpression(let x): return try x.encode(to: encoder)
+            case .ArrowFunctionExpression(let x): return try x.encode(to: encoder)
+            case .ClassExpression(let x): return try x.encode(to: encoder)
+            case .TaggedTemplateExpression(let x): return try x.encode(to: encoder)
+            case .Super(let x): return try x.encode(to: encoder)
+            case .NewExpression(let x): return try x.encode(to: encoder)
+            case .UpdateExpression(let x): return try x.encode(to: encoder)
+            case .AwaitExpression(let x): return try x.encode(to: encoder)
+            case .UnaryExpression(let x): return try x.encode(to: encoder)
+            case .BinaryExpression(let x): return try x.encode(to: encoder)
+            case .LogicalExpression(let x): return try x.encode(to: encoder)
+            case .ConditionalExpression(let x): return try x.encode(to: encoder)
+            case .YieldExpression(let x): return try x.encode(to: encoder)
+            case .AssignmentExpression(let x): return try x.encode(to: encoder)
+            case .AsyncArrowFunctionExpression(let x): return try x.encode(to: encoder)
+            case .AsyncFunctionExpression(let x): return try x.encode(to: encoder)
+            case .ChainExpression(let x): return try x.encode(to: encoder)
+            case .RegexLiteral(let x): return try x.encode(to: encoder)
+            }
+        }
+
+        enum CodingKeys : String, CodingKey {
+            case type
+        }
+    }
+
+    public indirect enum Statement : Hashable, Codable {
+        case BlockStatement(BlockStatement)
+        case AsyncFunctionDeclaration(AsyncFunctionDeclaration)
+        case BreakStatement(BreakStatement)
+        case ContinueStatement(ContinueStatement)
+        case DebuggerStatement(DebuggerStatement)
+        case DoWhileStatement(DoWhileStatement)
+        case EmptyStatement(EmptyStatement)
+        case ExpressionStatement(ExpressionStatement)
+        case Directive(Directive)
+        case ForStatement(ForStatement)
+        case ForInStatement(ForInStatement)
+        case ForOfStatement(ForOfStatement)
+        case FunctionDeclaration(FunctionDeclaration)
+        case IfStatement(IfStatement)
+        case LabeledStatement(LabeledStatement)
+        case ReturnStatement(ReturnStatement)
+        case SwitchStatement(SwitchStatement)
+        case ThrowStatement(ThrowStatement)
+        case TryStatement(TryStatement)
+        case VariableDeclaration(VariableDeclaration)
+        case WhileStatement(WhileStatement)
+        case WithStatement(WithStatement)
+
+        public init(from decoder: Decoder) throws {
+            let typeName = try decoder
+                .container(keyedBy: CodingKeys.self)
+                .decode(String.self, forKey: .type)
+
+            switch typeName {
+            case JSSyntax.BlockStatement.NodeType.BlockStatement.rawValue:
+                self = .BlockStatement(try .init(from: decoder))
+            case JSSyntax.AsyncFunctionDeclaration.NodeType.AsyncFunctionDeclaration.rawValue:
+                self = .AsyncFunctionDeclaration(try .init(from: decoder))
+            case JSSyntax.BreakStatement.NodeType.BreakStatement.rawValue:
+                self = .BreakStatement(try .init(from: decoder))
+            case JSSyntax.ContinueStatement.NodeType.ContinueStatement.rawValue:
+                self = .ContinueStatement(try .init(from: decoder))
+            case JSSyntax.DebuggerStatement.NodeType.DebuggerStatement.rawValue:
+                self = .DebuggerStatement(try .init(from: decoder))
+            case JSSyntax.DoWhileStatement.NodeType.DoWhileStatement.rawValue:
+                self = .DoWhileStatement(try .init(from: decoder))
+            case JSSyntax.EmptyStatement.NodeType.EmptyStatement.rawValue:
+                self = .EmptyStatement(try .init(from: decoder))
+            case JSSyntax.ExpressionStatement.NodeType.ExpressionStatement.rawValue:
+                self = .ExpressionStatement(try .init(from: decoder))
+            case JSSyntax.Directive.NodeType.Directive.rawValue:
+                self = .Directive(try .init(from: decoder))
+            case JSSyntax.ForStatement.NodeType.ForStatement.rawValue:
+                self = .ForStatement(try .init(from: decoder))
+            case JSSyntax.ForInStatement.NodeType.ForInStatement.rawValue:
+                self = .ForInStatement(try .init(from: decoder))
+            case JSSyntax.ForOfStatement.NodeType.ForOfStatement.rawValue:
+                self = .ForOfStatement(try .init(from: decoder))
+            case JSSyntax.FunctionDeclaration.NodeType.FunctionDeclaration.rawValue:
+                self = .FunctionDeclaration(try .init(from: decoder))
+            case JSSyntax.IfStatement.NodeType.IfStatement.rawValue:
+                self = .IfStatement(try .init(from: decoder))
+            case JSSyntax.LabeledStatement.NodeType.LabeledStatement.rawValue:
+                self = .LabeledStatement(try .init(from: decoder))
+            case JSSyntax.ReturnStatement.NodeType.ReturnStatement.rawValue:
+                self = .ReturnStatement(try .init(from: decoder))
+            case JSSyntax.SwitchStatement.NodeType.SwitchStatement.rawValue:
+                self = .SwitchStatement(try .init(from: decoder))
+            case JSSyntax.ThrowStatement.NodeType.ThrowStatement.rawValue:
+                self = .ThrowStatement(try .init(from: decoder))
+            case JSSyntax.TryStatement.NodeType.TryStatement.rawValue:
+                self = .TryStatement(try .init(from: decoder))
+            case JSSyntax.VariableDeclaration.NodeType.VariableDeclaration.rawValue:
+                self = .VariableDeclaration(try .init(from: decoder))
+            case JSSyntax.WhileStatement.NodeType.WhileStatement.rawValue:
+                self = .WhileStatement(try .init(from: decoder))
+            case JSSyntax.WithStatement.NodeType.WithStatement.rawValue:
+                self = .WithStatement(try .init(from: decoder))
+            default:
+                throw DecodingError.keyNotFound(CodingKeys.type, DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Bad value for type: \(typeName)"))
+            }
+        }
+
+        public func encode(to encoder: Encoder) throws {
+            switch self {
+            case .BlockStatement(let x): return try x.encode(to: encoder)
+            case .AsyncFunctionDeclaration(let x): return try x.encode(to: encoder)
+            case .BreakStatement(let x): return try x.encode(to: encoder)
+            case .ContinueStatement(let x): return try x.encode(to: encoder)
+            case .DebuggerStatement(let x): return try x.encode(to: encoder)
+            case .DoWhileStatement(let x): return try x.encode(to: encoder)
+            case .EmptyStatement(let x): return try x.encode(to: encoder)
+            case .ExpressionStatement(let x): return try x.encode(to: encoder)
+            case .Directive(let x): return try x.encode(to: encoder)
+            case .ForStatement(let x): return try x.encode(to: encoder)
+            case .ForInStatement(let x): return try x.encode(to: encoder)
+            case .ForOfStatement(let x): return try x.encode(to: encoder)
+            case .FunctionDeclaration(let x): return try x.encode(to: encoder)
+            case .IfStatement(let x): return try x.encode(to: encoder)
+            case .LabeledStatement(let x): return try x.encode(to: encoder)
+            case .ReturnStatement(let x): return try x.encode(to: encoder)
+            case .SwitchStatement(let x): return try x.encode(to: encoder)
+            case .ThrowStatement(let x): return try x.encode(to: encoder)
+            case .TryStatement(let x): return try x.encode(to: encoder)
+            case .VariableDeclaration(let x): return try x.encode(to: encoder)
+            case .WhileStatement(let x): return try x.encode(to: encoder)
+            case .WithStatement(let x): return try x.encode(to: encoder)
+            }
+        }
+
+        enum CodingKeys : String, CodingKey {
+            case type
+        }
+    }
+
+    public indirect enum Declaration : Hashable, Codable {
+        case AsyncFunctionDeclaration(AsyncFunctionDeclaration)
+        case ClassDeclaration(ClassDeclaration)
+        case ExportAllDeclaration(ExportAllDeclaration)
+        case ExportDefaultDeclaration(ExportDefaultDeclaration)
+        case ExportNamedDeclaration(ExportNamedDeclaration)
+        case FunctionDeclaration(FunctionDeclaration)
+        case ImportDeclaration(ImportDeclaration)
+        case VariableDeclaration(VariableDeclaration)
+
+        public init(from decoder: Decoder) throws {
+            let typeName = try decoder
+                .container(keyedBy: CodingKeys.self)
+                .decode(String.self, forKey: .type)
+
+            switch typeName {
+            case JSSyntax.AsyncFunctionDeclaration.NodeType.AsyncFunctionDeclaration.rawValue:
+                self = .AsyncFunctionDeclaration(try .init(from: decoder))
+            case JSSyntax.ClassDeclaration.NodeType.ClassDeclaration.rawValue:
+                self = .ClassDeclaration(try .init(from: decoder))
+            case JSSyntax.ExportAllDeclaration.NodeType.ExportAllDeclaration.rawValue:
+                self = .ExportAllDeclaration(try .init(from: decoder))
+            case JSSyntax.ExportDefaultDeclaration.NodeType.ExportDefaultDeclaration.rawValue:
+                self = .ExportDefaultDeclaration(try .init(from: decoder))
+            case JSSyntax.ExportNamedDeclaration.NodeType.ExportNamedDeclaration.rawValue:
+                self = .ExportNamedDeclaration(try .init(from: decoder))
+            case JSSyntax.FunctionDeclaration.NodeType.FunctionDeclaration.rawValue:
+                self = .FunctionDeclaration(try .init(from: decoder))
+            case JSSyntax.ImportDeclaration.NodeType.ImportDeclaration.rawValue:
+                self = .ImportDeclaration(try .init(from: decoder))
+            case JSSyntax.VariableDeclaration.NodeType.VariableDeclaration.rawValue:
+                self = .VariableDeclaration(try .init(from: decoder))
+            default:
+                throw DecodingError.keyNotFound(CodingKeys.type, DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Bad value for type: \(typeName)"))
+            }
+        }
+
+        public func encode(to encoder: Encoder) throws {
+            switch self {
+            case .AsyncFunctionDeclaration(let x): return try x.encode(to: encoder)
+            case .ClassDeclaration(let x): return try x.encode(to: encoder)
+            case .ExportAllDeclaration(let x): return try x.encode(to: encoder)
+            case .ExportDefaultDeclaration(let x): return try x.encode(to: encoder)
+            case .ExportNamedDeclaration(let x): return try x.encode(to: encoder)
+            case .FunctionDeclaration(let x): return try x.encode(to: encoder)
+            case .ImportDeclaration(let x): return try x.encode(to: encoder)
+            case .VariableDeclaration(let x): return try x.encode(to: encoder)
+            }
+        }
+
+        enum CodingKeys : String, CodingKey {
+            case type
+        }
+    }
+
+
+    public typealias ArgumentListElementOneOf = OneOf<Expression>
         .Or<SpreadElement>
-    
-    public typealias ArrayExpressionElement = Optional<OneOf<Expression>
+
+    public indirect enum ArgumentListElement : Hashable, Codable {
+        case Expression(Expression)
+        case SpreadElement(SpreadElement)
+
+        public init(from decoder: Decoder) throws {
+            let typeName = try decoder
+                .container(keyedBy: CodingKeys.self)
+                .decode(String.self, forKey: .type)
+
+            switch typeName {
+            case JSSyntax.SpreadElement.NodeType.SpreadElement.rawValue:
+                self = .SpreadElement(try .init(from: decoder))
+            default:
+                self = .Expression(try .init(from: decoder))
+            }
+        }
+
+        public func encode(to encoder: Encoder) throws {
+            switch self {
+            case .Expression(let x): return try x.encode(to: encoder)
+            case .SpreadElement(let x): return try x.encode(to: encoder)
+            }
+        }
+
+        enum CodingKeys : String, CodingKey {
+            case type
+        }
+    }
+
+    public typealias ArrayExpressionElementOneOf = Nullable<OneOf<Expression>
        .Or<SpreadElement>>
 
-    public typealias ArrayPatternElement = Optional<OneOf<AssignmentPattern>
+    public indirect enum ArrayExpressionElement : Hashable, Codable {
+        case Expression(Expression)
+        case SpreadElement(SpreadElement)
+
+        public init(from decoder: Decoder) throws {
+            let typeName = try decoder
+                .container(keyedBy: CodingKeys.self)
+                .decode(String.self, forKey: .type)
+
+            switch typeName {
+            case JSSyntax.SpreadElement.NodeType.SpreadElement.rawValue:
+                self = .SpreadElement(try .init(from: decoder))
+            default:
+                self = .Expression(try .init(from: decoder))
+            }
+        }
+
+        public func encode(to encoder: Encoder) throws {
+            switch self {
+            case .Expression(let x): return try x.encode(to: encoder)
+            case .SpreadElement(let x): return try x.encode(to: encoder)
+            }
+        }
+
+        enum CodingKeys : String, CodingKey {
+            case type
+        }
+    }
+
+    public typealias ArrayPatternElement = OneOf<AssignmentPattern>
         .Or<BindingIdentifier>
         .Or<BindingPattern>
-        .Or<RestElement>>
+        .Or<RestElement>
 
-    public typealias BindingPattern = OneOf<ArrayPattern>
+//    public indirect enum ArrayPatternElement : Hashable, Codable {
+//        case AssignmentPattern(AssignmentPattern)
+//        case BindingIdentifier(BindingIdentifier)
+//        case BindingPattern(BindingPattern)
+//        case RestElement(RestElement)
+//
+//        public init(from decoder: Decoder) throws {
+//            let typeName = try decoder
+//                .container(keyedBy: CodingKeys.self)
+//                .decode(String.self, forKey: .type)
+//
+//            switch typeName {
+//            case JSSyntax.AssignmentPattern.NodeType.AssignmentPattern.rawValue:
+//                self = .AssignmentPattern(try .init(from: decoder))
+//            case JSSyntax.BindingIdentifier.NodeType.BindingIdentifier.rawValue:
+//                self = .BindingIdentifier(try .init(from: decoder))
+//            case JSSyntax.BindingPattern.NodeType.BindingPattern.rawValue:
+//                self = .BindingPattern(try .init(from: decoder))
+//            case JSSyntax.RestElement.NodeType.RestElement.rawValue:
+//                self = .RestElement(try .init(from: decoder))
+//            default:
+//                throw DecodingError.keyNotFound(CodingKeys.type, DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Bad value for type: \(typeName)"))
+//            }
+//        }
+//
+//        public func encode(to encoder: Encoder) throws {
+//            switch self {
+//            case .AssignmentPattern(let x): return try x.encode(to: encoder)
+//            case .BindingIdentifier(let x): return try x.encode(to: encoder)
+//            case .BindingPattern(let x): return try x.encode(to: encoder)
+//            case .RestElement(let x): return try x.encode(to: encoder)
+//            }
+//        }
+//
+//        enum CodingKeys : String, CodingKey {
+//            case type
+//        }
+//    }
+
+    public typealias BindingPatternOneOf = OneOf<ArrayPattern>
         .Or<ObjectPattern>
+
+    public indirect enum BindingPattern : Hashable, Codable {
+        case ArrayPattern(ArrayPattern)
+        case ObjectPattern(ObjectPattern)
+
+        public init(from decoder: Decoder) throws {
+            let typeName = try decoder
+                .container(keyedBy: CodingKeys.self)
+                .decode(String.self, forKey: .type)
+
+            switch typeName {
+            case JSSyntax.ArrayPattern.NodeType.ArrayPattern.rawValue:
+                self = .ArrayPattern(try .init(from: decoder))
+            case JSSyntax.ObjectPattern.NodeType.ObjectPattern.rawValue:
+                self = .ObjectPattern(try .init(from: decoder))
+            default:
+                throw DecodingError.keyNotFound(CodingKeys.type, DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Bad value for type: \(typeName)"))
+            }
+        }
+
+        public func encode(to encoder: Encoder) throws {
+            switch self {
+            case .ArrayPattern(let x): return try x.encode(to: encoder)
+            case .ObjectPattern(let x): return try x.encode(to: encoder)
+            }
+        }
+
+        enum CodingKeys : String, CodingKey {
+            case type
+        }
+    }
 
     public typealias BindingIdentifier = Identifier
 
-    public typealias ChainElement = OneOf<CallExpression>
+    public typealias ChainElementOneOf = OneOf<CallExpression>
         .Or<ComputedMemberExpression>
         .Or<StaticMemberExpression>
 
-    public typealias Declaration = OneOf<AsyncFunctionDeclaration>
-        .Or<ClassDeclaration>
-        .Or<ExportDeclaration>
-        .Or<FunctionDeclaration>
-        .Or<ImportDeclaration>
-        .Or<VariableDeclaration>
+
+    public indirect enum ChainElement : Hashable, Codable {
+        case CallExpression(CallExpression)
+        case ComputedMemberExpression(ComputedMemberExpression)
+        case StaticMemberExpression(StaticMemberExpression)
+
+        public init(from decoder: Decoder) throws {
+            let typeName = try decoder
+                .container(keyedBy: CodingKeys.self)
+                .decode(String.self, forKey: .type)
+
+            switch typeName {
+            case JSSyntax.CallExpression.NodeType.CallExpression.rawValue:
+                self = .CallExpression(try .init(from: decoder))
+            case JSSyntax.ComputedMemberExpression.NodeType.ComputedMemberExpression.rawValue:
+                self = .ComputedMemberExpression(try .init(from: decoder))
+            case JSSyntax.StaticMemberExpression.NodeType.StaticMemberExpression.rawValue:
+                self = .StaticMemberExpression(try .init(from: decoder))
+            default:
+                throw DecodingError.keyNotFound(CodingKeys.type, DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Bad value for type: \(typeName)"))
+            }
+        }
+
+        public func encode(to encoder: Encoder) throws {
+            switch self {
+            case .CallExpression(let x): return try x.encode(to: encoder)
+            case .ComputedMemberExpression(let x): return try x.encode(to: encoder)
+            case .StaticMemberExpression(let x): return try x.encode(to: encoder)
+            }
+        }
+
+        enum CodingKeys : String, CodingKey {
+            case type
+        }
+    }
 
     public typealias ExportableDefaultDeclaration = OneOf<BindingIdentifier>
         .Or<BindingPattern>
@@ -1316,70 +2610,391 @@ extension JSSyntax {
         .Or<Expression>
         .Or<FunctionDeclaration>
 
-    public typealias ExportableNamedDeclaration = OneOf<AsyncFunctionDeclaration>
+//    public indirect enum ExportableDefaultDeclaration : Hashable, Codable {
+//        case BindingIdentifier(BindingIdentifier)
+//        case BindingPattern(BindingPattern)
+//        case ClassDeclaration(ClassDeclaration)
+//        case Expression(Expression)
+//        case FunctionDeclaration(FunctionDeclaration)
+//
+//        public init(from decoder: Decoder) throws {
+//            let typeName = try decoder
+//                .container(keyedBy: CodingKeys.self)
+//                .decode(String.self, forKey: .type)
+//
+//            switch typeName {
+//            case JSSyntax.BindingIdentifier.NodeType.BindingIdentifier.rawValue:
+//                self = .BindingIdentifier(try .init(from: decoder))
+//            case JSSyntax.BindingPattern.NodeType.BindingPattern.rawValue:
+//                self = .BindingPattern(try .init(from: decoder))
+//            case JSSyntax.ClassDeclaration.NodeType.ClassDeclaration.rawValue:
+//                self = .ClassDeclaration(try .init(from: decoder))
+//            case JSSyntax.Expression.NodeType.Expression.rawValue:
+//                self = .Expression(try .init(from: decoder))
+//            case JSSyntax.FunctionDeclaration.NodeType.FunctionDeclaration.rawValue:
+//                self = .FunctionDeclaration(try .init(from: decoder))
+//            default:
+//                throw DecodingError.keyNotFound(CodingKeys.type, DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Bad value for type: \(typeName)"))
+//            }
+//        }
+//
+//        public func encode(to encoder: Encoder) throws {
+//            switch self {
+//            case .BindingIdentifier(let x): return try x.encode(to: encoder)
+//            case .BindingPattern(let x): return try x.encode(to: encoder)
+//            case .ClassDeclaration(let x): return try x.encode(to: encoder)
+//            case .Expression(let x): return try x.encode(to: encoder)
+//            case .FunctionDeclaration(let x): return try x.encode(to: encoder)
+//            }
+//        }
+//
+//        enum CodingKeys : String, CodingKey {
+//            case type
+//        }
+//    }
+
+    public typealias ExportableNamedDeclarationOneOf = OneOf<AsyncFunctionDeclaration>
         .Or<ClassDeclaration>
         .Or<FunctionDeclaration>
         .Or<VariableDeclaration>
 
-    public typealias ExportDeclaration = OneOf<ExportAllDeclaration>
+    public indirect enum ExportableNamedDeclaration : Hashable, Codable {
+        case AsyncFunctionDeclaration(AsyncFunctionDeclaration)
+        case ClassDeclaration(ClassDeclaration)
+        case FunctionDeclaration(FunctionDeclaration)
+        case VariableDeclaration(VariableDeclaration)
+
+        public init(from decoder: Decoder) throws {
+            let typeName = try decoder
+                .container(keyedBy: CodingKeys.self)
+                .decode(String.self, forKey: .type)
+
+            switch typeName {
+            case JSSyntax.AsyncFunctionDeclaration.NodeType.AsyncFunctionDeclaration.rawValue:
+                self = .AsyncFunctionDeclaration(try .init(from: decoder))
+            case JSSyntax.ClassDeclaration.NodeType.ClassDeclaration.rawValue:
+                self = .ClassDeclaration(try .init(from: decoder))
+            case JSSyntax.FunctionDeclaration.NodeType.FunctionDeclaration.rawValue:
+                self = .FunctionDeclaration(try .init(from: decoder))
+            case JSSyntax.VariableDeclaration.NodeType.VariableDeclaration.rawValue:
+                self = .VariableDeclaration(try .init(from: decoder))
+            default:
+                throw DecodingError.keyNotFound(CodingKeys.type, DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Bad value for type: \(typeName)"))
+            }
+        }
+
+        public func encode(to encoder: Encoder) throws {
+            switch self {
+            case .AsyncFunctionDeclaration(let x): return try x.encode(to: encoder)
+            case .ClassDeclaration(let x): return try x.encode(to: encoder)
+            case .FunctionDeclaration(let x): return try x.encode(to: encoder)
+            case .VariableDeclaration(let x): return try x.encode(to: encoder)
+            }
+        }
+
+        enum CodingKeys : String, CodingKey {
+            case type
+        }
+    }
+
+    public typealias ExportDeclarationOneOf = OneOf<ExportAllDeclaration>
         .Or<ExportDefaultDeclaration>
         .Or<ExportNamedDeclaration>
 
-    /// An expression can be one of the following:
-    ///
-    /// ```js
-    /// type Expression = ThisExpression | Identifier | Literal |
-    ///     ArrayExpression | ObjectExpression | FunctionExpression | ArrowFunctionExpression | ClassExpression |
-    ///     TaggedTemplateExpression | MemberExpression | Super | MetaProperty |
-    ///     NewExpression | CallExpression | UpdateExpression | AwaitExpression | UnaryExpression |
-    ///     BinaryExpression | LogicalExpression | ConditionalExpression |
-    ///     YieldExpression | AssignmentExpression | SequenceExpression;
-    ///    ```
-    public typealias Expression = OneOf<ThisExpression>
-        .Or<Identifier>
-        .Or<Literal>
-        .Or<ArrayExpression>
-        .Or<ObjectExpression>
-        .Or<FunctionExpression>
-        .Or<ArrowFunctionExpression>
-        .Or<ClassExpression>
-        .Or<TaggedTemplateExpression>
-        .Or<MemberExpression>
-//        .Or<ComputedMemberExpression>
-//        .Or<StaticMemberExpression>
-        .Or<Super>
-        .Or<MetaProperty>
-        .Or<NewExpression>
-        .Or<CallExpression>
-        .Or<UpdateExpression>
-        .Or<AwaitExpression>
-        .Or<UnaryExpression>
-        .Or<BinaryExpression>
-        .Or<LogicalExpression>
-        .Or<ConditionalExpression>
-        .Or<YieldExpression>
-        .Or<AssignmentExpression>
-        .Or<SequenceExpression>
-        .Or<AsyncArrowFunctionExpression>
-        .Or<AsyncFunctionExpression>
-        .Or<ChainExpression>
-        .Or<RegexLiteral>
+    public indirect enum ExportDeclaration : Hashable, Codable {
+        case ExportAllDeclaration(ExportAllDeclaration)
+        case ExportDefaultDeclaration(ExportDefaultDeclaration)
+        case ExportNamedDeclaration(ExportNamedDeclaration)
+
+        public init(from decoder: Decoder) throws {
+            let typeName = try decoder
+                .container(keyedBy: CodingKeys.self)
+                .decode(String.self, forKey: .type)
+
+            switch typeName {
+            case JSSyntax.ExportAllDeclaration.NodeType.ExportAllDeclaration.rawValue:
+                self = .ExportAllDeclaration(try .init(from: decoder))
+            case JSSyntax.ExportDefaultDeclaration.NodeType.ExportDefaultDeclaration.rawValue:
+                self = .ExportDefaultDeclaration(try .init(from: decoder))
+            case JSSyntax.ExportNamedDeclaration.NodeType.ExportNamedDeclaration.rawValue:
+                self = .ExportNamedDeclaration(try .init(from: decoder))
+            default:
+                throw DecodingError.keyNotFound(CodingKeys.type, DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Bad value for type: \(typeName)"))
+            }
+        }
+
+        public func encode(to encoder: Encoder) throws {
+            switch self {
+            case .ExportAllDeclaration(let x): return try x.encode(to: encoder)
+            case .ExportDefaultDeclaration(let x): return try x.encode(to: encoder)
+            case .ExportNamedDeclaration(let x): return try x.encode(to: encoder)
+            }
+        }
+
+        enum CodingKeys : String, CodingKey {
+            case type
+        }
+    }
 
     public typealias FunctionParameter = OneOf<AssignmentPattern>
         .Or<BindingIdentifier>
         .Or<BindingPattern>
 
-    public typealias ImportDeclarationSpecifier = OneOf<ImportDefaultSpecifier>
+//    public indirect enum FunctionParameter : Hashable, Codable {
+//        case AssignmentPattern(AssignmentPattern)
+//        case BindingIdentifier(BindingIdentifier)
+//        case BindingPattern(BindingPattern)
+//
+//        public init(from decoder: Decoder) throws {
+//            let typeName = try decoder
+//                .container(keyedBy: CodingKeys.self)
+//                .decode(String.self, forKey: .type)
+//
+//            switch typeName {
+//            case JSSyntax.AssignmentPattern.NodeType.AssignmentPattern.rawValue:
+//                self = .AssignmentPattern(try .init(from: decoder))
+//            case JSSyntax.BindingIdentifier.NodeType.BindingIdentifier.rawValue:
+//                self = .BindingIdentifier(try .init(from: decoder))
+//            case JSSyntax.BindingPattern.NodeType.BindingPattern.rawValue:
+//                self = .BindingPattern(try .init(from: decoder))
+//            default:
+//                throw DecodingError.keyNotFound(CodingKeys.type, DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Bad value for type: \(typeName)"))
+//            }
+//        }
+//
+//        public func encode(to encoder: Encoder) throws {
+//            switch self {
+//            case .AssignmentPattern(let x): return try x.encode(to: encoder)
+//            case .BindingIdentifier(let x): return try x.encode(to: encoder)
+//            case .BindingPattern(let x): return try x.encode(to: encoder)
+//            }
+//        }
+//
+//        enum CodingKeys : String, CodingKey {
+//            case type
+//        }
+//    }
+
+    public typealias ImportDeclarationSpecifierOneOf = OneOf<ImportDefaultSpecifier>
         .Or<ImportNamespaceSpecifier>
         .Or<ImportSpecifier>
 
-    public typealias ObjectExpressionProperty = OneOf<Property>
+    public indirect enum ImportDeclarationSpecifier : Hashable, Codable {
+        case ImportDefaultSpecifier(ImportDefaultSpecifier)
+        case ImportNamespaceSpecifier(ImportNamespaceSpecifier)
+        case ImportSpecifier(ImportSpecifier)
+
+        public init(from decoder: Decoder) throws {
+            let typeName = try decoder
+                .container(keyedBy: CodingKeys.self)
+                .decode(String.self, forKey: .type)
+
+            switch typeName {
+            case JSSyntax.ImportDefaultSpecifier.NodeType.ImportDefaultSpecifier.rawValue:
+                self = .ImportDefaultSpecifier(try .init(from: decoder))
+            case JSSyntax.ImportNamespaceSpecifier.NodeType.ImportNamespaceSpecifier.rawValue:
+                self = .ImportNamespaceSpecifier(try .init(from: decoder))
+            case JSSyntax.ImportSpecifier.NodeType.ImportSpecifier.rawValue:
+                self = .ImportSpecifier(try .init(from: decoder))
+            default:
+                throw DecodingError.keyNotFound(CodingKeys.type, DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Bad value for type: \(typeName)"))
+            }
+        }
+
+        public func encode(to encoder: Encoder) throws {
+            switch self {
+            case .ImportDefaultSpecifier(let x): return try x.encode(to: encoder)
+            case .ImportNamespaceSpecifier(let x): return try x.encode(to: encoder)
+            case .ImportSpecifier(let x): return try x.encode(to: encoder)
+            }
+        }
+
+        enum CodingKeys : String, CodingKey {
+            case type
+        }
+    }
+
+    public typealias ObjectExpressionPropertyOneOf = OneOf<Property>
         .Or<SpreadElement>
 
-    public typealias ObjectPatternProperty = OneOf<Property>
+    public indirect enum ObjectExpressionProperty : Hashable, Codable {
+        case Property(Property)
+        case SpreadElement(SpreadElement)
+
+        public init(from decoder: Decoder) throws {
+            let typeName = try decoder
+                .container(keyedBy: CodingKeys.self)
+                .decode(String.self, forKey: .type)
+
+            switch typeName {
+            case JSSyntax.Property.NodeType.Property.rawValue:
+                self = .Property(try .init(from: decoder))
+            case JSSyntax.SpreadElement.NodeType.SpreadElement.rawValue:
+                self = .SpreadElement(try .init(from: decoder))
+            default:
+                throw DecodingError.keyNotFound(CodingKeys.type, DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Bad value for type: \(typeName)"))
+            }
+        }
+
+        public func encode(to encoder: Encoder) throws {
+            switch self {
+            case .Property(let x): return try x.encode(to: encoder)
+            case .SpreadElement(let x): return try x.encode(to: encoder)
+            }
+        }
+
+        enum CodingKeys : String, CodingKey {
+            case type
+        }
+    }
+
+    public typealias ObjectPatternPropertyOneOf = OneOf<Property>
         .Or<RestElement>
 
-    public typealias Statement = OneOf<BlockStatement>
+    public indirect enum ObjectPatternProperty : Hashable, Codable {
+        case Property(Property)
+        case RestElement(RestElement)
+
+        public init(from decoder: Decoder) throws {
+            let typeName = try decoder
+                .container(keyedBy: CodingKeys.self)
+                .decode(String.self, forKey: .type)
+
+            switch typeName {
+            case JSSyntax.Property.NodeType.Property.rawValue:
+                self = .Property(try .init(from: decoder))
+            case JSSyntax.RestElement.NodeType.RestElement.rawValue:
+                self = .RestElement(try .init(from: decoder))
+            default:
+                throw DecodingError.keyNotFound(CodingKeys.type, DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Bad value for type: \(typeName)"))
+            }
+        }
+
+        public func encode(to encoder: Encoder) throws {
+            switch self {
+            case .Property(let x): return try x.encode(to: encoder)
+            case .RestElement(let x): return try x.encode(to: encoder)
+            }
+        }
+
+        enum CodingKeys : String, CodingKey {
+            case type
+        }
+    }
+
+    public typealias PropertyKeyOneOf = OneOf<Identifier>
+        .Or<Literal>
+
+    public indirect enum PropertyKey : Hashable, Codable {
+        case Identifier(Identifier)
+        case Literal(Literal)
+
+        public init(from decoder: Decoder) throws {
+            let typeName = try decoder
+                .container(keyedBy: CodingKeys.self)
+                .decode(String.self, forKey: .type)
+
+            switch typeName {
+            case JSSyntax.Identifier.NodeType.Identifier.rawValue:
+                self = .Identifier(try .init(from: decoder))
+            case JSSyntax.Literal.NodeType.Literal.rawValue:
+                self = .Literal(try .init(from: decoder))
+            default:
+                throw DecodingError.keyNotFound(CodingKeys.type, DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Bad value for type: \(typeName)"))
+            }
+        }
+
+        public func encode(to encoder: Encoder) throws {
+            switch self {
+            case .Identifier(let x): return try x.encode(to: encoder)
+            case .Literal(let x): return try x.encode(to: encoder)
+            }
+        }
+
+        enum CodingKeys : String, CodingKey {
+            case type
+        }
+    }
+
+    public typealias StatementListItem = OneOf<Declaration>
+        .Or<Statement>
+
+//    public indirect enum StatementListItem : Hashable, Codable {
+//        case Declaration(Declaration)
+//        case Statement(Statement)
+//
+//        public init(from decoder: Decoder) throws {
+//            let typeName = try decoder
+//                .container(keyedBy: CodingKeys.self)
+//                .decode(String.self, forKey: .type)
+//
+//            switch typeName {
+//            case JSSyntax.Declaration.NodeType.Declaration.rawValue:
+//                self = .Declaration(try .init(from: decoder))
+//            case JSSyntax.Statement.NodeType.Statement.rawValue:
+//                self = .Statement(try .init(from: decoder))
+//            default:
+//                throw DecodingError.keyNotFound(CodingKeys.type, DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Bad value for type: \(typeName)"))
+//            }
+//        }
+//
+//        public func encode(to encoder: Encoder) throws {
+//            switch self {
+//            case .Declaration(let x): return try x.encode(to: encoder)
+//            case .Statement(let x): return try x.encode(to: encoder)
+//            }
+//        }
+//
+//        enum CodingKeys : String, CodingKey {
+//            case type
+//        }
+//    }
+
+    public typealias ModuleItem = OneOf<ImportDeclaration>
+        .Or<ExportDeclaration>
+        .Or<StatementListItem>
+
+//    public indirect enum ModuleItem : Hashable, Codable {
+//        case ImportDeclaration(ImportDeclaration)
+//        case ExportDeclaration(ExportDeclaration)
+//        case StatementListItem(StatementListItem)
+//
+//        public init(from decoder: Decoder) throws {
+//            let typeName = try decoder
+//                .container(keyedBy: CodingKeys.self)
+//                .decode(String.self, forKey: .type)
+//
+//            switch typeName {
+//            case JSSyntax.ImportDeclaration.NodeType.ImportDeclaration.rawValue:
+//                self = .ImportDeclaration(try .init(from: decoder))
+//            case JSSyntax.ExportDeclaration.NodeType.ExportDeclaration.rawValue:
+//                self = .ExportDeclaration(try .init(from: decoder))
+//            case JSSyntax.StatementListItem.NodeType.StatementListItem.rawValue:
+//                self = .StatementListItem(try .init(from: decoder))
+//            default:
+//                throw DecodingError.keyNotFound(CodingKeys.type, DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Bad value for type: \(typeName)"))
+//            }
+//        }
+//
+//        public func encode(to encoder: Encoder) throws {
+//            switch self {
+//            case .ImportDeclaration(let x): return try x.encode(to: encoder)
+//            case .ExportDeclaration(let x): return try x.encode(to: encoder)
+//            case .StatementListItem(let x): return try x.encode(to: encoder)
+//            }
+//        }
+//
+//        enum CodingKeys : String, CodingKey {
+//            case type
+//        }
+//    }
+
+}
+
+@available(*, deprecated, message: "Prefer custom enums over OneOf for performance")
+extension JSSyntax {
+
+    public typealias StatementOneOf = OneOf<BlockStatement>
         .Or<AsyncFunctionDeclaration>
         .Or<BreakStatement>
         .Or<ContinueStatement>
@@ -1402,18 +3017,43 @@ extension JSSyntax {
         .Or<WhileStatement>
         .Or<WithStatement>
 
-    public typealias PropertyKey = OneOf<Identifier>
+
+    public typealias ExpressionOneOf = OneOf<ThisExpression>
+        .Or<Identifier>
         .Or<Literal>
+        .Or<SequenceExpression>
+        .Or<ArrayExpression>
+        .Or<MemberExpression>
+        .Or<MetaProperty>
+        .Or<CallExpression>
+        .Or<ObjectExpression>
+        .Or<FunctionExpression>
+        .Or<ArrowFunctionExpression>
+        .Or<ClassExpression>
+        .Or<TaggedTemplateExpression>
+        .Or<Super>
+        .Or<NewExpression>
+        .Or<UpdateExpression>
+        .Or<AwaitExpression>
+        .Or<UnaryExpression>
+        .Or<BinaryExpression>
+        .Or<LogicalExpression>
+        .Or<ConditionalExpression>
+        .Or<YieldExpression>
+        .Or<AssignmentExpression>
+        .Or<AsyncArrowFunctionExpression>
+        .Or<AsyncFunctionExpression>
+        .Or<ChainExpression>
+        .Or<RegexLiteral>
 
-    public typealias StatementListItem = OneOf<Declaration>
-        .Or<Statement>
-
-    public typealias ModuleItem = OneOf<ImportDeclaration>
+    public typealias DeclarationOneOf = OneOf<AsyncFunctionDeclaration>
+        .Or<ClassDeclaration>
         .Or<ExportDeclaration>
-        .Or<StatementListItem>
+        .Or<FunctionDeclaration>
+        .Or<ImportDeclaration>
+        .Or<VariableDeclaration>
+
 }
-
-
 
 // - MARK: messages.ts
 
@@ -1668,66 +3308,43 @@ public struct SourceLocation : Hashable, Codable {
 }
 
 
-
-// - MARK: nodes.ts
-
-public protocol JSSyntaxASTType : Codable {
-    /// The name of the AST Type
-    var typeName: String { get }
-}
-
-public protocol JSSyntaxAST : Hashable, JSSyntaxASTType {
-    associatedtype NodeType : RawRepresentable where NodeType.RawValue == String
-    var type: NodeType { get }
-
-    /// The optional source location for this token
-    var loc: SourceLocation? { get }
-
-    /// The optional range location for this token
-    var range: [Int]? { get }
-}
-
-public extension JSSyntaxAST {
-    var typeName: String { type.rawValue }
-}
-
-extension Never : JSSyntaxASTType {
+extension Never : JSSyntaxNodeType {
     public var typeName: String { fatalError("never") }
 }
 
-extension OneOf2 : JSSyntaxASTType where T1: JSSyntaxASTType, T2: JSSyntaxASTType {
+extension OneOf2 : JSSyntaxNodeType where T1: JSSyntaxNodeType, T2: JSSyntaxNodeType {
     public var typeName: String { expanded.typeName }
 }
 
-extension OneOf3 : JSSyntaxASTType where T1: JSSyntaxASTType, T2: JSSyntaxASTType, T3: JSSyntaxASTType {
+extension OneOf3 : JSSyntaxNodeType where T1: JSSyntaxNodeType, T2: JSSyntaxNodeType, T3: JSSyntaxNodeType {
     public var typeName: String { expanded.typeName }
 }
 
-extension OneOf4 : JSSyntaxASTType where T1: JSSyntaxASTType, T2: JSSyntaxASTType, T3: JSSyntaxASTType, T4: JSSyntaxASTType {
+extension OneOf4 : JSSyntaxNodeType where T1: JSSyntaxNodeType, T2: JSSyntaxNodeType, T3: JSSyntaxNodeType, T4: JSSyntaxNodeType {
     public var typeName: String { expanded.typeName }
 }
 
-extension OneOf5 : JSSyntaxASTType where T1: JSSyntaxASTType, T2: JSSyntaxASTType, T3: JSSyntaxASTType, T4: JSSyntaxASTType, T5: JSSyntaxASTType {
+extension OneOf5 : JSSyntaxNodeType where T1: JSSyntaxNodeType, T2: JSSyntaxNodeType, T3: JSSyntaxNodeType, T4: JSSyntaxNodeType, T5: JSSyntaxNodeType {
     public var typeName: String { expanded.typeName }
 }
 
-extension OneOf6 : JSSyntaxASTType where T1: JSSyntaxASTType, T2: JSSyntaxASTType, T3: JSSyntaxASTType, T4: JSSyntaxASTType, T5: JSSyntaxASTType, T6: JSSyntaxASTType {
+extension OneOf6 : JSSyntaxNodeType where T1: JSSyntaxNodeType, T2: JSSyntaxNodeType, T3: JSSyntaxNodeType, T4: JSSyntaxNodeType, T5: JSSyntaxNodeType, T6: JSSyntaxNodeType {
     public var typeName: String { expanded.typeName }
 }
 
-extension OneOf7 : JSSyntaxASTType where T1: JSSyntaxASTType, T2: JSSyntaxASTType, T3: JSSyntaxASTType, T4: JSSyntaxASTType, T5: JSSyntaxASTType, T6: JSSyntaxASTType, T7: JSSyntaxASTType {
+extension OneOf7 : JSSyntaxNodeType where T1: JSSyntaxNodeType, T2: JSSyntaxNodeType, T3: JSSyntaxNodeType, T4: JSSyntaxNodeType, T5: JSSyntaxNodeType, T6: JSSyntaxNodeType, T7: JSSyntaxNodeType {
     public var typeName: String { expanded.typeName }
 }
 
-extension OneOf8 : JSSyntaxASTType where T1: JSSyntaxASTType, T2: JSSyntaxASTType, T3: JSSyntaxASTType, T4: JSSyntaxASTType, T5: JSSyntaxASTType, T6: JSSyntaxASTType, T7: JSSyntaxASTType, T8: JSSyntaxASTType {
+extension OneOf8 : JSSyntaxNodeType where T1: JSSyntaxNodeType, T2: JSSyntaxNodeType, T3: JSSyntaxNodeType, T4: JSSyntaxNodeType, T5: JSSyntaxNodeType, T6: JSSyntaxNodeType, T7: JSSyntaxNodeType, T8: JSSyntaxNodeType {
     public var typeName: String { expanded.typeName }
 }
 
-extension OneOf9 : JSSyntaxASTType where T1: JSSyntaxASTType, T2: JSSyntaxASTType, T3: JSSyntaxASTType, T4: JSSyntaxASTType, T5: JSSyntaxASTType, T6: JSSyntaxASTType, T7: JSSyntaxASTType, T8: JSSyntaxASTType, T9: JSSyntaxASTType {
+extension OneOf9 : JSSyntaxNodeType where T1: JSSyntaxNodeType, T2: JSSyntaxNodeType, T3: JSSyntaxNodeType, T4: JSSyntaxNodeType, T5: JSSyntaxNodeType, T6: JSSyntaxNodeType, T7: JSSyntaxNodeType, T8: JSSyntaxNodeType, T9: JSSyntaxNodeType {
     public var typeName: String { expanded.typeName }
 }
 
-extension OneOf10 : JSSyntaxASTType where T1: JSSyntaxASTType, T2: JSSyntaxASTType, T3: JSSyntaxASTType, T4: JSSyntaxASTType, T5: JSSyntaxASTType, T6: JSSyntaxASTType, T7: JSSyntaxASTType, T8: JSSyntaxASTType, T9: JSSyntaxASTType, T10: JSSyntaxASTType {
+extension OneOf10 : JSSyntaxNodeType where T1: JSSyntaxNodeType, T2: JSSyntaxNodeType, T3: JSSyntaxNodeType, T4: JSSyntaxNodeType, T5: JSSyntaxNodeType, T6: JSSyntaxNodeType, T7: JSSyntaxNodeType, T8: JSSyntaxNodeType, T9: JSSyntaxNodeType, T10: JSSyntaxNodeType {
     public var typeName: String {
         self[routing: (\.typeName, \.typeName, \.typeName, \.typeName, \.typeName, \.typeName, \.typeName, \.typeName, \.typeName, \.typeName)]
     }
