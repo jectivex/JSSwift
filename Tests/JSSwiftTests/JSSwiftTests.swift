@@ -36,6 +36,51 @@ private final class JXDebugValue : JXValue {
 
 final class JSSwiftTests: XCTestCase {
 
+    func parseLibrary(path: String) throws {
+        guard let syntaxURL = Bundle.module.url(forResource: path, withExtension: "json", subdirectory: "TestResources/parser/syntax") else {
+            return XCTFail("no JSON resource for \(path)")
+        }
+
+        // attempt to parse the syntax
+        let expectedSyntax = try JSSyntax.Script.loadJSON(url: syntaxURL)
+
+//        guard let scriptURL = Bundle.module.url(forResource: path, withExtension: "js", subdirectory: "TestResources/parser") else {
+//            return XCTFail("no JS resource for \(path)")
+//        }
+//
+//        let actualSyntax = try JavaScriptParser().parseJSSyntax(script: String(contentsOf: scriptURL))
+//
+//        XCTAssertEqual(expectedSyntax, actualSyntax)
+    }
+
+    func testParseAngular() throws {
+        try parseLibrary(path: "angular-1.2.5")
+    }
+
+    func testParseJQuery() throws {
+        try parseLibrary(path: "jquery-1.9.1")
+    }
+
+    func testParseBackbone() throws {
+        try parseLibrary(path: "backbone-1.1.0")
+    }
+
+    func testParseJQueryMobile() throws {
+        try parseLibrary(path: "jquery.mobile-1.4.2")
+    }
+
+    func testParseUnderscore() throws {
+        try parseLibrary(path: "underscore-1.5.2")
+    }
+
+    func testParseMooTools() throws {
+        try parseLibrary(path: "mootools-1.4.5")
+    }
+
+    func testParseYUI() throws {
+        try parseLibrary(path: "yui-3.12.0")
+    }
+
     /// Ensure that contexts are destroued as expected
     func testJSSwiftContext() throws {
         XCTAssertEqual(0, JXDebugContext.debugContextCount)
@@ -93,15 +138,15 @@ final class JSSwiftTests: XCTestCase {
 
                 do {
                     if module {
-                        let module = try parser.parse(module: javaScript, options: opts)
-//                        if let expectModule = expect {
-//                            XCTAssertEqual(oneOf(module), expectModule, line: line)
-//                        }
+                        let module = try parser.parseJSSyntax(module: javaScript, options: opts)
+                        if let expectModule = expect {
+                            XCTAssertEqual(oneOf(module), expectModule, line: line)
+                        }
                     } else {
-                        let script = try parser.parse(script: javaScript, options: opts)
-//                        if let expectScript = expect {
-//                            XCTAssertEqual(oneOf(script), expectScript, line: line)
-//                        }
+                        let script = try parser.parseJSSyntax(script: javaScript, options: opts)
+                        if let expectScript = expect {
+                            XCTAssertEqual(oneOf(script), expectScript, line: line)
+                        }
                     }
                 } catch {
                     try debugNode() // whenever we fail to parse, show the raw node JSON to help debug
@@ -142,21 +187,18 @@ final class JSSwiftTests: XCTestCase {
 
             try parse(js: "for (const x in list) process(x);")
 
-            try parse(js: "class A {static [\"prototype\"](){}}")
-
-
             guard let url = JXContext.SwiftJSResourceURL else {
                 return XCTFail("no resource URL")
             }
 
             let scriptString = try String(contentsOf: url)
-            let _ = try parser.parse(script: scriptString) // make sure we can parse the script once
+            let _ = try parser.parseJSSyntax(script: scriptString) // make sure we can parse the script once
             do {
                 let stress = false
                 if stress {
                     measure { // then profile the script parsing
                         do {
-                            let _ = try parser.parse(script: scriptString)
+                            let _ = try parser.parseJSSyntax(script: scriptString)
                         } catch {
                             XCTFail("error measuring performance: \(error)")
                         }

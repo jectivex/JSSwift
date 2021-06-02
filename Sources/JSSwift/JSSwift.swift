@@ -61,7 +61,6 @@ open class JavaScriptParser {
     open func tokenize(javaScript: String, options: TokenizeOptions = .init()) throws -> [JSToken] {
         return try ctx.trying { // invoke the cached function with the encoded arguments
             try tokenizeFunction.call(withArguments: [ctx.string(javaScript), ctx.encode(options)])
-
         }.toDecodable(ofType: [JSToken].self)
     }
 
@@ -89,26 +88,6 @@ open class JavaScriptParser {
             self.loc = loc
             self.comment = comment
         }
-    }
-
-    /// Parses a JavaScript script.
-    ///
-    /// More info: [Syntactic Analysis](https://esprima.readthedocs.io/en/4.0/syntactic-analysis.html)
-    open func parse(script javaScript: String, options: ParseOptions = .init()) throws -> ESTree.Program {
-        return try ctx.trying { // invoke the cached function with the encoded arguments
-            parseScriptFunction.call(withArguments: [ctx.string(javaScript), try ctx.encode(options)])
-        }.toDecodable(ofType: ESTree.Program.self)
-    }
-
-    /// Parses a JavaScript module.
-    ///
-    /// This differs from `parse(script:)` in that it permits module syntax like imports.
-    ///
-    /// More info: [Syntactic Analysis](https://esprima.readthedocs.io/en/4.0/syntactic-analysis.html)
-    open func parse(module javaScript: String, options: ParseOptions = .init()) throws -> ESTree.Program {
-        return try ctx.trying { // invoke the cached function with the encoded arguments
-            parseModuleFunction.call(withArguments: [ctx.string(javaScript), try ctx.encode(options)])
-        }.toDecodable(ofType: ESTree.Program.self)
     }
 
     /// Options for `JavaScriptParser.parse`
