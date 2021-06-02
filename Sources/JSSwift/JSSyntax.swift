@@ -11,7 +11,7 @@ public protocol JSSyntaxNode : Hashable, JSSyntaxNodeType {
     /// The type field is a string representing the AST variant type. Each subtype of Node is documented below with the specific string of its type field. You can use this field to determine which interface a node implements.
     var type: NodeType { get }
 
-    /// The loc field represents the source location information of the node. If the node contains no information about the source location, the field is null; otherwise it is an object consisting of a start position (the position of the first character of the parsed source region) and an end position (the position of the first character after the parsed source region):
+    /// The loc field represents the source location information of the node. If the node contains no information about the source location, the field is null; otherwise it is an object consisting of a start position (the position of the first character of the parsed source region) and an end position (the position of the first character after the parsed source region)
     var loc: SourceLocation? { get }
 
     /// The optional range location for this token
