@@ -141,13 +141,13 @@ final class JSSwiftTests: XCTestCase {
 
             let scriptString = try String(contentsOf: url)
             let _ = try parser.parse(script: scriptString) // make sure we can parse the script once
-//            measure { // then profile the script parsing
-//                do {
-//                    let _ = try parser.parse(module: scriptString)
-//                } catch {
-//                    XCTFail("error measuring performance: \(error)")
-//                }
-//            }
+            measure { // then profile the script parsing
+                do {
+                    let _ = try parser.parse(module: scriptString)
+                } catch {
+                    XCTFail("error measuring performance: \(error)")
+                }
+            }
 
             /// AST examples
 
