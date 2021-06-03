@@ -20,6 +20,6 @@ let package = Package(
         .testTarget(
             name: "JSSwiftTests",
             dependencies: ["JSSwift"],
-            resources: [.process("TestResources")]),
+            resources: [.copy("TestResources")]),
     ]
 )
