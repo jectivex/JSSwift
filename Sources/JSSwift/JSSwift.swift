@@ -140,7 +140,7 @@ open class JavaScriptParser {
 
 extension JXContext {
     /// - TODO: @available(*, deprecated, message: "use installJavaScriptParser instead")
-    public static let SwiftJSResourceURL = Bundle.module.url(forResource: "esprima", withExtension: "js", subdirectory: "Resources/JavaScript")
+    public static let SwiftJSResourceURL = Bundle.module.url(forResource: "esprima", withExtension: "js")
 
     /// Installs the `esprima.js` JavaScript parser into `exports.esprima`
     @discardableResult public func installJavaScriptParser() throws -> JXValType {
