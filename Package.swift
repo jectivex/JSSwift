@@ -16,10 +16,10 @@ let package = Package(
         .target(
             name: "JSSwift",
             dependencies: ["JXKit", "BricBrac"],
-            resources: [.copy("Resources")]),
+            resources: [.process("Resources")]),
         .testTarget(
             name: "JSSwiftTests",
             dependencies: ["JSSwift"],
-            resources: [.copy("TestResources")]),
+            resources: [.process("TestResources")]),
     ]
 )
