@@ -7,3 +7,5 @@
 
 JSSwift is a Swift JavaScript parser & AST. It uses [JXKit](https://github.com/jectivex/JXKit) to embed the [Esprima](https://github.com/jquery/esprima) JavaScript parser. It also serves as a template project for embedding JavaScript libraries in native Swift applications.
 
+Browse the [API Documentation](https://www.jective.org/docs/JSSwift/).
+
