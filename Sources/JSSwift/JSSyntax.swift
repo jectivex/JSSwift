@@ -1,5 +1,6 @@
+import BricBrac
 
-public protocol JSSyntaxNodeType : Codable {
+public protocol JSSyntaxNodeType : Pure, Codable {
     /// The name of the AST Type
     var typeName: String { get }
 }
