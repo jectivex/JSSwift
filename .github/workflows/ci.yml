@@ -30,8 +30,8 @@ jobs:
       - run: |
             xcodebuild clean test \
               -scheme "JSSwift" \
-              -sdk "iphonesimulator14.4" \
-              -destination "OS=14.4,name=iPod Touch (7th generation)" \
+              -sdk "iphonesimulator" \
+              -destination "platform=iOS Simulator,name=iPod touch (7th generation)" \
               ONLY_ACTIVE_ARCH=NO CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
 
   tvOS:
@@ -43,8 +43,8 @@ jobs:
       - run: |
             xcodebuild clean test \
               -scheme "JSSwift" \
-              -sdk "appletvsimulator14.3" \
-              -destination "OS=14.3,name=Apple TV" \
+              -sdk "appletvsimulator" \
+              -destination "platform=tvOS Simulator,name=Apple TV" \
               ONLY_ACTIVE_ARCH=NO CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
 
   macOS10:
@@ -71,9 +71,9 @@ jobs:
 
       - uses: seanmiddleditch/gha-setup-vsdevenv@master
 
-      - name: Install Install swift-5.4-RELEASE
+      - name: Install Install swift-5.4.1-RELEASE
         run: |
-          Install-Binary -Url "https://swift.org/builds/swift-5.4-release/windows10/swift-5.4-RELEASE/swift-5.4-RELEASE-windows10.exe" -Name "installer.exe" -ArgumentList ("-q")
+          Install-Binary -Url "https://swift.org/builds/swift-5.4.1-release/windows10/swift-5.4.1-RELEASE/swift-5.4.1-RELEASE-windows10.exe" -Name "installer.exe" -ArgumentList ("-q")
       - name: Set Environment Variables
         run: |
           echo "SDKROOT=C:\Library\Developer\Platforms\Windows.platform\Developer\SDKs\Windows.sdk" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
