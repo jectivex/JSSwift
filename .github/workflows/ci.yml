@@ -29,6 +29,7 @@ jobs:
       - uses: actions/checkout@v2
       - run: |
             xcodebuild clean test \
+              -configuration Release \
               -scheme "JSSwift" \
               -sdk "iphonesimulator" \
               -destination "platform=iOS Simulator,name=iPod touch (7th generation)" \
@@ -42,6 +43,7 @@ jobs:
       - uses: actions/checkout@v2
       - run: |
             xcodebuild clean test \
+              -configuration Release \
               -scheme "JSSwift" \
               -sdk "appletvsimulator" \
               -destination "platform=tvOS Simulator,name=Apple TV" \
