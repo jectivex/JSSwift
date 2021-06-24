@@ -1,5 +1,5 @@
 import XCTest
-@testable import JSSwift
+import JSSwift
 
 /// A running count of all the contexts that have been created and not destroyed
 private final class JXDebugContext : JXContext {

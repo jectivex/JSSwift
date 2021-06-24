@@ -1,12 +1,12 @@
 import BricBrac
 
-public protocol JSSyntaxNodeType : Pure, Codable {
+public protocol JSSyntaxNodeType : Pure {
     /// The name of the AST Type
     var typeName: String { get }
 }
 
 /// See: [Estree Node Objects](https://github.com/estree/estree/blob/master/es5.md#node-objects)
-public protocol JSSyntaxNode : Hashable, JSSyntaxNodeType {
+public protocol JSSyntaxNode : JSSyntaxNodeType {
     associatedtype NodeType : RawRepresentable where NodeType.RawValue == String
 
     /// The type field is a string representing the AST variant type. Each subtype of Node is documented below with the specific string of its type field. You can use this field to determine which interface a node implements.

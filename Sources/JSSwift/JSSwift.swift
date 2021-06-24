@@ -10,11 +10,11 @@ open class JavaScriptParser {
     open var ctx: JXContext
     public let esprimaVersion: String?
 
-    let esprima: JXValue
+    open var esprima: JXValue
 
-    let tokenizeFunction: JXValue
-    let parseScriptFunction: JXValue
-    let parseModuleFunction: JXValue
+    open var tokenizeFunction: JXValue
+    open var parseScriptFunction: JXValue
+    open var parseModuleFunction: JXValue
 
     public init(ctx: JXContext = JXContext()) throws {
         self.ctx = ctx

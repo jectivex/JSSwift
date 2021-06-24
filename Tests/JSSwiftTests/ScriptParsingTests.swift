@@ -1,5 +1,5 @@
 import XCTest
-@testable import JSSwift
+import JSSwift
 
 final class ScriptParsingTests : XCTestCase {
     /// Cached script parser result
