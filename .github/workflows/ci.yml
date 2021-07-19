@@ -73,7 +73,7 @@ jobs:
       - name: test (debug)
         run: swift test -v --configuration debug
       - name: test (release)
-        run: swift test -v --configuration release -xswiftc -enable-testing
+        run: swift test -v --configuration release -Xswiftc -enable-testing
 
   Windows10:
     if: false # JavaScriptCore not available on Windows
